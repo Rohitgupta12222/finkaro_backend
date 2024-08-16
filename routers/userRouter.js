@@ -9,7 +9,7 @@ const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
 
 
 router.post('/register', async (req, res) => {
-  const { email ,pass } = req.body;
+  const { email ,password,name } = req.body;
 
   try {
 
@@ -18,9 +18,11 @@ router.post('/register', async (req, res) => {
 
       const payloadJwt = {
         id: existingUser.id,
-        username: existingUser.username,
+        email: existingUser.email,
         role: existingUser.role,
       }
+      console.log( payloadJwt , 'alreasy payloadJwt');
+
         const token = genrateToken(payloadJwt)
         
       return   res.status(200).json({ response: existingUser, token: token })
@@ -30,14 +32,15 @@ router.post('/register', async (req, res) => {
     const response = await userData.save()
     const payloadJwt = {
       id: response.id,
-      username: response.username,
+      name: response.email,
       role: response.role,
     }
+    console.log( payloadJwt , 'register payloadJwt');
 
     const token = genrateToken(payloadJwt)
     console.log(' this is token ', token);
     console.log('data save successfully ...');
-    const emailContent = `Hello ${response.username},\n\nYou have successfully registered with the following password:\n\n${pass}\n\nPlease keep it safe.`;
+    const emailContent = `Hello ${name},\n\nYou have successfully registered with the following password:\n\n${password}\n\nPlease keep it safe.`;
     await sendRegistrationEmail(email, 'Registration Successful', emailContent);
 
     res.status(201).json({ response: response, token: token })
