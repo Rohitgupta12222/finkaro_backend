@@ -3,12 +3,13 @@ const express = require('express');
 const User = require('../models/users');
 const router = express.Router();
 const bcrypt = require('bcrypt')
+const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer file
 
 const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
 
 
 router.post('/register', async (req, res) => {
-  const { email } = req.body;
+  const { email ,pass } = req.body;
 
   try {
 
@@ -21,6 +22,7 @@ router.post('/register', async (req, res) => {
         role: existingUser.role,
       }
         const token = genrateToken(payloadJwt)
+        
       return   res.status(200).json({ response: existingUser, token: token })
 
     }
@@ -35,6 +37,9 @@ router.post('/register', async (req, res) => {
     const token = genrateToken(payloadJwt)
     console.log(' this is token ', token);
     console.log('data save successfully ...');
+    const emailContent = `Hello ${response.username},\n\nYou have successfully registered with the following password:\n\n${pass}\n\nPlease keep it safe.`;
+    await sendRegistrationEmail(email, 'Registration Successful', emailContent);
+
     res.status(201).json({ response: response, token: token })
 } catch (error) {
 
