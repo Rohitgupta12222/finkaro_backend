@@ -54,4 +54,21 @@ router.post('/register', async (req, res) => {
 }
 }
 )
+
+
+router.post('/login', async (req, res) => {
+  const  {username,password} = req.body
+  const user = await User.findOne({ username: username })
+
+  if (!user) return res.status(404).json({ error: 'user not found' })
+  const check = await user.comparePassword(password)
+  if (!check) return res.status(404).json({ error: 'invaild password' })
+  const payload = {
+      id: user.id,
+      username: user.username
+  }
+  res.status(200).json({ response: user, token: genrateToken(payload) })
+
+
+})
 module.exports = router;
