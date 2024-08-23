@@ -71,4 +71,53 @@ router.post('/login', async (req, res) => {
 
 
 })
+
+router.get('/profile',jwtAuthMiddleWare, async (req, res) => {
+
+try {
+  const userId = req.user.id; // Access the userId from the decoded token
+  console.log(userId, 'userId');
+  const user = await User.findById(userId)
+
+  res.status(200).json({ response: user })
+  
+} catch (error) {
+  console.log(error);
+  res.status(500).json({ error: 'Internal Server error' })
+
+}
+
+})
+
+router.put('/profile/password',jwtAuthMiddleWare, async (req, res) => {
+
+  try {
+      const userId = req.user.id
+      const { currentPassword, newPassword } = req.body
+      console.log(userId , 'user id ');
+      console.log(req.body , 'user req.body ');
+
+
+      const user = await User.findById(userId)
+      console.log(user , 'data user');
+      console.log(await user.comparePassword(currentPassword , 'await user.comparePassword(currentPassword user'));
+
+
+      if (!(await user.comparePassword(currentPassword))) {
+          console.log('Current password is not match');
+
+          return res.status(404).json({ error: 'Current password is not match' })
+      }
+      user.password = newPassword
+      await user.save()
+      console.log('password updated successfullly');
+      return res.status(404).json({ message: ' password updated successfullly' })
+
+
+  } catch (error) {
+      console.log(error);
+
+      res.status(500).json({ 'message': 'Internal Server error' })
+  }
+})
 module.exports = router;
