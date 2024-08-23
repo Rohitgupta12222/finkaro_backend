@@ -90,7 +90,6 @@ try {
 })
 
 router.put('/profile/password',jwtAuthMiddleWare, async (req, res) => {
-
   try {
       const userId = req.user.id
       const { currentPassword, newPassword } = req.body
@@ -118,6 +117,27 @@ router.put('/profile/password',jwtAuthMiddleWare, async (req, res) => {
       console.log(error);
 
       res.status(500).json({ 'message': 'Internal Server error' })
+  }
+})
+
+
+router.put('/profile/:id',jwtAuthMiddleWare, async (req, res) => {
+  try {
+      const id = req.params.id;
+      const data = req.body
+
+      const response = await User.findByIdAndUpdate(id, data, {
+          new: true,
+          runValidators: true
+      })
+      if (!response) {
+          res.status(404).json('No person found');
+      }
+      res.status(200).json(response);
+
+  } catch (error) {
+      res.status(500).json(error);
+
   }
 })
 module.exports = router;
