@@ -58,7 +58,7 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   const  {email,password} = req.body
-  const user = await User.findOne({ username: email })
+  const user = await User.findOne({ email: email })
 
   if (!user) return res.status(404).json({ error: 'user not found' })
   const check = await user.comparePassword(password)
