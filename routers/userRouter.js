@@ -29,7 +29,7 @@ router.post('/register', async (req, res) => {
         return res.status(200).json({ response: existingUser, token: token })
 
       } else {
-        const smsContent = `Hi ${existingUser?.name}, your account is activated!.Please keep it safe. Login here:${process.env.FRONTEND_LINK}/user/activate/${existingUser.id}`;
+        const smsContent = `Hi ${existingUser?.name}, your account is activated!.Please keep it safe. Login here:${process.env.FRONTEND_LINK}/activate/${existingUser.id}`;
         res.status(404).json({ message: "Please visit your email to activate your account." })
 
         return sendRegistrationEmail(email, 'Account activated', smsContent);
@@ -43,7 +43,7 @@ router.post('/register', async (req, res) => {
     const response = await userData.save()
     if (!isActive) {
 
-      const smsContent = `Hi ${name}, your account is activated! Your password is: ${password}.Please keep it safe. Login here:${process.env.FRONTEND_LINK}/user/activate/${response.id}`;
+      const smsContent = `Hi ${name}, your account is activated! Your password is: ${password}.Please keep it safe. Login here:${process.env.FRONTEND_LINK}/activate/${response.id}`;
       res.status(404).json({ message: "Please visit your email to activate your account." })
       return sendRegistrationEmail(email, 'Account activated', smsContent);
 
@@ -82,7 +82,7 @@ router.post('/login', async (req, res) => {
 
   if (!user) return res.status(404).json({ message: 'user not found' })
   if (!user?.isActive) {
-    const smsContent = `Hi ${user?.name}, your account is activated!.Please keep it safe. Login here:${process.env.FRONTEND_LINK}/user/activate/${user.id}`;
+    const smsContent = `Hi ${user?.name}, your account is activated!.Please keep it safe. Login here:${process.env.FRONTEND_LINK}/activate/${user.id}`;
    await  sendRegistrationEmail(email, 'Account activated', smsContent);
 
     return res.status(404).json({ message: 'Please visit your email to activate your account. ' })
@@ -92,26 +92,29 @@ router.post('/login', async (req, res) => {
   if (!check) return res.status(404).json({ message: 'invaild password' })
   const payload = {
     id: user.id,
-    username: user.username
+    name: user.email,
+    role: user.role,
   }
   res.status(200).json({ response: user, token: genrateToken(payload) })
 
 
 })
 
-router.put('/activateProfile/:id', async (req, res) => {
+router.put('/activateProfile', async (req, res) => {
   try {
-    console.log(req.params.id, 'req.params.id;');
-    const userId = req.params.id; // Access the userId from the decoded token
-    console.log(userId, 'userId');
-    const user = await User.findById(userId)
+    const { id } = req.body; // Access the userId from the decoded token
+  
+    const user = await User.findById(id)
     console.log(user, 'usr data');
     user.isActive = true
     await user.save()
     console.log('activated successfullly');
-    return res.status(200).json({ message: 'Account Activated ' })
-
-
+    const payload = {
+      id: user.id,
+      name: user.email,
+      role: user.role,
+    }
+  return  res.status(200).json({ response: user, token: genrateToken(payload) })
 
   } catch (message) {
     console.log(message);
