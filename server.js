@@ -7,8 +7,18 @@ const bodyParser = require('body-parser')
 require('dotenv').config();
 const PORT = process.env.PORT || 4000
 app.use(cors({
-    origin: process.env.FRONTEND_LINK, // Replace with your Angular app's URL
-  }));
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      process.env.FRONTEND_LINK, // First Angular app's URL
+      process.env.FRONTEND_LINK_LOCAL  // Second Angular app's URL
+    ];
+
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }  }));
 app.use(bodyParser.json());
 const userRouter = require('./routers/userRouter')
 const subscribeRouter = require('./routers/subscribeRouter')
