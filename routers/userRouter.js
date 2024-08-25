@@ -41,24 +41,64 @@ router.post('/register', async (req, res) => {
     }
     const userData = new User(req.body)
     const response = await userData.save()
+
+    const activationLink = `${process.env.FRONTEND_LINK}/activate/${response.id}`
     if (!isActive) {
 
-      const smsContent = `Hi ${name}, your account is activated! Your password is: ${password}.Please keep it safe. Login here:${process.env.FRONTEND_LINK}/activate/${response.id}`;
+      const smsContent = `
+  Subject: Activate Your Account
+
+  Dear ${name},
+
+  Welcome to Our Service!
+
+  Your account has been successfully created. To start using your account, please activate it by clicking the link below:
+
+  ${activationLink}
+
+  Here are your account details:
+  - **Email**: ${response?.email}
+  - **Password**: ${password}
+
+  Please keep this information safe and secure. You can use these credentials to log in after activating your account.
+
+  If you didn't create this account, please ignore this email.
+
+  Thank you,
+  FINKARO
+`;
+
       res.status(404).json({ message: "Please visit your email to activate your account." })
       return sendRegistrationEmail(email, 'Account activated', smsContent);
 
     } else {
       const payloadJwt = {
         id: response.id,
-        name: response.email,
+        email: response.email,
         role: response.role,
       }
       console.log(payloadJwt, 'register payloadJwt');
 
       const token = genrateToken(payloadJwt)
       console.log(' this is token ', token);
-      console.log('data save successfully ...');
-      const emailContent = `Hello ${name},\n\nYou have successfully registered with the following password:\n\n${password}\n\nPlease keep it safe.`;
+      const emailContent = `
+      Subject: Welcome to Our Service
+    
+      Dear ${response?.name},
+    
+      Welcome to Our Service!
+    
+      Here are your account details:
+      - **Email**: ${response.email}
+      - **Password**: ${password}
+    
+      Please keep this information safe and secure. You can use these credentials to log in and start using our services.
+    
+      Thank you,
+      FINKARO 
+    `;
+
+
       sendRegistrationEmail(email, 'Registration Successful', emailContent);
       res.status(201).json({ response: response, token: token })
 
@@ -82,12 +122,40 @@ router.post('/login', async (req, res) => {
 
   if (!user) return res.status(404).json({ message: 'user not found' })
   if (!user?.isActive) {
-    const smsContent = `Hi ${user?.name}, your account is activated!.Please keep it safe. Login here:${process.env.FRONTEND_LINK}/activate/${user.id}`;
-   await  sendRegistrationEmail(email, 'Account activated', smsContent);
+
+
+    const activationLink = `${process.env.FRONTEND_LINK}/activate/${response.id}`
+ 
+
+      const smsContent = `
+  Subject: Activate Your Account
+
+  Dear ${user?.name},
+
+  Welcome to Our Service!
+
+  Your account has been successfully created. To start using your account, please activate it by clicking the link below:
+
+  ${activationLink}
+
+  Here are your account details:
+  - **Email**: ${user?.email}
+  - **Password**: ${password}
+
+  Please keep this information safe and secure. You can use these credentials to log in after activating your account.
+
+  If you didn't create this account, please ignore this email.
+
+  Thank you,
+  FINKARO
+`;
+
+
+    await sendRegistrationEmail(email, 'Account activated', smsContent);
 
     return res.status(404).json({ message: 'Please visit your email to activate your account. ' })
   }
-    
+
   const check = await user.comparePassword(password)
   if (!check) return res.status(404).json({ message: 'invaild password' })
   const payload = {
@@ -103,7 +171,7 @@ router.post('/login', async (req, res) => {
 router.put('/activateProfile', async (req, res) => {
   try {
     const { id } = req.body; // Access the userId from the decoded token
-  
+
     const user = await User.findById(id)
     console.log(user, 'usr data');
     user.isActive = true
@@ -114,7 +182,7 @@ router.put('/activateProfile', async (req, res) => {
       name: user.email,
       role: user.role,
     }
-  return  res.status(200).json({ response: user, token: genrateToken(payload) })
+    return res.status(200).json({ response: user, token: genrateToken(payload) })
 
   } catch (message) {
     console.log(message);
