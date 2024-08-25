@@ -32,6 +32,6 @@ app.get('/', (req, res) => {
 
 
 
-app.listen(3000 , () => {
+app.listen(PORT , () => {
     console.log('server runing ', PORT);
 })

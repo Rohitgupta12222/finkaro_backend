@@ -8,15 +8,14 @@ const sendsubscribemail = require('../mail/subscribeMail.js'); // Adjust path to
 
 router.post('/mail', async (req, res) => {
   console.log(req.body , '============ req.body');
-  const { email, name ,contant} = req.body;
-  if(!contant) return  res.status(404).json({message:"contant is required"})
-    const emailContent = `Hello Sir,\n\n${contant}\n\n\n thank you  from  ${name || email}.`;
+  const { email, name ,subject ,contant} = req.body;
+ 
   try {
 
     const existingUser = await Subscribe.findOne({ email });
     if (existingUser) {
 
-      await sendsubscribemail(email, 'Subscribe mail', emailContent);
+      await sendsubscribemail(email, name,subject,contant);
       res.status(201).json({message:"Subscribe mail sended successfully"})
       console.log("Subscribe mail sended successfully")
 
@@ -25,8 +24,8 @@ router.post('/mail', async (req, res) => {
       const userData = new Subscribe(req.body)
      const response = await userData.save()
    
-      await sendsubscribemail(email, 'Subscribe mail', emailContent);
-      res.status(201).json({message:"Subscribe mail sended successfully"})
+     await sendsubscribemail(email, name,subject,contant);
+     res.status(201).json({message:"Subscribe mail sended successfully"})
 
       console.log("Subscribe mail sended successfully")
 
@@ -42,5 +41,6 @@ router.post('/mail', async (req, res) => {
   }
 }
 )
+
 
 module.exports = router;
