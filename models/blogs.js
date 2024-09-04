@@ -10,17 +10,11 @@ const blogSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  author: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  tags: [
-    {
-      type: String,
-      trim: true
-    }
-  ],
   coverImage: {
     type: String,
     default: null
@@ -50,9 +44,23 @@ const blogSchema = new mongoose.Schema({
       }
     }
   ],
-  isPublished: {
-    type: Boolean,
-    default: false
+  links: [
+    {
+      youtubeLink: {
+        type: String,
+        default: ''
+
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ],
+  status: {
+    type: String,
+    enum:['active','deactive'],
+    default: "active"
   },
   createdAt: {
     type: Date,

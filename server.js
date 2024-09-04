@@ -22,6 +22,7 @@ app.use(cors({
 app.use(bodyParser.json());
 const userRouter = require('./routers/userRouter')
 const subscribeRouter = require('./routers/subscribeRouter')
+const blogRouter = require('./routers/blogRouter')
 app.use((req, res, next) => {
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
     next();
@@ -39,9 +40,11 @@ app.get('/', (req, res) => {
 })
  app.use('/user', userRouter)
  app.use('/subscribe', subscribeRouter)
+ app.use('/blog', blogRouter)
 
 
 
-app.listen(PORT , () => {
+
+app.listen(4000 , () => {
     console.log('server runing ', PORT);
 })
