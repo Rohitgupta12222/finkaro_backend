@@ -118,9 +118,10 @@ router.get('/getAllBlogs', async (req, res) => {
   try {
     // Find all blog posts
     const blogPosts = await Blog.find();
+    const count = await Blog.count();
 
     // Respond with the list of blog posts
-    res.status(200).json(blogPosts);
+    res.status(200).json({"count":count,"result": blogPosts});
   } catch (error) {
     // Handle errors
     res.status(500).json({ error: 'An error occurred while retrieving blog posts' });
