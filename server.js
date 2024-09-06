@@ -19,6 +19,7 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   }  }));
+  app.use('/uploads', express.static('uploads'));
 app.use(bodyParser.json());
 const userRouter = require('./routers/userRouter')
 const subscribeRouter = require('./routers/subscribeRouter')
