@@ -5,7 +5,7 @@ const router = express.Router();
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer fil
 const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
 const upload =require('../middelware/multer')
-
+const BASE_URL = 'http://localhost:3000'; // Change this to your actual base URL
 
 router.post('/addBlog', async (req, res) => {
     try {
@@ -14,16 +14,21 @@ router.post('/addBlog', async (req, res) => {
         if (err) {
           return res.status(400).json({ error: err });
         }
+
+        console.log(req.file , 'req.file ================= ',  req.file.path  );
+
+
+        let path =  req.file ? req.file.path.replace('public/', '') : null;
+
     
         const newBlog = new Blog({
           title: req.body.title,
           content: req.body.content,
           userId: req.body.userId,
-          coverImage: req.file ? req.file.path : null, // Save the uploaded image path
+          coverImage: path,// Save the uploaded image path
           links: req.body.links, // Handle any additional fields
           status: req.body.status
         });
-
    
         const response = await newBlog.save()
         res.status(201).json({ response: response,message:"Blog created" })
@@ -116,17 +121,40 @@ router.get('/getBlog/:blogId', async (req, res) => {
 
 router.get('/getAllBlogs', async (req, res) => {
   try {
-    // Find all blog posts
-    const blogPosts = await Blog.find();
-    const count = await Blog.count();
+    const page = parseInt(req.query.page, 10) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
+    const title = req.query.title || ''; // Get the title query (default is an empty string)
+    
+    const skip = (page - 1) * limit;
 
-    // Respond with the list of blog posts
-    res.status(200).json({"count":count,"result": blogPosts});
+    // Build the query with case-insensitive title search using a regular expression
+    const query = title ? { title: { $regex: title, $options: 'i' } } : {};
+
+    // Find blog posts based on title and apply pagination
+    const [blogPosts, count] = await Promise.all([
+      Blog.find(query).skip(skip).limit(limit),
+      Blog.countDocuments(query) // Count documents matching the query
+    ]);
+
+    // Modify blog posts to include full coverImage URL
+    const updatedBlogPosts = blogPosts.map(blog => {
+      return {
+        ...blog._doc,
+        coverImage: blog.coverImage ? `${BASE_URL}/${blog.coverImage}` : null // Append the base URL to the coverImage
+      };
+    });
+
+    // Return the response with paginated results
+    res.status(200).json({
+      count,
+      data: updatedBlogPosts
+    });
   } catch (error) {
-    // Handle errors
+    console.log(error);
     res.status(500).json({ error: 'An error occurred while retrieving blog posts' });
   }
 });
+
 
 
 module.exports = router;

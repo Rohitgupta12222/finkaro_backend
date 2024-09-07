@@ -1,51 +1,64 @@
-const express = require('express')
+const express = require('express');
 const app = express();
-const cors = require('cors')
-
-const db = require('./db')
-const bodyParser = require('body-parser')
+const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
-const PORT = process.env.PORT || 4000
+
+// Database connection (assuming `db.js` connects to the DB)
+const db = require('./db');
+
+// Use express's built-in JSON parser (replaces body-parser)
+app.use(express.json());
+
+// Serve static files from 'public/uploads' at '/uploads' URL
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+// CORS configuration
+const allowedOrigins = [
+  process.env.FRONTEND_LINK, // First Angular app's URL
+  process.env.FRONTEND_LINK_LOCAL  // Second Angular app's URL (local dev)
+];
+
 app.use(cors({
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      process.env.FRONTEND_LINK, // First Angular app's URL
-      process.env.FRONTEND_LINK_LOCAL  // Second Angular app's URL
-    ];
-
-    if (allowedOrigins.includes(origin) || !origin) {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error('CORS not allowed from this origin: ' + origin));
     }
-  }  }));
-  app.use('/uploads', express.static('uploads'));
-app.use(bodyParser.json());
-const userRouter = require('./routers/userRouter')
-const subscribeRouter = require('./routers/subscribeRouter')
-const blogRouter = require('./routers/blogRouter')
+  }
+}));
+
+// Logging middleware for requests
 app.use((req, res, next) => {
-    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
-    next();
-  });
+  console.log(`[${new Date().toLocaleString()}] Request made to: ${req.originalUrl}`);
+  next();
+});
 
-const logRequest = ((req, res, next) => {
-    console.log(`[${new Date().toLocaleString()}] request made to :`, req.originalUrl);
-    next()
-})
+// Security headers for Cross-Origin-Opener-Policy
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  next();
+});
 
-app.use(logRequest)
+// Routers
+const userRouter = require('./routers/userRouter');
+const subscribeRouter = require('./routers/subscribeRouter');
+const blogRouter = require('./routers/blogRouter');
 
+// Define routes
+app.use('/user', userRouter);
+app.use('/subscribe', subscribeRouter);
+app.use('/blog', blogRouter);
+
+// Root route
 app.get('/', (req, res) => {
-    res.send('Server connected')
-})
- app.use('/user', userRouter)
- app.use('/subscribe', subscribeRouter)
- app.use('/blog', blogRouter)
+  res.send('Server connected');
+});
 
-
-
-
-app.listen(PORT , () => {
-    console.log('server runing ', PORT);
-})
+// Start server on specified port (from .env or default 3000)
+const PORT = process.env.PORT || 3000;
+app.listen(3000, () => {
+  console.log(`Server running on port ${PORT}`);
+});
