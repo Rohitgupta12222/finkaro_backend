@@ -3,28 +3,22 @@ const app = express();
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
-
+// Start server on specified port (from .env or default 3000)
+const PORT = process.env.PORT || 3000;
 const db = require('./db');
 
 app.use(express.json());
 
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-// CORS configuration
-const allowedOrigins = [
-  process.env.FRONTEND_LINK, // First Angular app's URL
-  process.env.FRONTEND_LINK_LOCAL  // Second Angular app's URL (local dev)
-];
+
+console.log('Allowed Origins:', process.env.FRONTEND_LINK, process.env.FRONTEND_LINK_LOCAL);
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, Postman)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS not allowed from this origin: ' + origin));
-    }
-  }
+  origin: '*', // Allow all origins (for testing purposes)
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 // Logging middleware for requests
@@ -54,8 +48,7 @@ app.get('/', (req, res) => {
   res.send('Server connected');
 });
 
-// Start server on specified port (from .env or default 3000)
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+
+app.listen(3000, () => {
   console.log(`Server running on port ${PORT}`);
 });
