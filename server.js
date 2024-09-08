@@ -4,13 +4,10 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
-// Database connection (assuming `db.js` connects to the DB)
 const db = require('./db');
 
-// Use express's built-in JSON parser (replaces body-parser)
 app.use(express.json());
 
-// Serve static files from 'public/uploads' at '/uploads' URL
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // CORS configuration
