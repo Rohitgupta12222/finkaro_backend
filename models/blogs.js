@@ -59,8 +59,8 @@ const blogSchema = new mongoose.Schema({
   ],
   status: {
     type: String,
-    enum:['active','deactive'],
-    default: "active"
+    enum:['public','private'],
+    default: "public"
   },
   createdAt: {
     type: Date,
