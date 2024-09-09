@@ -12,6 +12,10 @@ const subscribeSchema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
+  phoneNumber: {
+    type: String,
+    required: true
+  },
 
   createdAt: {
     type: Date,
