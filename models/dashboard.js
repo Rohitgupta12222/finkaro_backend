@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const blogSchema = new mongoose.Schema({
+const DashboardSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
@@ -76,12 +76,12 @@ const blogSchema = new mongoose.Schema({
 });
 
 // Pre-save hook to update the `updatedAt` field
-blogSchema.pre('save', function(next) {
+DashboardSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();
 });
 
 // Optional: Create a model from the schema
-const Blog = mongoose.model('Blog', blogSchema);
+const Dashboard = mongoose.model('Dashboard', DashboardSchema);
 
-module.exports = Blog;
+module.exports = Dashboard;

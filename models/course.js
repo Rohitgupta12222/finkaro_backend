@@ -11,11 +11,6 @@ const courseSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  instructor: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',  // Assuming you have a User model for instructors
-    required: true
-  },
   price: {
     type: Number,
     required: true,
@@ -25,17 +20,6 @@ const courseSchema = new mongoose.Schema({
     type: String, // e.g., "5 hours", "3 weeks"
     required: true
   },
-  level: {
-    type: String,
-    enum: ['Beginner', 'Intermediate', 'Advanced'],
-    required: true
-  },
-  categories: [
-    {
-      type: String,
-      trim: true
-    }
-  ],
   lessons: [
     {
       title: {

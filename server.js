@@ -37,11 +37,17 @@ app.use((req, res, next) => {
 const userRouter = require('./routers/userRouter');
 const subscribeRouter = require('./routers/subscribeRouter');
 const blogRouter = require('./routers/blogRouter');
+const youtubeRouter = require('./routers/youtubelinkRouter');
+const courseRouter = require('./routers/courseRouter');
+
 
 // Define routes
 app.use('/user', userRouter);
 app.use('/subscribe', subscribeRouter);
 app.use('/blog', blogRouter);
+app.use('/youtubelink', youtubeRouter);
+app.use('/course', courseRouter);
+
 
 // Root route
 app.get('/', (req, res) => {

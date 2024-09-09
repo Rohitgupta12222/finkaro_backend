@@ -5,7 +5,7 @@ const router = express.Router();
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer fil
 const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
 const upload =require('../middelware/multer')
- const BASE_URL = process.env.BASE_URL; // Change this to your actual base URL
+ const BASE_URL = 'http://localhost:3000'; // Change this to your actual base URL
 // const BASE_URL = 'https://finkaro-backend.onrender.com'; // Change this to your actual base URL
 
 router.post('/addBlog',jwtAuthMiddleWare, async (req, res) => {

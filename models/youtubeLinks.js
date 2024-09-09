@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const youtubeLinkSchema = new mongoose.Schema({
+
+  title: {
+    type: String,
+    trim: true
+  },
   url: {
     type: String,
     required: true,
@@ -12,11 +17,7 @@ const youtubeLinkSchema = new mongoose.Schema({
       message: props => `${props.value} is not a valid YouTube URL!`
     }
   },
-  title: {
-    type: String,
-    trim: true
-  },
-  description: {
+  alternative: {
     type: String,
     trim: true
   },
