@@ -4,33 +4,46 @@ const Dashboard = require('../models/dashboard');
 const router = express.Router();
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer fil
 const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
-const uploadDashboard =require('../middelware/dashboarMulter')
+const upload =require('../middelware/dashboarMulter')
 const BASE_URL = process.env.BASE_URL; // Change this to your actual base URL
 const fs = require('fs');
 const path = require('path');
 
 
-router.post('/add', uploadDashboard.fields([
+router.post('/add', jwtAuthMiddleWare, upload.fields([
   { name: 'coverImage', maxCount: 1 },
   { name: 'zipfile', maxCount: 1 },
   { name: 'excelFile', maxCount: 1 }
 ]), async (req, res) => {
   try {
-    const { title, content, userId, status, links, mail } = req.body;
+    // Extract file paths if files are uploaded
+    const coverImage = req.files['coverImage'] ? `${BASE_URL}/uploads/${req.files['coverImage'][0].filename}` : null;
+    const zipfile = req.files['zipfile'] ? `${BASE_URL}/uploads/${req.files['zipfile'][0].filename}` : null;
+    const excelFile = req.files['excelFile'] ? `${BASE_URL}/uploads/${req.files['excelFile'][0].filename}` : null;
 
+    // Get the userId from the authenticated user
+    const userId = req.user.id;
+
+    // Extract other fields from the request body
+    const { title, content, status, links, mail, shortDescription } = req.body;
+
+    // Create a new Dashboard entry
     const newDashboard = new Dashboard({
       title,
       content,
       userId,
       status,
       links,
+      shortDescription,
       mail,
-      coverImage: req.files['coverImage'] ? req.files['coverImage'][0].filename : null,
-      zipfile: req.files['zipfile'] ? req.files['zipfile'][0].filename : null,
-      excelFile: req.files['excelFile'] ? req.files['excelFile'][0].filename : null
+      coverImage,   // Use the file path or null if not provided
+      zipfile,      // Use the file path or null if not provided
+      excelFile     // Use the file path or null if not provided
     });
 
     await newDashboard.save();
+
+    // Respond with success message and dashboard data
     res.json({ message: 'Dashboard created successfully', dashboard: newDashboard });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -38,73 +51,49 @@ router.post('/add', uploadDashboard.fields([
 });
 
 
-// Route to update dashboard entry and delete old files
-router.put('/update/:id', uploadDashboard.fields([
+// Update dashboard route with file uploads
+router.put('/update/:id', jwtAuthMiddleWare, upload.fields([
   { name: 'coverImage', maxCount: 1 },
   { name: 'zipfile', maxCount: 1 },
   { name: 'excelFile', maxCount: 1 }
 ]), async (req, res) => {
   try {
-    const dashboardId = req.params.id;
-    const existingDashboard = await Dashboard.findById(dashboardId);
-
-    if (!existingDashboard) {
-      return res.status(404).json({ error: 'Dashboard not found' });
+    // Find the existing dashboard by ID
+    const dashboard = await Dashboard.findById(req.params.id);
+    if (!dashboard) {
+      return res.status(404).json({ message: 'Dashboard not found' });
     }
 
-    const updatedData = {
-      title: req.body.title,
-      content: req.body.content,
-      status: req.body.status,
-      links: req.body.links,
-      mail: req.body.mail,
-      userId: req.body.userId,
-    };
+    // Update file paths if new files are uploaded
+    const coverImage = req.files['coverImage'] ? `${BASE_URL}/uploads/${req.files['coverImage'][0].filename}` : dashboard.coverImage;
+    const zipfile = req.files['zipfile'] ? `${BASE_URL}/uploads/${req.files['zipfile'][0].filename}` : dashboard.zipfile;
+    const excelFile = req.files['excelFile'] ? `${BASE_URL}/uploads/${req.files['excelFile'][0].filename}` : dashboard.excelFile;
 
-    // Helper function to delete a file if it exists
-    const deleteFile = (filePath) => {
-      if (fs.existsSync(filePath)) {
-        fs.unlink(filePath, (err) => {
-          if (err) console.error('Error deleting file:', err);
-        });
-      }
-    };
+    // Update other fields from the request body
+    const { title, content, status, links, mail, shortDescription } = req.body;
 
-    // Process coverImage
-    if (req.files['coverImage']) {
-      if (existingDashboard.coverImage) {
-        const oldCoverImagePath = path.join(__dirname, '../public/uploads/', existingDashboard.coverImage);
-        deleteFile(oldCoverImagePath);
-      }
-      updatedData.coverImage = req.files['coverImage'][0].filename;
-    }
+    // Update the dashboard entry
+    dashboard.title = title || dashboard.title;
+    dashboard.content = content || dashboard.content;
+    dashboard.status = status || dashboard.status;
+    dashboard.links = links || dashboard.links;
+    dashboard.shortDescription = shortDescription || dashboard.shortDescription;
+    dashboard.mail = mail || dashboard.mail;
+    dashboard.coverImage = coverImage;
+    dashboard.zipfile = zipfile;
+    dashboard.excelFile = excelFile;
+    dashboard.updatedAt = Date.now();
 
-    // Process zipfile
-    if (req.files['zipfile']) {
-      if (existingDashboard.zipfile) {
-        const oldZipfilePath = path.join(__dirname, '../public/uploads/', existingDashboard.zipfile);
-        deleteFile(oldZipfilePath);
-      }
-      updatedData.zipfile = req.files['zipfile'][0].filename;
-    }
+    // Save the updated dashboard to the database
+    await dashboard.save();
 
-    // Process excelFile
-    if (req.files['excelFile']) {
-      if (existingDashboard.excelFile) {
-        const oldExcelFilePath = path.join(__dirname, '../public/uploads/', existingDashboard.excelFile);
-        deleteFile(oldExcelFilePath);
-      }
-      updatedData.excelFile = req.files['excelFile'][0].filename;
-    }
-
-    // Update the dashboard with new data and files
-    const updatedDashboard = await Dashboard.findByIdAndUpdate(dashboardId, updatedData, { new: true });
-
-    res.json({ message: 'Dashboard updated successfully', dashboard: updatedDashboard });
+    // Respond with success message and updated dashboard data
+    res.json({ message: 'Dashboard updated successfully', dashboard });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 router.delete('/delete/:id', async (req, res) => {
   try {
@@ -150,41 +139,30 @@ router.delete('/delete/:id', async (req, res) => {
 
 router.get('/get', async (req, res) => {
   try {
-    // Extract query parameters
-    const { search = '', page = 1, limit = 10, status } = req.query;
+    const page = parseInt(req.query.page, 10) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
+    const title = req.query.title || ''; // Get the title query (default is an empty string)
+    
+    const skip = (page - 1) * limit;
 
-    // Convert page and limit to numbers
-    const pageNumber = parseInt(page, 10);
-    const pageSize = parseInt(limit, 10);
+    // Build the query with case-insensitive title search using a regular expression
+    const query = title ? { title: { $regex: title, $options: 'i' } } : {};
 
-    // Build the query object
-    const query = {
-      title: { $regex: search, $options: 'i' }, // Case-insensitive search
-    };
+    // Find blog posts based on title and apply pagination
+    const [dashboards, count] = await Promise.all([
+      Dashboard.find(query).skip(skip).limit(limit),
+      Dashboard.countDocuments(query) // Count documents matching the query
+    ]);
 
-    // Add status filter if provided
-    if (status) {
-      query.status = status;
-    }
-
-    // Find total count of documents matching the query
-    const count = await Dashboard.countDocuments(query);
-
-    // Retrieve the paginated documents
-    const dashboards = await Dashboard.find(query)
-      .skip((pageNumber - 1) * pageSize)
-      .limit(pageSize)
-      .sort({ createdAt: -1 }); // Sort by creation date (descending)
-
-    // Respond with the paginated data
     res.json({
       count,
-      "data":dashboards
+      data: dashboards,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 router.get('/get/:id', async (req, res) => {
   try {

@@ -50,13 +50,13 @@ const DashboardSchema = new mongoose.Schema({
       ref: 'User'  // Reference to the User model for students
     }
   ],
-  links: { 
+  links: {
     type: String,
     default: ''
   },
   status: {
     type: String,
-    enum:['public','private'],
+    enum: ['public', 'private'],
     default: "private"
   },
   createdAt: {
@@ -68,19 +68,24 @@ const DashboardSchema = new mongoose.Schema({
   },
   mail: {
     type: Boolean,
-    default:true
+    default: true
   },
-  zipfile:{
-  type: String,
+  zipfile: {
+    type: String,
     default: ''
-  },excelFile:{
+  },
+   excelFile: {
+    type: String,
+    default: ''
+  },
+  shortDescription:{
      type: String,
     default: ''
   }
 });
 
 // Pre-save hook to update the `updatedAt` field
-DashboardSchema.pre('save', function(next) {
+DashboardSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });
