@@ -8,7 +8,7 @@ const upload =require('../middelware/multer')
  const BASE_URL = process.env.BASE_URL; // Change this to your actual base URL
 // const BASE_URL = 'https://finkaro-backend.onrender.com'; // Change this to your actual base URL
 
-router.post('/addBlog',jwtAuthMiddleWare, async (req, res) => {
+router.post('/add',jwtAuthMiddleWare, async (req, res) => {
     try {
       const tokenUser = req.user
       if(tokenUser?.role !== 'admin')   return res.status(40).json({ message: 'User is not a admin ' });
@@ -51,7 +51,7 @@ router.post('/addBlog',jwtAuthMiddleWare, async (req, res) => {
 }
 )
 
-router.put('/updateBlog/:blogId',jwtAuthMiddleWare, async (req, res) => {
+router.put('/update/:blogId',jwtAuthMiddleWare, async (req, res) => {
   const tokenUser = req.user
   if(tokenUser?.role !== 'admin')   return res.status(40).json({ message: 'User is not a admin ' });
 
@@ -88,7 +88,7 @@ router.put('/updateBlog/:blogId',jwtAuthMiddleWare, async (req, res) => {
   });
 });
 
-router.delete('/deleteBlog/:blogId', jwtAuthMiddleWare,async (req, res) => {
+router.delete('/delete/:blogId', jwtAuthMiddleWare,async (req, res) => {
   const tokenUser = req.user
   if(tokenUser?.role !== 'admin')   return res.status(40).json({ message: 'User is not a admin ' });
 
@@ -111,7 +111,7 @@ router.delete('/deleteBlog/:blogId', jwtAuthMiddleWare,async (req, res) => {
   }
 });
 
-router.get('/getBlog/:blogId', async (req, res) => {
+router.get('/get/:blogId', async (req, res) => {
   try {
     const { blogId } = req.params;
 
