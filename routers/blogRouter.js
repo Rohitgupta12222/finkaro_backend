@@ -4,7 +4,8 @@ const Blog = require('../models/blogs');
 const router = express.Router();
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer fil
 const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
-const upload =require('../middelware/multer')
+const upload =require('../middelware/multer');
+const uploadDashboard = require('../middelware/dashboarMulter');
  const BASE_URL = process.env.BASE_URL; // Change this to your actual base URL
 // const BASE_URL = 'https://finkaro-backend.onrender.com'; // Change this to your actual base URL
 
@@ -15,6 +16,8 @@ router.post('/add',jwtAuthMiddleWare, async (req, res) => {
 
 
    await   upload(req, res, async (err) => {
+
+    console.log(req.body , '============================== >>>>>>>>>>>>>>>>>>');
         if (err) {
           return res.status(400).json({ error: err });
         }
@@ -52,14 +55,16 @@ router.post('/add',jwtAuthMiddleWare, async (req, res) => {
 }
 )
 
-router.put('/update/:blogId',jwtAuthMiddleWare, async (req, res) => {
-  const tokenUser = req.user
-  if(tokenUser?.role !== 'admin')   return res.status(40).json({ message: 'User is not a admin ' });
+router.put('/update/:blogId', jwtAuthMiddleWare, (req, res) => {
+  const tokenUser = req.user;
+  if (tokenUser?.role !== 'admin') {
+    return res.status(403).json({ message: 'User is not an admin' }); // Use 403 Forbidden for access control
+  }
 
-  
-  upload(req, res, async (err) => {
+  // Handle file upload
+  upload.single('coverImage')(req, res, async (err) => {
     if (err) {
-      return res.status(400).json({ error: err });
+      return res.status(400).json({ error: err.message });
     }
 
     try {
@@ -67,14 +72,17 @@ router.put('/update/:blogId',jwtAuthMiddleWare, async (req, res) => {
       const updates = {
         title: req.body.title,
         content: req.body.content,
-        links: req.body.links ? JSON.parse(req.body.links) : [], // Parse JSON string if necessary
+        links: req.body.links || [], // Parse JSON string if necessary
         status: req.body.status,
-        shortDescription:req.body.shortDescription,
+        shortDescription: req.body.shortDescription,
         updatedAt: Date.now()
       };
 
+      // Handle coverImage
       if (req.file) {
-        updates.coverImage = req.file.path; // Save the new image path if a file is uploaded
+        if (req.file.path) {
+          updates.coverImage = req.file.path;
+        }
       }
 
       const updatedBlog = await Blog.findByIdAndUpdate(blogId, updates, { new: true });
@@ -85,10 +93,13 @@ router.put('/update/:blogId',jwtAuthMiddleWare, async (req, res) => {
 
       res.status(200).json(updatedBlog);
     } catch (error) {
+      console.error(error); // Log error details for debugging
       res.status(500).json({ error: 'An error occurred while updating the blog' });
     }
   });
 });
+
+
 
 router.delete('/delete/:blogId', jwtAuthMiddleWare,async (req, res) => {
   const tokenUser = req.user
@@ -120,21 +131,12 @@ router.get('/get/:blogId', async (req, res) => {
     // Find the blog post by ID
     let blogPost = await Blog.findById(blogId);
 
-     blogPost = blogPosts.map(blog => {
-      return {
-        ...blog._doc,
-        coverImage: blog.coverImage ? `${BASE_URL}/${blog.coverImage}` : null // Append the base URL to the coverImage
-      };
-    });
-
-   
-
     // Check if the blog post was found
     if (!blogPost) {
       return res.status(404).json({ error: 'Blog not found' });
     }
 
-    // Respond with the blog post data
+ 
     res.status(200).json(blogPost);
   } catch (error) {
     // Handle errors

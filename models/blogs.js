@@ -18,7 +18,7 @@ const blogSchema = new mongoose.Schema({
   shortDescription: {
     type: String,
     default: '',
-    
+
   },
   coverImage: {
     type: String,
@@ -49,22 +49,15 @@ const blogSchema = new mongoose.Schema({
       }
     }
   ],
-  links: [
-    {
-      youtubeLink: {
-        type: String,
-        default: ''
-
-      },
-      createdAt: {
-        type: Date,
-        default: Date.now
-      }
-    }
-  ],
+  links:
+  {
+    type: String,
+    default: ''
+  }
+  ,
   status: {
     type: String,
-    enum:['public','private'],
+    enum: ['public', 'private'],
     default: "public"
   },
   createdAt: {
@@ -76,12 +69,12 @@ const blogSchema = new mongoose.Schema({
   },
   mail: {
     type: Boolean,
-    default:true
+    default: true
   }
 });
 
 // Pre-save hook to update the `updatedAt` field
-blogSchema.pre('save', function(next) {
+blogSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });
