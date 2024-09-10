@@ -15,6 +15,11 @@ const blogSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  shortDescription: {
+    type: String,
+    default: '',
+    
+  },
   coverImage: {
     type: String,
     default: null

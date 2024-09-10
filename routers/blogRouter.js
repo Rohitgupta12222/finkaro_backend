@@ -32,6 +32,7 @@ router.post('/add',jwtAuthMiddleWare, async (req, res) => {
           coverImage: path,// Save the uploaded image path
           links: req.body.links, // Handle any additional fields
           status: req.body.status,
+          shortDescription:req.body.shortDescription,
           mail:req.body.status === true ? true : false,
         });
    
@@ -68,6 +69,7 @@ router.put('/update/:blogId',jwtAuthMiddleWare, async (req, res) => {
         content: req.body.content,
         links: req.body.links ? JSON.parse(req.body.links) : [], // Parse JSON string if necessary
         status: req.body.status,
+        shortDescription:req.body.shortDescription,
         updatedAt: Date.now()
       };
 
