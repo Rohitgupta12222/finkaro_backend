@@ -118,7 +118,16 @@ router.get('/get/:blogId', async (req, res) => {
     const { blogId } = req.params;
 
     // Find the blog post by ID
-    const blogPost = await Blog.findById(blogId);
+    let blogPost = await Blog.findById(blogId);
+
+     blogPost = blogPosts.map(blog => {
+      return {
+        ...blog._doc,
+        coverImage: blog.coverImage ? `${BASE_URL}/${blog.coverImage}` : null // Append the base URL to the coverImage
+      };
+    });
+
+   
 
     // Check if the blog post was found
     if (!blogPost) {
