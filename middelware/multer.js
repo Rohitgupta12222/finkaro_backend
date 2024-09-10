@@ -26,10 +26,10 @@ function checkFileType(file, cb) {
 // Initialize upload middleware
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1000000 }, // 1MB file size limit
+  limits: { fileSize: 1000000000000 }, // 1MB file size limit
   fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   }
-}).single('coverImage'); // Adjust field name as necessary
+});
 
 module.exports = upload;
