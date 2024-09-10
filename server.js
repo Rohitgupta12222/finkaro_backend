@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const Razorpay = require('razorpay');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
@@ -39,6 +40,8 @@ const subscribeRouter = require('./routers/subscribeRouter');
 const blogRouter = require('./routers/blogRouter');
 const youtubeRouter = require('./routers/youtubelinkRouter');
 const courseRouter = require('./routers/courseRouter');
+const razorpayRouter = require('./routers/razorpayRouter');
+const dashboardRouter = require('./routers/dashboardRouter')
 
 
 // Define routes
@@ -47,6 +50,10 @@ app.use('/subscribe', subscribeRouter);
 app.use('/blog', blogRouter);
 app.use('/youtubelink', youtubeRouter);
 app.use('/course', courseRouter);
+app.use('/payment', razorpayRouter);
+app.use('/dashboard', dashboardRouter);
+
+
 
 
 // Root route

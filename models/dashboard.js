@@ -44,23 +44,20 @@ const DashboardSchema = new mongoose.Schema({
       }
     }
   ],
-  links: [
+  purchaseDashboard: [
     {
-      youtubeLink: {
-        type: String,
-        default: ''
-
-      },
-      createdAt: {
-        type: Date,
-        default: Date.now
-      }
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'  // Reference to the User model for students
     }
   ],
+  links: { 
+    type: String,
+    default: ''
+  },
   status: {
     type: String,
     enum:['public','private'],
-    default: "public"
+    default: "private"
   },
   createdAt: {
     type: Date,
@@ -72,6 +69,13 @@ const DashboardSchema = new mongoose.Schema({
   mail: {
     type: Boolean,
     default:true
+  },
+  zipfile:{
+  type: String,
+    default: ''
+  },excelFile:{
+     type: String,
+    default: ''
   }
 });
 
