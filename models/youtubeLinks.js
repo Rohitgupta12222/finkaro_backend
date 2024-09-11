@@ -6,24 +6,26 @@ const youtubeLinkSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  url: {
+  video: {
     type: String,
     required: true,
     trim: true,
-    validate: {
-      validator: function(v) {
-        return /^(https?\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+$/.test(v);
-      },
-      message: props => `${props.value} is not a valid YouTube URL!`
-    }
   },
-  alternative: {
+  alt: {
     type: String,
     trim: true
+  },
+  status: {
+    type: String,
+    enum: ['public', 'private'],
+    default: "public"
   },
   addedAt: {
     type: Date,
     default: Date.now
+  },
+  updatedAt: {
+    type: Date
   }
 });
 
