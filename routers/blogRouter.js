@@ -8,6 +8,8 @@ const upload =require('../middelware/multer');
 const uploadDashboard = require('../middelware/dashboarMulter');
  const BASE_URL = process.env.BASE_URL; // Change this to your actual base URL
 // const BASE_URL = 'https://finkaro-backend.onrender.com'; // Change this to your actual base URL
+const fs = require('fs');
+const path = require('path');
 
 router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), async (req, res) => {
   const { title, content, status, shortDescription, links } = req.body;
@@ -19,8 +21,7 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), async (req, 
   }
 
   // Log the request body and file information for debugging
-  console.log('Request Body:', req.body);
-  console.log('Uploaded File:', req.file);
+
   const userId = req.user.id
   try {
     const newBlog = new Blog({
@@ -70,28 +71,53 @@ router.put('/update/:blogId', jwtAuthMiddleWare, upload.single('coverImage'), as
 });
 
 
-router.delete('/delete/:blogId', jwtAuthMiddleWare,async (req, res) => {
-  const tokenUser = req.user
-  if(tokenUser?.role !== 'admin')   return res.status(40).json({ message: 'User is not a admin ' });
+router.delete('/delete/:blogId', jwtAuthMiddleWare, async (req, res) => {
+  const tokenUser = req.user;
+  
+  // Ensure only admin can delete
+  if (tokenUser?.role !== 'admin') {
+    return res.status(403).json({ message: 'User is not an admin' });
+  }
 
   try {
     const { blogId } = req.params;
 
-    // Find and delete the blog post by ID
-    const deletedBlog = await Blog.findByIdAndDelete(blogId);
+    // Find the blog post by ID
+    const blog = await Blog.findById(blogId);
 
-    // Check if the blog post was found and deleted
-    if (!deletedBlog) {
+    // Check if the blog post exists
+    if (!blog) {
       return res.status(404).json({ error: 'Blog not found' });
     }
 
+    // Helper function to delete a file
+    const deleteFile = (filePath) => {
+      if (filePath) {
+        const fullPath = path.join(__dirname, '../public/uploads/', path.basename(filePath));
+        fs.unlink(fullPath, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.error('Error deleting file:', err);
+          }
+        });
+      }
+    };
+
+    // Delete the cover image if it exists
+    if (blog.coverImage) {
+      deleteFile(blog.coverImage);
+    }
+
+    // Delete the blog post from the database
+    await Blog.findByIdAndDelete(blogId);
+
     // Respond with a success message
-    res.status(200).json({ message: 'Blog post deleted successfully' });
+    res.status(200).json({ message: 'Blog post and associated cover image deleted successfully' });
   } catch (error) {
     // Handle errors
     res.status(500).json({ error: 'An error occurred while deleting the blog' });
   }
 });
+
 
 router.get('/get/:blogId', async (req, res) => {
   try {

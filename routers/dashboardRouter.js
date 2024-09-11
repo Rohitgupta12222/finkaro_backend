@@ -4,13 +4,13 @@ const Dashboard = require('../models/dashboard');
 const router = express.Router();
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer fil
 const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
-const upload =require('../middelware/dashboarMulter')
+const Dashboardupload =require('../middelware/dashboarMulter')
 const BASE_URL = process.env.BASE_URL; // Change this to your actual base URL
 const fs = require('fs');
 const path = require('path');
 
 
-router.post('/add', jwtAuthMiddleWare, upload.fields([
+router.post('/add', jwtAuthMiddleWare, Dashboardupload.fields([
   { name: 'coverImage', maxCount: 1 },
   { name: 'zipfile', maxCount: 1 },
   { name: 'excelFile', maxCount: 1 }
@@ -51,8 +51,8 @@ router.post('/add', jwtAuthMiddleWare, upload.fields([
 });
 
 
-// Update dashboard route with file uploads
-router.put('/update/:id', jwtAuthMiddleWare, upload.fields([
+
+router.put('/update/:id', jwtAuthMiddleWare, Dashboardupload.fields([
   { name: 'coverImage', maxCount: 1 },
   { name: 'zipfile', maxCount: 1 },
   { name: 'excelFile', maxCount: 1 }
@@ -64,10 +64,39 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.fields([
       return res.status(404).json({ message: 'Dashboard not found' });
     }
 
+    // Function to remove old files from server
+    const removeOldFile = (filePath) => {
+      const fullPath = path.join(__dirname, '../public/uploads', path.basename(filePath));
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath); // Remove the file
+      }
+    };
+
     // Update file paths if new files are uploaded
-    const coverImage = req.files['coverImage'] ? `${BASE_URL}/uploads/${req.files['coverImage'][0].filename}` : dashboard.coverImage;
-    const zipfile = req.files['zipfile'] ? `${BASE_URL}/uploads/${req.files['zipfile'][0].filename}` : dashboard.zipfile;
-    const excelFile = req.files['excelFile'] ? `${BASE_URL}/uploads/${req.files['excelFile'][0].filename}` : dashboard.excelFile;
+    let coverImage = dashboard.coverImage;
+    let zipfile = dashboard.zipfile;
+    let excelFile = dashboard.excelFile;
+
+    if (req.files['coverImage']) {
+      // Remove the old cover image
+      if (dashboard.coverImage) removeOldFile(dashboard.coverImage);
+      // Update with the new cover image path
+      coverImage = `${BASE_URL}/uploads/${req.files['coverImage'][0].filename}`;
+    }
+
+    if (req.files['zipfile']) {
+      // Remove the old zip file
+      if (dashboard.zipfile) removeOldFile(dashboard.zipfile);
+      // Update with the new zip file path
+      zipfile = `${BASE_URL}/uploads/${req.files['zipfile'][0].filename}`;
+    }
+
+    if (req.files['excelFile']) {
+      // Remove the old excel file
+      if (dashboard.excelFile) removeOldFile(dashboard.excelFile);
+      // Update with the new excel file path
+      excelFile = `${BASE_URL}/uploads/${req.files['excelFile'][0].filename}`;
+    }
 
     // Update other fields from the request body
     const { title, content, status, links, mail, shortDescription } = req.body;
@@ -95,6 +124,9 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.fields([
 });
 
 
+
+
+
 router.delete('/delete/:id', async (req, res) => {
   try {
     const dashboardId = req.params.id;
@@ -106,10 +138,11 @@ router.delete('/delete/:id', async (req, res) => {
       return res.status(404).json({ error: 'Dashboard not found' });
     }
 
-
+    // Function to delete a file
     const deleteFile = (filePath) => {
       if (filePath) {
-        fs.unlink(filePath, (err) => {
+        const fullPath = path.join(__dirname, '../public/uploads/', path.basename(filePath));
+        fs.unlink(fullPath, (err) => {
           if (err && err.code !== 'ENOENT') {
             console.error('Error deleting file:', err);
           }
@@ -119,13 +152,13 @@ router.delete('/delete/:id', async (req, res) => {
 
     // Delete associated files if they exist
     if (dashboard.coverImage) {
-      deleteFile(path.join(__dirname, './public/uploads/', dashboard.coverImage));
+      deleteFile(dashboard.coverImage); // Delete coverImage
     }
     if (dashboard.zipfile) {
-      deleteFile(path.join(__dirname, './public/uploads/', dashboard.zipfile));
+      deleteFile(dashboard.zipfile); // Delete zipfile
     }
     if (dashboard.excelFile) {
-      deleteFile(path.join(__dirname, './public/uploads/', dashboard.excelFile));
+      deleteFile(dashboard.excelFile); // Delete excelFile
     }
 
     // Delete the dashboard entry from the database
@@ -136,6 +169,7 @@ router.delete('/delete/:id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 router.get('/get', async (req, res) => {
   try {
@@ -166,19 +200,13 @@ router.get('/get', async (req, res) => {
 
 router.get('/get/:id', async (req, res) => {
   try {
-    // Extract the ID from the request parameters
     const dashboardId = req.params.id;
 
-    // Find the dashboard by ID
     const dashboard = await Dashboard.findById(dashboardId);
-
-    // Check if the dashboard exists
     if (!dashboard) {
       return res.status(404).json({ error: 'Dashboard not found' });
     }
-
-    // Respond with the found dashboard
-    res.json({"data":dashboard});
+    res.json({dashboard});
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
