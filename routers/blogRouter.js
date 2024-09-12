@@ -48,15 +48,17 @@ router.put('/update/:blogId', jwtAuthMiddleWare, upload.single('coverImage'), as
   const { blogId } = req.params;
   const { title, content, status, shortDescription, links } = req.body;
   const coverImage = req.file ? req.file.path.replace('public/', '') : ''; // Remove 'public/' prefix
-  let imagepath =''
-  if(coverImage){
+  
+  let updateFields = { title, content, status, shortDescription, links, updatedAt: Date.now() };
 
-     imagepath = `${BASE_URL}/${coverImage}`
+  if (coverImage) {
+    updateFields.coverImage = `${BASE_URL}/${coverImage}`;
   }
+
   try {
     const updatedBlog = await Blog.findByIdAndUpdate(
       blogId,
-      { title, content, status, shortDescription, links, coverImage:imagepath, updatedAt: Date.now() },
+      updateFields,
       { new: true }
     );
 

@@ -67,7 +67,7 @@ router.put('/update/:id', jwtAuthMiddleWare, Dashboardupload.fields([
       return res.status(404).json({ message: 'Dashboard not found' });
     }
 
-    // Function to remove old files from server
+    // Function to remove old files from the server
     const removeOldFile = (filePath) => {
       const fullPath = path.join(__dirname, '../public/uploads', path.basename(filePath));
       if (fs.existsSync(fullPath)) {
@@ -75,34 +75,32 @@ router.put('/update/:id', jwtAuthMiddleWare, Dashboardupload.fields([
       }
     };
 
-    // Update file paths if new files are uploaded
-    let coverImage = dashboard.coverImage;
-    let zipfile = dashboard.zipfile;
-    let excelFile = dashboard.excelFile;
+    // Update file paths only if new files are uploaded
+    let { coverImage, zipfile, excelFile } = dashboard;
 
     if (req.files['coverImage']) {
-      // Remove the old cover image
+      // Remove the old cover image if it exists
       if (dashboard.coverImage) removeOldFile(dashboard.coverImage);
-      // Update with the new cover image path
+      // Set the new cover image path
       coverImage = `${BASE_URL}/uploads/${req.files['coverImage'][0].filename}`;
     }
 
     if (req.files['zipfile']) {
-      // Remove the old zip file
+      // Remove the old zip file if it exists
       if (dashboard.zipfile) removeOldFile(dashboard.zipfile);
-      // Update with the new zip file path
+      // Set the new zip file path
       zipfile = `${BASE_URL}/uploads/${req.files['zipfile'][0].filename}`;
     }
 
     if (req.files['excelFile']) {
-      // Remove the old excel file
+      // Remove the old excel file if it exists
       if (dashboard.excelFile) removeOldFile(dashboard.excelFile);
-      // Update with the new excel file path
+      // Set the new excel file path
       excelFile = `${BASE_URL}/uploads/${req.files['excelFile'][0].filename}`;
     }
 
     // Update other fields from the request body
-    const { title, content, status, links, mail, shortDescription ,actualPrice,offerPrice,start } = req.body;
+    const { title, content, status, links, mail, shortDescription, actualPrice, offerPrice, start } = req.body;
 
     // Update the dashboard entry
     dashboard.title = title || dashboard.title;

@@ -30,10 +30,7 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), async (req, 
                 mail: req.body.published === 'public' ? true : false,  // Conditionally set mail flag
             });
 
-            console.log(newCourse);
-
-
-            const response = await newCourse.save()
+             const response = await newCourse.save()
             res.status(201).json({ response: response, message: "Course created" })
     
 
@@ -48,52 +45,57 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), async (req, 
 }
 )
 router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), async (req, res) => {
-    try {
+  try {
+      const tokenUser = req.user;
+      if (tokenUser?.role !== 'admin') {
+          return res.status(401).json({ message: 'User is not an admin' });
+      }
 
-        const tokenUser = req.user;
-        if (tokenUser?.role !== 'admin') {
-            return res.status(401).json({ message: 'User is not an admin' });
-        }
+      const course = await Course.findById(req.params.id);
+      if (!course) {
+          return res.status(404).json({ message: 'Course not found' });
+      }
 
-        const course = await Course.findById(req.params.id);
-        if (!course) {
-            return res.status(404).json({ message: 'Course not found' });
-        }
+      // Initialize the fields to update
+      const updateFields = {
+          title: req.body.title || course.title,
+          description: req.body.description || course.description,
+          price: req.body.price || course.price,
+          duration: req.body.duration || course.duration,
+          lessons: req.body.lessons || course.lessons,
+          published: req.body.published || course.published,
+          mail: req.body.published === 'public' ? true : course.mail, // Conditionally update mail field
+          updatedAt: Date.now() // Update timestamp
+      };
 
-        // Check if a new file is uploaded
-        let coverImage = course.coverImage; // Keep the existing image if no new file is uploaded
+      // If a new image file is uploaded
+      if (req.file) {
+          // Remove the old image if it exists
+          if (course.coverImage) {
+              const oldImagePath = `./public/${course.coverImage}`;
+              fs.unlinkSync(oldImagePath); // Delete the old image
+          }
 
-        if (req.file) {
-            // Remove the old image if it exists
-            if (course.coverImage) {
-                const oldImagePath = `./public/${course.coverImage}`;
-                fs.unlinkSync(oldImagePath); // Delete the old image
-            }
-            // Store the new image path
-            coverImage = req.file.path.replace('public/', ''); // Remove 'public/' prefix
-        }
+          // Update with the new image path
+          const coverImage = req.file.path.replace('public/', ''); // Remove 'public/' prefix
+          updateFields.coverImage = `${BASE_URL}/${coverImage}`; // Full image URL
+      }
 
-        const imageUrl = `${BASE_URL}/${coverImage}`; // Full image URL
+      // Update the course
+      const updatedCourse = await Course.findByIdAndUpdate(req.params.id, updateFields, { new: true });
 
-        // Update fields, only if provided, otherwise retain old data
-        course.title = req.body.title || course.title;
-        course.description = req.body.description || course.description;
-        course.price = req.body.price || course.price;
-        course.duration = req.body.duration || course.duration;
-        course.lessons = req.body.lessons || course.lessons;
-        course.coverImage = imageUrl;
-        course.published = req.body.published || course.published;
-        course.mail = req.body.published === 'public' ? true : course.mail; // Update mail field conditionally
+      if (!updatedCourse) {
+          return res.status(404).json({ message: 'Course not found' });
+      }
 
-        // Save the updated course
-        const updatedCourse = await course.save();
-        res.status(200).json({ updatedCourse, message: "Course updated successfully" });
+      res.status(200).json({ updatedCourse, message: "Course updated successfully" });
 
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ message: "Internal server error", error: error.message });
-    }
+  } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ message: "Internal server error", error: error.message });
+  }
 });
+
 router.get('/getcourses', async (req, res) => {
     try {
       const page = parseInt(req.query.page, 10) || 1; // Default to page 1
