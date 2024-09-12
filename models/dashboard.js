@@ -78,6 +78,18 @@ const DashboardSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  actualPrice: {
+    type: String,
+    default: ''
+  },
+  offerPrice:{
+      type: String,
+    default: ''
+  },
+  start:{
+    type: Number,
+    default: 3
+  },
   shortDescription:{
      type: String,
     default: ''

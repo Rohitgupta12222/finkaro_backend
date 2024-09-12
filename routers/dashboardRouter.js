@@ -25,7 +25,7 @@ router.post('/add', jwtAuthMiddleWare, Dashboardupload.fields([
     const userId = req.user.id;
 
     // Extract other fields from the request body
-    const { title, content, status, links, mail, shortDescription } = req.body;
+    const { title, content, status, links, mail, shortDescription ,actualPrice,offerPrice,start } = req.body;
 
     // Create a new Dashboard entry
     const newDashboard = new Dashboard({
@@ -35,6 +35,9 @@ router.post('/add', jwtAuthMiddleWare, Dashboardupload.fields([
       status,
       links,
       shortDescription,
+      actualPrice,
+      offerPrice,
+      start,
       mail,
       coverImage,   // Use the file path or null if not provided
       zipfile,      // Use the file path or null if not provided
@@ -99,7 +102,7 @@ router.put('/update/:id', jwtAuthMiddleWare, Dashboardupload.fields([
     }
 
     // Update other fields from the request body
-    const { title, content, status, links, mail, shortDescription } = req.body;
+    const { title, content, status, links, mail, shortDescription ,actualPrice,offerPrice,start } = req.body;
 
     // Update the dashboard entry
     dashboard.title = title || dashboard.title;
@@ -108,6 +111,9 @@ router.put('/update/:id', jwtAuthMiddleWare, Dashboardupload.fields([
     dashboard.links = links || dashboard.links;
     dashboard.shortDescription = shortDescription || dashboard.shortDescription;
     dashboard.mail = mail || dashboard.mail;
+    dashboard.actualPrice = actualPrice || dashboard.actualPrice;
+    dashboard.offerPrice = offerPrice || dashboard.offerPrice;
+    dashboard.start = start || dashboard.start;
     dashboard.coverImage = coverImage;
     dashboard.zipfile = zipfile;
     dashboard.excelFile = excelFile;
