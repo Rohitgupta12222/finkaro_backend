@@ -51,8 +51,9 @@ const courseSchema = new mongoose.Schema({
     default: null
   },
   published: {
-    type: Boolean,
-    default: false
+    type: String,
+    enum: ['public', 'private'],
+    default: "private",
   },
   enrolledStudents: [
     {
