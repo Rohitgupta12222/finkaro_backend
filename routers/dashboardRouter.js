@@ -11,13 +11,13 @@ const path = require('path');
 
 
 router.post('/add', jwtAuthMiddleWare, Dashboardupload.fields([
-  { name: 'coverImage', maxCount: 1 },
+  { name: 'coverImage', maxCount: 10 },
   { name: 'zipfile', maxCount: 1 },
   { name: 'excelFile', maxCount: 1 }
 ]), async (req, res) => {
   try {
     // Extract file paths if files are uploaded
-    const coverImage = req.files['coverImage'] ? `${BASE_URL}/uploads/${req.files['coverImage'][0].filename}` : null;
+    const coverImage = req.files['coverImage'] ? req.files['coverImage'].map(file => `${BASE_URL}/uploads/${file.filename}`) : [];
     const zipfile = req.files['zipfile'] ? `${BASE_URL}/uploads/${req.files['zipfile'][0].filename}` : null;
     const excelFile = req.files['excelFile'] ? `${BASE_URL}/uploads/${req.files['excelFile'][0].filename}` : null;
 
