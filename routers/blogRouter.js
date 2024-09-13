@@ -43,6 +43,7 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), async (req, 
     res.status(500).json({ error: 'An error occurred while adding the blog' });
   }
 });
+// ss
 
 router.put('/update/:blogId', jwtAuthMiddleWare, upload.single('coverImage'), async (req, res) => {
   const { blogId } = req.params;
