@@ -21,7 +21,6 @@
     "nodemailer": "^6.9.14",
     "nodemon": "^3.1.4",
     "path": "^0.12.7",
-    "razorpay": "^2.9.4",
-    "webp-converter": "^2.3.3"
+    "razorpay": "^2.9.4"
   }
 }
