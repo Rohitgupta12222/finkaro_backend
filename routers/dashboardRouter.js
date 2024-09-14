@@ -16,18 +16,13 @@ router.post('/add', jwtAuthMiddleWare, Dashboardupload.fields([
   { name: 'excelFile', maxCount: 1 }
 ]), async (req, res) => {
   try {
-    // Extract file paths if files are uploaded
     const coverImage = req.files['coverImage'] ? req.files['coverImage'].map(file => `${BASE_URL}/uploads/${file.filename}`) : [];
     const zipfile = req.files['zipfile'] ? `${BASE_URL}/uploads/${req.files['zipfile'][0].filename}` : null;
     const excelFile = req.files['excelFile'] ? `${BASE_URL}/uploads/${req.files['excelFile'][0].filename}` : null;
 
-    // Get the userId from the authenticated user
     const userId = req.user.id;
+    const { title, content, status, links, mail, shortDescription, actualPrice, offerPrice, start } = req.body;
 
-    // Extract other fields from the request body
-    const { title, content, status, links, mail, shortDescription ,actualPrice,offerPrice,start } = req.body;
-
-    // Create a new Dashboard entry
     const newDashboard = new Dashboard({
       title,
       content,
@@ -39,14 +34,13 @@ router.post('/add', jwtAuthMiddleWare, Dashboardupload.fields([
       offerPrice,
       start,
       mail,
-      coverImage,   // Use the file path or null if not provided
-      zipfile,      // Use the file path or null if not provided
-      excelFile     // Use the file path or null if not provided
+      coverImage,
+      zipfile,
+      excelFile
     });
 
     await newDashboard.save();
 
-    // Respond with success message and dashboard data
     res.json({ message: 'Dashboard created successfully', dashboard: newDashboard });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -55,8 +49,10 @@ router.post('/add', jwtAuthMiddleWare, Dashboardupload.fields([
 
 
 
+
+
 router.put('/update/:id', jwtAuthMiddleWare, Dashboardupload.fields([
-  { name: 'coverImage', maxCount: 1 },
+  { name: 'coverImage', maxCount: 10 },
   { name: 'zipfile', maxCount: 1 },
   { name: 'excelFile', maxCount: 1 }
 ]), async (req, res) => {
@@ -75,28 +71,30 @@ router.put('/update/:id', jwtAuthMiddleWare, Dashboardupload.fields([
       }
     };
 
-    // Update file paths only if new files are uploaded
-    let { coverImage, zipfile, excelFile } = dashboard;
-
+    // Handle cover images
     if (req.files['coverImage']) {
-      // Remove the old cover image if it exists
-      if (dashboard.coverImage) removeOldFile(dashboard.coverImage);
-      // Set the new cover image path
-      coverImage = `${BASE_URL}/uploads/${req.files['coverImage'][0].filename}`;
+      // Remove old cover images
+      if (dashboard.coverImage) {
+        dashboard.coverImage.forEach(filePath => removeOldFile(filePath));
+      }
+      // Set the new cover image paths
+      dashboard.coverImage = req.files['coverImage'].map(file => `${BASE_URL}/uploads/${file.filename}`);
     }
 
+    // Handle zip file
     if (req.files['zipfile']) {
-      // Remove the old zip file if it exists
+      // Remove the old zip file
       if (dashboard.zipfile) removeOldFile(dashboard.zipfile);
       // Set the new zip file path
-      zipfile = `${BASE_URL}/uploads/${req.files['zipfile'][0].filename}`;
+      dashboard.zipfile = `${BASE_URL}/uploads/${req.files['zipfile'][0].filename}`;
     }
 
+    // Handle excel file
     if (req.files['excelFile']) {
-      // Remove the old excel file if it exists
+      // Remove the old excel file
       if (dashboard.excelFile) removeOldFile(dashboard.excelFile);
       // Set the new excel file path
-      excelFile = `${BASE_URL}/uploads/${req.files['excelFile'][0].filename}`;
+      dashboard.excelFile = `${BASE_URL}/uploads/${req.files['excelFile'][0].filename}`;
     }
 
     // Update other fields from the request body
@@ -112,9 +110,6 @@ router.put('/update/:id', jwtAuthMiddleWare, Dashboardupload.fields([
     dashboard.actualPrice = actualPrice || dashboard.actualPrice;
     dashboard.offerPrice = offerPrice || dashboard.offerPrice;
     dashboard.start = start || dashboard.start;
-    dashboard.coverImage = coverImage;
-    dashboard.zipfile = zipfile;
-    dashboard.excelFile = excelFile;
     dashboard.updatedAt = Date.now();
 
     // Save the updated dashboard to the database

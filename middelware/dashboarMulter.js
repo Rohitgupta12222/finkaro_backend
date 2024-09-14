@@ -4,11 +4,11 @@ const path = require('path');
 // Configure storage options
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, './public/uploads/'); // Directory for uploaded files
+    cb(null, './public/uploads/');
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + '-' + file.originalname); // Unique filename
+    cb(null, uniqueSuffix + '-' + file.originalname);
   }
 });
 
@@ -24,11 +24,11 @@ const fileFilter = (req, file, cb) => {
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'application/vnd.ms-excel'
   ];
-  
+
   if (allowedMimeTypes.includes(file.mimetype) && mimetype) {
-    cb(null, true); // Accept the file
+    cb(null, true);
   } else {
-    cb(new Error('Only image, zip, and Excel files are allowed!'), false); // Reject the file
+    cb(new Error('Only image, zip, and Excel files are allowed!'), false);
   }
 };
 
@@ -36,7 +36,7 @@ const fileFilter = (req, file, cb) => {
 const Dashboardupload = multer({
   storage: storage,
   fileFilter: fileFilter,
-  limits: { fileSize: 100 * 1024 * 1024 } // Limit file size to 10MB
+  limits: { fileSize: 10 * 1024 * 1024 } // Limit file size to 10MB
 });
 
 module.exports = Dashboardupload;
