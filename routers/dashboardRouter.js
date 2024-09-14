@@ -151,7 +151,12 @@ router.delete('/delete/:id', async (req, res) => {
 
     // Delete associated files if they exist
     if (dashboard.coverImage) {
-      deleteFile(dashboard.coverImage); // Delete coverImage
+      // Check if coverImage is an array
+      if (Array.isArray(dashboard.coverImage)) {
+        dashboard.coverImage.forEach(filePath => deleteFile(filePath));
+      } else {
+        deleteFile(dashboard.coverImage); // Delete single cover image
+      }
     }
     if (dashboard.zipfile) {
       deleteFile(dashboard.zipfile); // Delete zipfile
