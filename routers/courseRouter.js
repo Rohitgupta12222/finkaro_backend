@@ -8,7 +8,7 @@ const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
 const upload = require('../middelware/multer');
 const fs = require('fs'); // To delete files if necessary
 const BASE_URL = process.env.BASE_URL; // Change this to your actual base URL
-// const BASE_URL = 'https://finkaro-backend.onrender.com'; // Change this to your actual base URL
+const cloudinary = require('../middelware/Cloudinary'); // Adjust the path to your Cloudinary configuration
 
 router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), async (req, res) => {
     try {
@@ -16,15 +16,13 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), async (req, 
         if (tokenUser?.role !== 'admin') return res.status(40).json({ message: 'User is not a admin ' });
 
         const coverImage = req.file ? req.file.path.replace('public/', '') : ''; // Remove 'public/' prefix
-       const path =`${BASE_URL}/${coverImage}`
-
-            const newCourse = new Course({
+                   const newCourse = new Course({
                 title: req.body.title,
                 description: req.body.description,
                 price: req.body.price,
                 duration: req.body.duration,
                 lessons: req.body.lessons,  // Assuming lessons will be passed as an array in req.body
-                coverImage: path,  // Save the uploaded image path
+                coverImage,  // Save the uploaded image path
                 published: req.body.published,
                 enrolledStudents: req.body.enrolledStudents || [],  // Default to an empty array if not provided
                 mail: req.body.published === 'public' ? true : false,  // Conditionally set mail flag
@@ -55,6 +53,8 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), async 
       if (!course) {
           return res.status(404).json({ message: 'Course not found' });
       }
+      const coverImage = req.file ? req.file.path : ''; // Cloudinary URL
+
 
       // Initialize the fields to update
       const updateFields = {
@@ -68,18 +68,24 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), async 
           updatedAt: Date.now() // Update timestamp
       };
 
-      // If a new image file is uploaded
-      if (req.file) {
-          // Remove the old image if it exists
-          if (course.coverImage) {
-              const oldImagePath = `./public/${course.coverImage}`;
-              fs.unlinkSync(oldImagePath); // Delete the old image
-          }
-
-          // Update with the new image path
-          const coverImage = req.file.path.replace('public/', ''); // Remove 'public/' prefix
-          updateFields.coverImage = `${BASE_URL}/${coverImage}`; // Full image URL
+      if (coverImage) {
+        updateFields.coverImage = coverImage;
+  
+        // Delete the old image from Cloudinary if it exists
+        if (course.coverImage) {
+          const publicId = 'uploads/'+course.coverImage.split('/').pop().split('.')[0]; // Extract the public ID
+  
+          console.log(' publicId' ,publicId);
+          await cloudinary.uploader.destroy(publicId, function (error, result) {
+            if (error) {
+              console.error('Error deleting old image from Cloudinary:', error);
+            } else {
+              console.log('Old image deleted from Cloudinary:', result);
+            }
+          });
+        }
       }
+  
 
       // Update the course
       const updatedCourse = await Course.findByIdAndUpdate(req.params.id, updateFields, { new: true });
@@ -146,52 +152,33 @@ router.get('/getcourses/:id', async (req, res) => {
     }
 });
 
-
 router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
-    const tokenUser = req.user;
-    
-    // Ensure only admin can delete
-    if (tokenUser?.role !== 'admin') {
-      return res.status(403).json({ message: 'User is not an admin' });
+  const tokenUser = req.user;
+
+  if (tokenUser?.role !== 'admin') {
+    return res.status(403).json({ message: 'User is not an admin' });
+  }
+
+  try {
+    const { id } = req.params;
+    const course = await Course.findById(id);
+
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
     }
-  
-    try {
-      const { id } = req.params;
-  
-      // Find the Course post by ID
-      const course = await Course.findById(id);
-  
-      // Check if the Course post exists
-      if (!course) {
-        return res.status(404).json({ error: 'Course not found' });
-      }
-  
-      // Helper function to delete a file
-      const deleteFile = (filePath) => {
-        if (filePath) {
-          const fullPath = path.join(__dirname, '../public/uploads/', path.basename(filePath));
-          fs.unlink(fullPath, (err) => {
-            if (err && err.code !== 'ENOENT') {
-              console.error('Error deleting file:', err);
-            }
-          });
-        }
-      };
-  
-      // Delete the cover image if it exists
-      if (Course.coverImage) {
-        deleteFile(Course.coverImage);
-      }
-  
-      // Delete the Course post from the database
-      await Course.findByIdAndDelete(id);
-  
-      // Respond with a success message
-      res.status(200).json({ message: 'Course post and associated cover image deleted successfully' });
-    } catch (error) {
-      // Handle errors
-      res.status(500).json({ error: 'An error occurred while deleting the Course' });
+    if (course.coverImage) {
+      const publicId = course.coverImage.split('/').pop().split('.')[0]; 
+      await cloudinary.uploader
+        .destroy(['uploads/' + publicId],
+          { type: 'upload', resource_type: 'image' })
+        .then(console.log);
     }
-  });
+    await Course.findByIdAndDelete(id);
+    res.status(200).json({ message: 'Course post and associated cover image deleted successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'An error occurred while deleting the Course' });
+  }
+});
 
 module.exports = router;

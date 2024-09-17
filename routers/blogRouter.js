@@ -4,9 +4,11 @@ const Blog = require('../models/blogs');
 const router = express.Router();
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer fil
 const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
-const upload =require('../middelware/multer');
+const upload = require('../middelware/multer');
 const uploadDashboard = require('../middelware/dashboarMulter');
- const BASE_URL = process.env.BASE_URL; // Change this to your actual base URL
+const cloudinary = require('../middelware/Cloudinary'); // Adjust the path to your Cloudinary configuration
+
+const BASE_URL = process.env.BASE_URL; // Change this to your actual base URL
 // const BASE_URL = 'https://finkaro-backend.onrender.com'; // Change this to your actual base URL
 const fs = require('fs');
 const path = require('path');
@@ -14,11 +16,6 @@ const path = require('path');
 router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), async (req, res) => {
   const { title, content, status, shortDescription, links } = req.body;
   const coverImage = req.file ? req.file.path.replace('public/', '') : ''; // Remove 'public/' prefix
-  let imagepath =''
-  if(coverImage){
-
-     imagepath = `${BASE_URL}/${coverImage}`
-  }
 
   // Log the request body and file information for debugging
 
@@ -30,7 +27,7 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), async (req, 
       status,
       shortDescription,
       links,
-      coverImage:imagepath,
+      coverImage: coverImage,
       userId
     });
 
@@ -48,26 +45,48 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), async (req, 
 router.put('/update/:blogId', jwtAuthMiddleWare, upload.single('coverImage'), async (req, res) => {
   const { blogId } = req.params;
   const { title, content, status, shortDescription, links } = req.body;
-  const coverImage = req.file ? req.file.path.replace('public/', '') : ''; // Remove 'public/' prefix
-  
+  const coverImage = req.file ? req.file.path : ''; // Cloudinary URL
+
   let updateFields = { title, content, status, shortDescription, links, updatedAt: Date.now() };
 
-  if (coverImage) {
-    updateFields.coverImage = `${BASE_URL}/${coverImage}`;
-  }
-
   try {
+    // Find the blog by ID
+    const blog = await Blog.findById(blogId);
+
+    // Check if the blog exists
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+
+    // If a new cover image is uploaded, delete the old one from Cloudinary
+    if (coverImage) {
+      updateFields.coverImage = coverImage;
+
+      // Delete the old image from Cloudinary if it exists
+      if (blog.coverImage) {
+        const publicId = 'uploads/'+blog.coverImage.split('/').pop().split('.')[0]; // Extract the public ID
+
+        console.log(' publicId' ,publicId);
+        await cloudinary.uploader.destroy(publicId, function (error, result) {
+          if (error) {
+            console.error('Error deleting old image from Cloudinary:', error);
+          } else {
+            console.log('Old image deleted from Cloudinary:', result);
+          }
+        });
+      }
+    }
+
+    // Update the blog with the new data
     const updatedBlog = await Blog.findByIdAndUpdate(
       blogId,
       updateFields,
       { new: true }
     );
 
-    if (!updatedBlog) {
-      return res.status(404).json({ error: 'Blog not found' });
-    }
-
+    // Send the updated blog as a response
     res.status(200).json(updatedBlog);
+
   } catch (error) {
     res.status(500).json({ error: 'An error occurred while updating the blog' });
   }
@@ -76,7 +95,7 @@ router.put('/update/:blogId', jwtAuthMiddleWare, upload.single('coverImage'), as
 
 router.delete('/delete/:blogId', jwtAuthMiddleWare, async (req, res) => {
   const tokenUser = req.user;
-  
+
   // Ensure only admin can delete
   if (tokenUser?.role !== 'admin') {
     return res.status(403).json({ message: 'User is not an admin' });
@@ -93,24 +112,14 @@ router.delete('/delete/:blogId', jwtAuthMiddleWare, async (req, res) => {
       return res.status(404).json({ error: 'Blog not found' });
     }
 
-    // Helper function to delete a file
-    const deleteFile = (filePath) => {
-      if (filePath) {
-        const fullPath = path.join(__dirname, '../public/uploads/', path.basename(filePath));
-        fs.unlink(fullPath, (err) => {
-          if (err && err.code !== 'ENOENT') {
-            console.error('Error deleting file:', err);
-          }
-        });
-      }
-    };
-
-    // Delete the cover image if it exists
     if (blog.coverImage) {
-      deleteFile(blog.coverImage);
+      const publicId = blog.coverImage.split('/').pop().split('.')[0]; 
+      await cloudinary.uploader
+        .destroy(['uploads/' + publicId],
+          { type: 'upload', resource_type: 'image' })
+        .then(console.log);
     }
 
-    // Delete the blog post from the database
     await Blog.findByIdAndDelete(blogId);
 
     // Respond with a success message
@@ -120,6 +129,8 @@ router.delete('/delete/:blogId', jwtAuthMiddleWare, async (req, res) => {
     res.status(500).json({ error: 'An error occurred while deleting the blog' });
   }
 });
+
+
 
 
 router.get('/get/:blogId', async (req, res) => {
@@ -134,7 +145,7 @@ router.get('/get/:blogId', async (req, res) => {
       return res.status(404).json({ error: 'Blog not found' });
     }
 
- 
+
     res.status(200).json(blogPost);
   } catch (error) {
     // Handle errors
@@ -146,7 +157,7 @@ router.get('/getAllBlogs', async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1; // Default to page 1
     const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
     const title = req.query.title || ''; // Get the title query (default is an empty string)
-    
+
     const skip = (page - 1) * limit;
 
     // Build the query with case-insensitive title search using a regular expression
