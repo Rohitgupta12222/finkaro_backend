@@ -40,7 +40,7 @@ const subscribeRouter = require('./routers/subscribeRouter');
 const blogRouter = require('./routers/blogRouter');
 const youtubeRouter = require('./routers/youtubelinkRouter');
 const courseRouter = require('./routers/courseRouter');
-// const razorpayRouter = require('./routers/razorpayRouter');
+const razorpayRouter = require('./routers/razorpayRouter');
 const dashboardRouter = require('./routers/dashboardRouter')
 const subscriptionRouter = require('./routers/transactionsRouter')
 const servicesRouter = require('./routers/servicesRouter')
@@ -54,7 +54,7 @@ app.use('/youtubelink', youtubeRouter);
 app.use('/course', courseRouter);
 app.use('/services', servicesRouter);
 
-// app.use('/payment', razorpayRouter);
+app.use('/payment', razorpayRouter);
 app.use('/dashboard', dashboardRouter);
 app.use('/subscription', subscriptionRouter);
 
