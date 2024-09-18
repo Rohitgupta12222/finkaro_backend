@@ -62,10 +62,11 @@ router.get('/get/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
+    console.log(id,'============ >>>>>>>>>');
     // Find the product by ID
-    const services = await services.findById(id);
+    const services = await Services.findById(id);
 
-    if (!product) {
+    if (!services) {
       return res.status(404).json({
         message: 'services not found'
       });
