@@ -43,7 +43,7 @@ const courseRouter = require('./routers/courseRouter');
 // const razorpayRouter = require('./routers/razorpayRouter');
 const dashboardRouter = require('./routers/dashboardRouter')
 const subscriptionRouter = require('./routers/transactionsRouter')
-
+const servicesRouter = require('./routers/servicesRouter')
 
 
 // Define routes
@@ -52,6 +52,8 @@ app.use('/subscribe', subscribeRouter);
 app.use('/blog', blogRouter);
 app.use('/youtubelink', youtubeRouter);
 app.use('/course', courseRouter);
+app.use('/services', servicesRouter);
+
 // app.use('/payment', razorpayRouter);
 app.use('/dashboard', dashboardRouter);
 app.use('/subscription', subscriptionRouter);
