@@ -1,6 +1,7 @@
 
 const express = require('express');
 const router = express.Router();
+require('dotenv').config();
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer fil
 const Razorpay = require('razorpay');
 const Order = require('../models/order'); // Import the Order model
