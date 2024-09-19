@@ -1,18 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-// Helper function to calculate endDate based on the plan
-const calculateEndDate = (plan) => {
-  const now = new Date();
-  if (plan === '1-year') {
-    return new Date(now.setFullYear(now.getFullYear() + 1));
-  } else if (plan === '2-year') {
-    return new Date(now.setFullYear(now.getFullYear() + 2));
-  } else {
-    return new Date(now.setFullYear(now.getFullYear() + 34));
-  }
-};
-
 const subscriptionSchema = new Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -35,7 +23,13 @@ const subscriptionSchema = new Schema({
   endDate: {
     type: Date,
     default: function () {
-      return calculateEndDate(this.plan);
+      if (this.plan === '1-year') {
+        return new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+      } else if (this.plan === '2-year') {
+        return new Date(new Date().setFullYear(new Date().getFullYear() + 2));
+      } else {
+        return new Date(new Date().setFullYear(new Date().getFullYear() + 34));
+      }
     }
   },
   price: {
@@ -44,28 +38,27 @@ const subscriptionSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['active', 'expired', 'cancelled', 'refund'],
+    enum: ['active', 'expired', 'cancelled','refund'],
     default: 'active'
   },
   razorpay_payment_id: {
     type: String,
     required: true,
-    unique: true
   },
+
   razorpay_order_id: {
     type: String,
     required: true,
-    unique: true
   },
-  productsType: {
+  productsType:{
     type: String,
-    enum: ['course', 'dashboard', 'book', 'services'],
-    default: 'services'
+    enum: ['course', 'dashboard', 'book','serives'],
+    default:'serives'
   },
+
   razorpay_signature: {
     type: String,
     required: true,
-    unique: true
   },
   createdAt: {
     type: Date,
@@ -83,10 +76,4 @@ subscriptionSchema.pre('save', function (next) {
   next();
 });
 
-// Indexes
-subscriptionSchema.index({ razorpay_payment_id: 1 }, { unique: true });
-subscriptionSchema.index({ razorpay_order_id: 1 }, { unique: true });
-subscriptionSchema.index({ razorpay_signature: 1 }, { unique: true });
-
-// Export the model
 module.exports = mongoose.model('Subscription', subscriptionSchema);
