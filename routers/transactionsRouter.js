@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Subscription = require('../models/transactions'); // Adjust the path to your model
-const db = require('../db');
+
 
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
@@ -29,9 +29,6 @@ router.post('/add', async (req, res) => {
                 message: 'Subscription with the same payment ID, order ID, or signature already exists'
             });
         }
-
-        db.subscriptions.getIndexes()
-        db.subscriptions.dropIndex('transactionId_1')
 
 
         // Create a new subscription document
