@@ -24,9 +24,9 @@ const subscriptionSchema = new Schema({
   endDate: {
     type: Date,
     default: function () {
-      if (this.planType === '1-year') {
+      if (this.plan === '1-year') {
         return new Date(new Date().setFullYear(new Date().getFullYear() + 1));
-      } else if (this.planType === '2-year') {
+      } else if (this.plan === '2-year') {
         return new Date(new Date().setFullYear(new Date().getFullYear() + 2));
       } else {
         return null; // Lifetime has no end date
