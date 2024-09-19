@@ -2,14 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Subscription = require('../models/transactions'); // Adjust the path to your model
 
-
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
-    const { productId, plan, price, razorpay_payment_id, razorpay_order_id, razorpay_signature, status, productsType } = req.body;
+    const { userId, productId, plan, price, razorpay_payment_id, razorpay_order_id, razorpay_signature, status, productsType,transactionId } = req.body;
 
     try {
         // Validate input
-        if ( !productId || !plan || !price || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+        if (!userId || !productId || !plan || !price || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
             return res.status(400).json({
                 message: 'Missing required fields'
             });
@@ -30,9 +29,9 @@ router.post('/add', async (req, res) => {
             });
         }
 
-
         // Create a new subscription document
         const newSubscription = new Subscription({
+            userId,
             productId,
             plan,
             price,
@@ -40,7 +39,8 @@ router.post('/add', async (req, res) => {
             razorpay_order_id,
             razorpay_signature,
             status,
-            productsType
+            productsType,
+            transactionId
         });
 
         // Save the subscription to the database

@@ -2,7 +2,11 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const subscriptionSchema = new Schema({
-
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true
@@ -28,7 +32,11 @@ const subscriptionSchema = new Schema({
       }
     }
   },
-
+  transactionId: {
+    type: String,
+    unique: true,  // Ensure unique constraint
+    required: true // Ensure this field is always set
+  },
   price: {
     type: Number,
     required: true
