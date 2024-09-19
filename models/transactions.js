@@ -57,8 +57,8 @@ const subscriptionSchema = new Schema({
   },
   productsType:{
     type: String,
-    enum: ['course', 'dashboard', 'book','serives'],
-    default:'serives'
+    enum: ['course', 'dashboard', 'book','services'],
+    default:'services'
   },
 
   razorpay_signature: {
