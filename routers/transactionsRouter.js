@@ -4,7 +4,7 @@ const Subscription = require('../models/transactions'); // Adjust the path to yo
 
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
-    const { userId, productId, plan, price, razorpay_payment_id ,razorpay_order_id,razorpay_signature,status} = req.body;
+    const { userId, productId, plan, price, razorpay_payment_id ,razorpay_order_id,razorpay_signature,status,productsType} = req.body;
 
     try {
         // Create a new subscription document
@@ -16,7 +16,8 @@ router.post('/add', async (req, res) => {
             razorpay_payment_id,
             razorpay_order_id,
             razorpay_signature,
-            status
+            status,
+            productsType
         });
 
         // Save the subscription to the database
@@ -98,7 +99,7 @@ router.get('/get/:id', async (req, res) => {
 router.put('/update/:id', async (req, res) => {
     try {
         const subscriptionId = req.params.id;
-        const { userId, productId, plan, price, razorpay_payment_id ,razorpay_order_id,razorpay_signature,status} = req.body;
+        const { userId, productId, plan, price, razorpay_payment_id ,razorpay_order_id,razorpay_signature,status,productsType} = req.body;
 
         // Find the subscription by ID
         const subscription = await Subscription.findById(subscriptionId);

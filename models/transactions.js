@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { default: products } = require('razorpay/dist/types/products');
 const { Schema } = mongoose;
 
 const subscriptionSchema = new Schema({
@@ -52,6 +53,11 @@ const subscriptionSchema = new Schema({
     type: String,
     required: true,
     unique: true
+  },
+  productsType:{
+    type: String,
+    enum: ['course', 'dashboard', 'book','serives'],
+    default:'serives'
   },
 
   razorpay_signature: {
