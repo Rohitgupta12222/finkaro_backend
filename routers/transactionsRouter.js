@@ -29,6 +29,10 @@ router.post('/add', async (req, res) => {
             });
         }
 
+        db.subscriptions.getIndexes()
+        db.subscriptions.dropIndex('transactionId_1')
+
+
         // Create a new subscription document
         const newSubscription = new Subscription({
             userId,

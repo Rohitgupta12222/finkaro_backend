@@ -32,6 +32,7 @@ const subscriptionSchema = new Schema({
       }
     }
   },
+
   price: {
     type: Number,
     required: true
