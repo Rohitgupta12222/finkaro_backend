@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { default: products } = require('razorpay/dist/types/products');
 const { Schema } = mongoose;
 
 const subscriptionSchema = new Schema({

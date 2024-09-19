@@ -19,8 +19,6 @@ router.post('/add', async (req, res) => {
             status,
             productsType
         });
-
-        // Save the subscription to the database
         const savedSubscription = await newSubscription.save();
         res.status(201).json({
             message: 'Subscription created successfully',
