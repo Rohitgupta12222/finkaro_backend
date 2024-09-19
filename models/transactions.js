@@ -12,7 +12,7 @@ const subscriptionSchema = new Schema({
     ref: 'Product', // This should reference your Product model
     required: true
   },
-  planType: {
+  plan: {
     type: String,
     enum: ['1-year', '2-year', 'lifetime'],
     required: true
@@ -42,7 +42,19 @@ const subscriptionSchema = new Schema({
     enum: ['active', 'expired', 'cancelled','refund'],
     default: 'active'
   },
-  transactionId: {
+  razorpay_payment_id: {
+    type: String,
+    required: true,
+    unique: true
+  },
+
+  razorpay_order_id: {
+    type: String,
+    required: true,
+    unique: true
+  },
+
+  razorpay_signature: {
     type: String,
     required: true,
     unique: true

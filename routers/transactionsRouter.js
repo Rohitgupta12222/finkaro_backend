@@ -4,16 +4,18 @@ const Subscription = require('../models/transactions'); // Adjust the path to yo
 
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
-    const { userId, productId, planType, price, transactionId } = req.body;
+    const { userId, productId, plan, price, razorpay_payment_id ,razorpay_order_id,razorpay_signature} = req.body;
 
     try {
         // Create a new subscription document
         const newSubscription = new Subscription({
             userId,
             productId,
-            planType,
+            plan,
             price,
-            transactionId
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature
         });
 
         // Save the subscription to the database
@@ -95,7 +97,7 @@ router.get('/get/:id', async (req, res) => {
 router.put('/update/:id', async (req, res) => {
     try {
         const subscriptionId = req.params.id;
-        const { status, planType, startDate, endDate } = req.body;
+        const { userId, productId, plan, price, razorpay_payment_id ,razorpay_order_id,razorpay_signature} = req.body;
 
         // Find the subscription by ID
         const subscription = await Subscription.findById(subscriptionId);
@@ -107,15 +109,15 @@ router.put('/update/:id', async (req, res) => {
         }
 
         // Update fields
-        if (planType) {
-            subscription.planType = planType;
+        if (plan) {
+            subscription.plan = plan;
 
-            // Update endDate based on planType
-            if (planType === '1-year') {
+            // Update endDate based on plan
+            if (plan === '1-year') {
                 subscription.endDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
-            } else if (planType === '2-year') {
+            } else if (plan === '2-year') {
                 subscription.endDate = new Date(new Date().setFullYear(new Date().getFullYear() + 2));
-            } else if (planType === 'lifetime') {
+            } else if (plan === 'lifetime') {
                 subscription.endDate = null; // Lifetime subscriptions have no end date
             }
         }
@@ -165,7 +167,7 @@ router.get('/check/valid/:productId', async (req, res) => {
         // Check if the subscription is valid
         const currentDate = new Date();
         const isValid = subscription.status === 'active' &&
-            (subscription.planType === 'lifetime' ||
+            (subscription.plan === 'lifetime' ||
                 (subscription.endDate && subscription.endDate > currentDate));
 
         res.json({
@@ -205,7 +207,7 @@ router.get('/check/purchased', async (req, res) => {
         // Check if the subscription is valid
         const currentDate = new Date();
         const isValid = subscription.status === 'active' &&
-            (subscription.planType === 'lifetime' || (subscription.endDate && subscription.endDate > currentDate));
+            (subscription.plan === 'lifetime' || (subscription.endDate && subscription.endDate > currentDate));
 
         res.json({
             hasPurchased: isValid
