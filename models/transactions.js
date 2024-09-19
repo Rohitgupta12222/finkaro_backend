@@ -9,7 +9,6 @@ const subscriptionSchema = new Schema({
   },
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product', // This should reference your Product model
     required: true
   },
   plan: {
@@ -29,7 +28,7 @@ const subscriptionSchema = new Schema({
       } else if (this.plan === '2-year') {
         return new Date(new Date().setFullYear(new Date().getFullYear() + 2));
       } else {
-        return null; // Lifetime has no end date
+        return new Date(new Date().setFullYear(new Date().getFullYear() + 34));
       }
     }
   },
