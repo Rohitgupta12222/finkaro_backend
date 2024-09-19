@@ -72,7 +72,7 @@ router.post('/add', async (req, res) => {
 router.get('/get', async (req, res) => {
     try {
         // Get query parameters
-        const { page = 1, limit = 10, search = '' } = req.query;
+        const { page,limit, search } = req.query;
 
         // Convert page and limit to numbers
         const pageNumber = parseInt(page, 10);
