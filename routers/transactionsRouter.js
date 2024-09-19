@@ -4,9 +4,31 @@ const Subscription = require('../models/transactions'); // Adjust the path to yo
 
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
-    const { userId, productId, plan, price, razorpay_payment_id ,razorpay_order_id,razorpay_signature,status,productsType} = req.body;
+    const { userId, productId, plan, price, razorpay_payment_id, razorpay_order_id, razorpay_signature, status, productsType } = req.body;
 
     try {
+        // Validate input
+        if (!userId || !productId || !plan || !price || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+            return res.status(400).json({
+                message: 'Missing required fields'
+            });
+        }
+
+        // Check for existing subscription with the same razorpay_payment_id, razorpay_order_id, or razorpay_signature
+        const existingSubscription = await Subscription.findOne({
+            $or: [
+                { razorpay_payment_id },
+                { razorpay_order_id },
+                { razorpay_signature }
+            ]
+        });
+
+        if (existingSubscription) {
+            return res.status(409).json({
+                message: 'Subscription with the same payment ID, order ID, or signature already exists'
+            });
+        }
+
         // Create a new subscription document
         const newSubscription = new Subscription({
             userId,
@@ -19,19 +41,33 @@ router.post('/add', async (req, res) => {
             status,
             productsType
         });
+
+        // Save the subscription to the database
         const savedSubscription = await newSubscription.save();
         res.status(201).json({
             message: 'Subscription created successfully',
             data: savedSubscription
         });
     } catch (error) {
+        // Log error details
         console.error('Error saving subscription:', error);
+
+        // Check if the error is related to duplicate keys
+        if (error.code === 11000) {
+            return res.status(400).json({
+                message: 'Duplicate key error',
+                error: error.message
+            });
+        }
+
+        // Handle other errors
         res.status(500).json({
             message: 'Error saving subscription',
             error: error.message
         });
     }
 });
+
 router.get('/get', async (req, res) => {
     try {
         // Get query parameters
