@@ -5,11 +5,11 @@ const db = require('../db');
 
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
-    const { userId, productId, plan, price, razorpay_payment_id, razorpay_order_id, razorpay_signature, status, productsType } = req.body;
+    const { productId, plan, price, razorpay_payment_id, razorpay_order_id, razorpay_signature, status, productsType } = req.body;
 
     try {
         // Validate input
-        if (!userId || !productId || !plan || !price || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+        if ( !productId || !plan || !price || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
             return res.status(400).json({
                 message: 'Missing required fields'
             });
@@ -36,7 +36,6 @@ router.post('/add', async (req, res) => {
 
         // Create a new subscription document
         const newSubscription = new Subscription({
-            userId,
             productId,
             plan,
             price,
