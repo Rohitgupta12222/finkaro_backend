@@ -6,10 +6,6 @@ const Dashboard =require('../models/dashboard')
 const Course =require('../models/course')
 const Services =require('../models/servicesModel')
 
-
-
-
-
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
 
@@ -104,10 +100,11 @@ router.post('/add', async (req, res) => {
         }
         console.log(Subscriptiondata);
         users.enrolled.push(Subscriptiondata)
-        await users.save()
+       let updateUserData = await users.save()
         res.status(201).json({
             message: 'Subscription created successfully',
-            data: savedSubscription
+            data: savedSubscription,
+            userData:updateUserData
         });
 
     } catch (error) {

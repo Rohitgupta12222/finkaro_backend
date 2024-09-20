@@ -1,33 +1,11 @@
 const mongoose = require('mongoose');
 
-const DashboardSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  content: {
-    type: String,
-    required: true
-  },
+const BookSchema = new mongoose.Schema({
+
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
-  },
-  coverImage: [
-    {
-      type: String,  // Stores the file paths of multiple cover images
-      required: true
-    }
-  ],
-  views: {
-    type: Number,
-    default: 0
-  },
-  likes: {
-    type: Number,
-    default: 0
   },
   comments: [
     {
@@ -46,21 +24,12 @@ const DashboardSchema = new mongoose.Schema({
       }
     }
   ],
-  purchaseDashboard: [
+  purchaseBook: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'  // Reference to the User model for students
     }
   ],
-  links: {
-    type: String,
-    default: ''
-  },
-  status: {
-    type: String,
-    enum: ['public', 'private'],
-    default: "private"
-  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -68,30 +37,29 @@ const DashboardSchema = new mongoose.Schema({
   updatedAt: {
     type: Date
   },
-  mail: {
-    type: Boolean,
-    default: true
-  },
-  zipfile: {
+
+   pdfFile: {
     type: String,
-    default: ''
+    default: 'assets/product/Finkaro-Book-Romance-with-Equity.pdf'
   },
-   excelFile: {
-    type: String,
-    default: ''
+  actualEbookPrice: {
+    type: Number,
+    default: 0
   },
-  actualPrice: {
-    type: String,
-    default: ''
+  offerEbookPrice:{
+      type: Number,
+    default: 0
   },
-  offerPrice:{
-      type: String,
-    default: ''
+  actualHardPrice: {
+    type: Number,
+    default: 0
   },
-  shortDescription:{
-     type: String,
-    default: ''
+  offerHardPrice:{
+      type: Number,
+    default: 0
   },
+
+
   enrolled: [
     {
       users:
@@ -110,12 +78,12 @@ const DashboardSchema = new mongoose.Schema({
 });
 
 // Pre-save hook to update the `updatedAt` field
-DashboardSchema.pre('save', function (next) {
+BookSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
 // Optional: Create a model from the schema
-const Dashboard = mongoose.model('Dashboard', DashboardSchema);
+const Book = mongoose.model('Book', BookSchema);
 
-module.exports = Dashboard;
+module.exports = Book;

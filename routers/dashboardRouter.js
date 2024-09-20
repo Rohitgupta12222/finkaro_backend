@@ -21,7 +21,7 @@ router.post('/add', jwtAuthMiddleWare, Dashboardupload.fields([
     const excelFile = req.files['excelFile'] ? `${BASE_URL}/uploads/${req.files['excelFile'][0].filename}` : null;
 
     const userId = req.user.id;
-    const { title, content, status, links, mail, shortDescription, actualPrice, offerPrice, start } = req.body;
+    const { title, content, status, links, mail, shortDescription, actualPrice, offerPrice } = req.body;
 
     const newDashboard = new Dashboard({
       title,
@@ -32,7 +32,6 @@ router.post('/add', jwtAuthMiddleWare, Dashboardupload.fields([
       shortDescription,
       actualPrice,
       offerPrice,
-      start,
       mail,
       coverImage,
       zipfile,
