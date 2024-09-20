@@ -125,9 +125,9 @@ router.post('/login', async (req, res) => {
 
 
     const activationLink = `${process.env.FRONTEND_LINK}/activate/${response.id}`
- 
 
-      const smsContent = `
+
+    const smsContent = `
   Subject: Activate Your Account
 
   Dear ${user?.name},
