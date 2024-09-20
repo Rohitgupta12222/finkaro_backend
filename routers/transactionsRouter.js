@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const Subscription = require('../models/transactions'); // Adjust the path to your model
-
+const User = require('../models/users')
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
-    const { userId, productId, plan, price, razorpay_payment_id, razorpay_order_id, razorpay_signature, status, productsType,transactionId } = req.body;
+
+    const { userId, productId, plan, price, razorpay_payment_id, razorpay_order_id, razorpay_signature, status, productsType, transactionId } = req.body;
+
+
 
     try {
         // Validate input
@@ -45,10 +48,25 @@ router.post('/add', async (req, res) => {
 
         // Save the subscription to the database
         const savedSubscription = await newSubscription.save();
+        const users = await User.findById(userId)
+
+        let Subscriptiondata = {
+            SubscriptionId: savedSubscription?._id,
+            productId: savedSubscription?.productId,
+            status: savedSubscription?.status,
+            plan: savedSubscription?.plan,
+            startDate: savedSubscription?.startDate,
+            endDate: savedSubscription?.endDate,
+            order_id: savedSubscription?.razorpay_order_id
+        }
+        console.log(Subscriptiondata);
+        users.enrolled.push(Subscriptiondata)
+        await users.save()
         res.status(201).json({
             message: 'Subscription created successfully',
             data: savedSubscription
         });
+
     } catch (error) {
         // Log error details
         console.error('Error saving subscription:', error);
@@ -72,7 +90,7 @@ router.post('/add', async (req, res) => {
 router.get('/get', async (req, res) => {
     try {
         // Get query parameters
-        const { page,limit, search } = req.query;
+        const { page, limit, search } = req.query;
 
         // Convert page and limit to numbers
         const pageNumber = parseInt(page, 10);
@@ -134,7 +152,7 @@ router.get('/get/:id', async (req, res) => {
 router.put('/update/:id', async (req, res) => {
     try {
         const subscriptionId = req.params.id;
-        const { userId, productId, plan, price, razorpay_payment_id ,razorpay_order_id,razorpay_signature,status,productsType} = req.body;
+        const { userId, productId, plan, price, razorpay_payment_id, razorpay_order_id, razorpay_signature, status, productsType } = req.body;
 
         // Find the subscription by ID
         const subscription = await Subscription.findById(subscriptionId);

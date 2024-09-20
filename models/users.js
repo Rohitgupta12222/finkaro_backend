@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
-  phoneNumber:{
+  phoneNumber: {
     type: String,
     default: null
   },
@@ -38,9 +38,46 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  enrolled: [
+    {
+      SubscriptionId:
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Subscription',
+        required: true
+      },
+      productId: {
+        type: String,
+        required: true
+      },
+      status: {
+        type: String,
+        enum: ['active', 'expired', 'cancelled', 'refund'],
+        required: true
+      },
+      plan: {
+        type: String,
+        enum: ['1-year', '2-year', 'lifetime'],
+        required: true
+      },
+      startDate: {
+        type: Date,
+        required: true
+      },
+      endDate: {
+        type: Date,
+        default: ''
+      },
+      order_id: {
+        type: String,
+        required: true
+
+      }
+    }
+  ],
   loginType: {
     type: String,
-    default:"formLogin"
+    default: "formLogin"
   }
 
 });
@@ -50,21 +87,21 @@ userSchema.pre('save', async function (next) {
   const user = this
   if (!user.isModified('password')) return next();
   try {
-      const salt = await bcrypt.genSalt(10);
-      const hashPassword = await bcrypt.hash(user.password, salt)
-      user.password = hashPassword
-      next()
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(user.password, salt)
+    user.password = hashPassword
+    next()
   } catch (error) {
-     return next(error)
+    return next(error)
   }
 
 
 })
-userSchema.methods.comparePassword =  function(candidatePassword){
+userSchema.methods.comparePassword = function (candidatePassword) {
   try {
-      return  bcrypt.compare(candidatePassword,this.password)
+    return bcrypt.compare(candidatePassword, this.password)
   } catch (error) {
-     throw error
+    throw error
   }
 }
 const User = mongoose.model('User', userSchema);
