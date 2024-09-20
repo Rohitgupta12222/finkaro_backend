@@ -44,6 +44,8 @@ const razorpayRouter = require('./routers/razorpayRouter');
 const dashboardRouter = require('./routers/dashboardRouter')
 const subscriptionRouter = require('./routers/transactionsRouter')
 const servicesRouter = require('./routers/servicesRouter')
+const bookRouter = require('./routers/bookRouter')
+
 
 
 // Define routes
@@ -53,10 +55,11 @@ app.use('/blog', blogRouter);
 app.use('/youtubelink', youtubeRouter);
 app.use('/course', courseRouter);
 app.use('/services', servicesRouter);
-
 app.use('/payment', razorpayRouter);
 app.use('/dashboard', dashboardRouter);
 app.use('/subscription', subscriptionRouter);
+app.use('/book', bookRouter);
+
 
 
 

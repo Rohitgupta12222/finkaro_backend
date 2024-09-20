@@ -50,6 +50,10 @@ const BookSchema = new mongoose.Schema({
       type: Number,
     default: 0
   },
+  shippingPrice:{
+    type: Number,
+  default: 0
+},
   actualHardPrice: {
     type: Number,
     default: 0
