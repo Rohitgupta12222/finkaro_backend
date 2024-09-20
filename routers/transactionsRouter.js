@@ -4,6 +4,10 @@ const Subscription = require('../models/transactions'); // Adjust the path to yo
 const User = require('../models/users')
 const Dashboard =require('../models/dashboard')
 const Course =require('../models/course')
+const Book =require('../models/book')
+
+
+
 const Services =require('../models/servicesModel')
 
 // POST route to create a new subscription
@@ -72,6 +76,10 @@ router.post('/add', async (req, res) => {
                 break;
 
             case 'book':
+                const book = await Book.findById(userId)
+                book.enrolled.push({userId})
+                book.count++
+                await book.save()
 
                 break;
 
