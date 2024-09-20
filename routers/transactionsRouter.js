@@ -2,6 +2,14 @@ const express = require('express');
 const router = express.Router();
 const Subscription = require('../models/transactions'); // Adjust the path to your model
 const User = require('../models/users')
+const Dashboard =require('../models/dashboard')
+const Course =require('../models/course')
+const Services =require('../models/servicesModel')
+
+
+
+
+
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
 
@@ -48,6 +56,41 @@ router.post('/add', async (req, res) => {
 
         // Save the subscription to the database
         const savedSubscription = await newSubscription.save();
+
+
+        switch (savedSubscription?.status) {
+
+
+            case 'dashbard':
+                const dashboard = await Dashboard.findById(userId)
+                dashboard.enrolled.push({userId})
+                dashboard.count++
+                await dashboard.save()
+
+                break;
+            case 'course':
+                const course = await Course.findById(userId)
+                course.enrolled.push({userId})
+                course.count++
+                await course.save()
+                break;
+
+            case 'book':
+
+                break;
+
+            case 'services':
+                const services = await Services.findById(userId)
+                services.enrolled.push({userId})
+                services.count++
+                await services.save()
+                break;
+
+
+            default:
+                break;
+        }
+
         const users = await User.findById(userId)
 
         let Subscriptiondata = {

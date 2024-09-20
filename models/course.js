@@ -67,6 +67,21 @@ const courseSchema = new mongoose.Schema({
   },
   updatedAt: {
     type: Date
+  },
+  enrolled: [
+    {
+      users:
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+      },
+
+    }
+  ],
+  count:{
+    type:Number,
+    default:0
   }
 });
 

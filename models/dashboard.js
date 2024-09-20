@@ -95,6 +95,21 @@ const DashboardSchema = new mongoose.Schema({
   shortDescription:{
      type: String,
     default: ''
+  },
+  enrolled: [
+    {
+      users:
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+      },
+
+    }
+  ],
+  count:{
+    type:Number,
+    default:0
   }
 });
 

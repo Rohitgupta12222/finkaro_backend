@@ -71,6 +71,7 @@ const blogSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   }
+  
 });
 
 // Pre-save hook to update the `updatedAt` field

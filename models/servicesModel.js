@@ -38,7 +38,22 @@ const servicesSchema = new Schema({
       type: String,
       required: true
     }
-  }]
+  }],
+    enrolled: [
+      {
+        users:
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true
+        },
+
+      }
+    ],
+    count:{
+      type:Number,
+      default:0
+    }
 });
 
 module.exports = mongoose.model('Services', servicesSchema);
