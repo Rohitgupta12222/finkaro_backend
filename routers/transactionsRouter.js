@@ -5,24 +5,48 @@ const User = require('../models/users')
 const Dashboard =require('../models/dashboard')
 const Course =require('../models/course')
 const Book =require('../models/book')
-
-
-
 const Services =require('../models/servicesModel')
+const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer file
 
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
+    const { 
+        userId, 
+        productId, 
+        plan, 
+        price, 
+        razorpay_payment_id, 
+        razorpay_order_id, 
+        razorpay_signature, 
+        status, 
+        productsType, 
+        transactionId 
+    } = req.body;
 
-    const { userId, productId, plan, price, razorpay_payment_id, razorpay_order_id, razorpay_signature, status, productsType, transactionId } = req.body;
-
-
+    console.log(req.body, 'user id ', userId);
 
     try {
-        // Validate input
-        if (!userId || !productId || !plan || !price || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
-            return res.status(400).json({
-                message: 'Missing required fields'
-            });
+        // Validate input with detailed error messages
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+        if (!productId) {
+            return res.status(400).json({ message: 'Product ID is required' });
+        }
+        if (!plan) {
+            return res.status(400).json({ message: 'Plan is required' });
+        }
+        if (!price) {
+            return res.status(400).json({ message: 'Price is required' });
+        }
+        if (!razorpay_payment_id) {
+            return res.status(400).json({ message: 'Razorpay Payment ID is required' });
+        }
+        if (!razorpay_order_id) {
+            return res.status(400).json({ message: 'Razorpay Order ID is required' });
+        }
+        if (!razorpay_signature) {
+            return res.status(400).json({ message: 'Razorpay Signature is required' });
         }
 
         // Check for existing subscription with the same razorpay_payment_id, razorpay_order_id, or razorpay_signature
@@ -57,45 +81,40 @@ router.post('/add', async (req, res) => {
         // Save the subscription to the database
         const savedSubscription = await newSubscription.save();
 
-
+        // Perform actions based on subscription status
         switch (savedSubscription?.status) {
-
-
             case 'dashbard':
-                const dashboard = await Dashboard.findById(userId)
-                dashboard.enrolled.push({userId})
-                dashboard.count++
-                await dashboard.save()
-
+                const dashboard = await Dashboard.findById(userId);
+                dashboard.enrolled.push({ userId });
+                dashboard.count++;
+                await dashboard.save();
                 break;
             case 'course':
-                const course = await Course.findById(userId)
-                course.enrolled.push({userId})
-                course.count++
-                await course.save()
+                const course = await Course.findById(userId);
+                course.enrolled.push({ userId });
+                course.count++;
+                await course.save();
                 break;
-
             case 'book':
-                const book = await Book.findById(userId)
-                book.enrolled.push({userId})
-                book.count++
-                await book.save()
+                const book = await Book.findById(userId);
+                book.enrolled.push({ userId });
 
+                book.count++;
+                await book.save();
+                const attachmentPath = `http://localhost:4200/assets/product/Finkaro-Book-Romance-with-Equity.pdf`;
+                sendRegistrationEmail('recipient@example.com', ' Softcopy Received  from Finkaro', 'Please  Find the Attchement And stay connected with Finkaro', attachmentPath);
                 break;
-
             case 'services':
-                const services = await Services.findById(userId)
-                services.enrolled.push({userId})
-                services.count++
-                await services.save()
+                const services = await Services.findById(userId);
+                services.enrolled.push({ userId });
+                services.count++;
+                await services.save();
                 break;
-
-
             default:
                 break;
         }
 
-        const users = await User.findById(userId)
+        const users = await User.findById(userId);
 
         let Subscriptiondata = {
             SubscriptionId: savedSubscription?._id,
@@ -105,14 +124,16 @@ router.post('/add', async (req, res) => {
             startDate: savedSubscription?.startDate,
             endDate: savedSubscription?.endDate,
             order_id: savedSubscription?.razorpay_order_id
-        }
+        };
         console.log(Subscriptiondata);
-        users.enrolled.push(Subscriptiondata)
-       let updateUserData = await users.save()
+        users.enrolled.push(Subscriptiondata);
+        let updateUserData = await users.save();
+
+       
         res.status(201).json({
             message: 'Subscription created successfully',
             data: savedSubscription,
-            userData:updateUserData
+            userData: updateUserData
         });
 
     } catch (error) {
@@ -134,6 +155,7 @@ router.post('/add', async (req, res) => {
         });
     }
 });
+
 
 router.get('/get', async (req, res) => {
     try {

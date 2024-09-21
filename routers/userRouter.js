@@ -22,7 +22,7 @@ router.post('/register', async (req, res) => {
           email: existingUser.email,
           role: existingUser.role,
         }
-        console.log(payloadJwt, 'alreasy payloadJwt');
+        console.log(payloadJwt, 'already payloadJwt');
 
 
         const token = genrateToken(payloadJwt)

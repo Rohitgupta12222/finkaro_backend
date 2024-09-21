@@ -9,15 +9,26 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-const sendRegistrationEmail = async (to, subject, text) => {
+const sendRegistrationEmail = async (to, subject, text, attachmentPath) => {
   try {
-    await transporter.sendMail({
+    const mailOptions = {
       from: process.env.EMAIL_USER, // Sender address
       to, // List of recipients
       subject, // Subject line
       text, // Plain text body
-      // html: '<b>Hello world?</b>' // If you want to send HTML content
-    });
+      // html: '<b>Hello world?</b>', // If you want to send HTML content
+    };
+
+    // Add attachments if attachmentPath is provided
+    if (attachmentPath) {
+      mailOptions.attachments = [
+        {
+          path: attachmentPath, // File path for the attachment
+        },
+      ];
+    }
+
+    await transporter.sendMail(mailOptions);
     console.log('Email sent successfully.');
   } catch (error) {
     console.error('Error sending email:', error);

@@ -27,7 +27,8 @@ const subscriptionSchema = new Schema({
         return new Date(new Date().setFullYear(new Date().getFullYear() + 1));
       } else if (this.plan === '2-year') {
         return new Date(new Date().setFullYear(new Date().getFullYear() + 2));
-      } else {
+      }   
+        else {
         return new Date(new Date().setFullYear(new Date().getFullYear() + 34));
       }
     }
