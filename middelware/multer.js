@@ -1,31 +1,28 @@
-// uploadMiddleware.js
 const multer = require('multer');
 const path = require('path');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('./Cloudinary'); // Adjust the path as needed
+const sharp = require('sharp');
+const fs = require('fs');
 
-
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'uploads', // Cloudinary folder where images will be stored
-    allowed_formats: ['jpeg', 'jpg', 'png', 'gif'],
-  }
-});
+// Set up multer storage to save files locally
+const storage = multer.memoryStorage(); // Store files in memory for processing
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10000000 }, // 1MB file size limit
-  fileFilter: function (req, file, cb) {
+  limits: {
+    fileSize: 10 * 1024 * 1024, // Limit file size to 10 MB
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept images only
     const filetypes = /jpeg|jpg|png|gif/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = filetypes.test(file.mimetype);
-
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     if (mimetype && extname) {
       return cb(null, true);
-    } else {
-      cb('Error: Images Only!');
     }
-  }
+    cb(new Error('Error: File type not supported!'));
+  },
 });
-module.exports = upload;
+
+
+
+module.exports = upload

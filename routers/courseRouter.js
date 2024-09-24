@@ -6,179 +6,223 @@ const path = require('path')
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer fil
 const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
 const upload = require('../middelware/multer');
+const processImage = require('../middelware/imagsProcess');
 const fs = require('fs'); // To delete files if necessary
-const BASE_URL = process.env.BASE_URL; // Change this to your actual base URL
-const cloudinary = require('../middelware/Cloudinary'); // Adjust the path to your Cloudinary configuration
 
-router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), async (req, res) => {
-    try {
-        const tokenUser = req.user
-        if (tokenUser?.role !== 'admin') return res.status(40).json({ message: 'User is not a admin ' });
-
-        const coverImage = req.file ? req.file.path.replace('public/', '') : ''; // Remove 'public/' prefix
-                   const newCourse = new Course({
-                title: req.body.title,
-                description: req.body.description,
-                price: req.body.price,
-                duration: req.body.duration,
-                lessons: req.body.lessons,  // Assuming lessons will be passed as an array in req.body
-                coverImage,  // Save the uploaded image path
-                published: req.body.published,
-                enrolledStudents: req.body.enrolledStudents || [],  // Default to an empty array if not provided
-                mail: req.body.published === 'public' ? true : false,  // Conditionally set mail flag
-            });
-
-             const response = await newCourse.save()
-            res.status(201).json({ response: response, message: "Course created" })
-    
-
-    } catch (message) {
-
-        console.log('message ', message);
-        res.status(500).json({
-            message: "internal Server message",
-            message: message
-        })
-    }
-}
-)
-router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), async (req, res) => {
-  try {
-      const tokenUser = req.user;
-      if (tokenUser?.role !== 'admin') {
-          return res.status(401).json({ message: 'User is not an admin' });
-      }
-
-      const course = await Course.findById(req.params.id);
-      if (!course) {
-          return res.status(404).json({ message: 'Course not found' });
-      }
-      const coverImage = req.file ? req.file.path : ''; // Cloudinary URL
-
-
-      // Initialize the fields to update
-      const updateFields = {
-          title: req.body.title || course.title,
-          description: req.body.description || course.description,
-          price: req.body.price || course.price,
-          duration: req.body.duration || course.duration,
-          lessons: req.body.lessons || course.lessons,
-          published: req.body.published || course.published,
-          mail: req.body.published === 'public' ? true : course.mail, // Conditionally update mail field
-          updatedAt: Date.now() // Update timestamp
-      };
-
-      if (coverImage) {
-        updateFields.coverImage = coverImage;
-  
-        // Delete the old image from Cloudinary if it exists
-        if (course.coverImage) {
-          const publicId = 'uploads/'+course.coverImage.split('/').pop().split('.')[0]; // Extract the public ID
-  
-          console.log(' publicId' ,publicId);
-          await cloudinary.uploader.destroy(publicId, function (error, result) {
-            if (error) {
-              console.error('Error deleting old image from Cloudinary:', error);
-            } else {
-              console.log('Old image deleted from Cloudinary:', result);
-            }
-          });
-        }
-      }
-  
-
-      // Update the course
-      const updatedCourse = await Course.findByIdAndUpdate(req.params.id, updateFields, { new: true });
-
-      if (!updatedCourse) {
-          return res.status(404).json({ message: 'Course not found' });
-      }
-
-      res.status(200).json({ updatedCourse, message: "Course updated successfully" });
-
-  } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ message: "Internal server error", error: error.message });
-  }
-});
-
-router.get('/getcourses', async (req, res) => {
-    try {
-      const page = parseInt(req.query.page, 10) || 1; // Default to page 1
-      const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
-      const title = req.query.title || ''; // Get the title query (default is an empty string)
-      
-      const skip = (page - 1) * limit;
-  
-      // Build the query with case-insensitive title search using a regular expression
-      const query = title ? { title: { $regex: title, $options: 'i' } } : {};
-  
-      // Find Course posts based on title and apply pagination
-      const [courses, count] = await Promise.all([
-        Course.find(query).skip(skip).limit(limit),
-        Course.countDocuments(query) // Count documents matching the query
-      ]);
-  
-      // Return the response with paginated results
-      res.status(200).json({
-        count,
-        data: courses
-      });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: 'An error occurred while retrieving courses' });
-    }
-  });
-
-
-router.get('/getcourses/:id', async (req, res) => {
-    try {
-        // Extract course ID from URL parameters
-        const { id } = req.params;
-
-        // Find the course by ID
-        const course = await Course.findById(id);
-
-        // Check if course exists
-        if (!course) {
-            return res.status(404).json({ message: 'Course not found' });
-        }
-
-        // Send the course data in the response
-        res.status(200).json( course );
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ message: "Internal server error", error: error.message });
-    }
-});
-
-router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
+router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
+  // Check if the user is an admin
   const tokenUser = req.user;
-
   if (tokenUser?.role !== 'admin') {
     return res.status(403).json({ message: 'User is not an admin' });
   }
 
-  try {
-    const { id } = req.params;
-    const course = await Course.findById(id);
+  // Handle the coverImage path correctly
+  const coverImage = req.file ? req.file.path.replace('public/', '') : '';
+  const imagePath = coverImage ? `${process.env.BASE_URL}/${coverImage}` : '';
 
-    if (!course) {
-      return res.status(404).json({ error: 'Course not found' });
-    }
-    if (course.coverImage) {
-      const publicId = course.coverImage.split('/').pop().split('.')[0]; 
-      await cloudinary.uploader
-        .destroy(['uploads/' + publicId],
-          { type: 'upload', resource_type: 'image' })
-        .then(console.log);
-    }
-    await Course.findByIdAndDelete(id);
-    res.status(200).json({ message: 'Course post and associated cover image deleted successfully' });
+  // Create a new Course instance with the provided data
+  const newCourse = new Course({
+    title: req.body.title,
+    description: req.body.description,
+    price: req.body.price,
+    duration: req.body.duration,
+    lessons: req.body.lessons || [],  // Default to an empty array if not provided
+    coverImage: imagePath,  // Save the uploaded image path
+    published: req.body.published,
+    enrolledStudents: req.body.enrolledStudents || [],  // Default to an empty array if not provided
+    mail: req.body.published === 'public' ? true : false,  // Conditionally set mail flag
+  });
+
+  try {
+    // Save the course to the database
+    const response = await newCourse.save();
+
+    // Return the newly created course in the response
+    res.status(201).json({ response: response, message: "Course created" });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: 'An error occurred while deleting the Course' });
+    console.error('Error adding course:', error);
+
+    // If an error occurred, remove the uploaded image
+    if (req.file && coverImage) {
+      const filePath = path.join(__dirname, '../public', coverImage);
+
+      // Check if the file exists before trying to delete it
+      if (fs.existsSync(filePath)) {
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error('Error deleting file:', err);
+          } else {
+            console.log('Uploaded image deleted due to error:', coverImage);
+          }
+        });
+      }
+    }
+
+    // Send a 500 error response
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message  // Return the specific error message for debugging
+    });
   }
 });
+
+router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
+  // Check if the user is an admin
+  const tokenUser = req.user;
+  if (tokenUser?.role !== 'admin') {
+    return res.status(403).json({ message: 'User is not an admin' });
+  }
+
+  const courseId = req.params.id;
+  const updateData = {
+    title: req.body.title,
+    description: req.body.description,
+    price: req.body.price,
+    duration: req.body.duration,
+    lessons: req.body.lessons || [],
+    published: req.body.published,
+    enrolledStudents: req.body.enrolledStudents || [],
+    mail: req.body.published === 'public' ? true : false,
+  };
+
+  // Handle the coverImage path correctly
+  if (req.file) {
+    const coverImage = req.file.path.replace('public/', '');
+    updateData.coverImage = `${process.env.BASE_URL}/${coverImage}`;
+  }
+
+  try {
+    // Find the course by ID and update it
+    const updatedCourse = await Course.findByIdAndUpdate(courseId, updateData, { new: true, runValidators: true });
+
+    if (!updatedCourse) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // Return the updated course in the response
+    res.status(200).json({ response: updatedCourse, message: "Course updated successfully" });
+  } catch (error) {
+    console.error('Error updating course:', error);
+
+    // If an error occurred while trying to delete the previously uploaded image
+    if (req.file) {
+      const filePath = path.join(__dirname, '../public', req.file.path.replace('public/', ''));
+      if (fs.existsSync(filePath)) {
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error('Error deleting previous image:', err);
+          } else {
+            console.log('Previous image deleted due to update error');
+          }
+        });
+      }
+    }
+
+    // Send a 500 error response
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message  // Return the specific error message for debugging
+    });
+  }
+});
+
+
+router.get('/getcourses', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
+    const title = req.query.title || ''; // Get the title query (default is an empty string)
+
+    const skip = (page - 1) * limit;
+
+    // Build the query with case-insensitive title search using a regular expression
+    const query = title ? { title: { $regex: title, $options: 'i' } } : {};
+
+    // Find Course posts based on title and apply pagination
+    const [courses, count] = await Promise.all([
+      Course.find(query).skip(skip).limit(limit),
+      Course.countDocuments(query) // Count documents matching the query
+    ]);
+
+    // Return the response with paginated results
+    res.status(200).json({
+      count,
+      data: courses
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'An error occurred while retrieving courses' });
+  }
+});
+
+
+router.get('/getcourses/:id', async (req, res) => {
+  try {
+    // Extract course ID from URL parameters
+    const { id } = req.params;
+
+    // Find the course by ID
+    const course = await Course.findById(id);
+
+    // Check if course exists
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // Send the course data in the response
+    res.status(200).json(course);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
+  }
+});
+router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
+  // Check if the user is an admin
+  const tokenUser = req.user;
+  if (tokenUser?.role !== 'admin') {
+    return res.status(403).json({ message: 'User is not an admin' });
+  }
+
+  const courseId = req.params.id;
+
+  try {
+    // Find the course by ID
+    const courseToDelete = await Course.findById(courseId);
+
+    if (!courseToDelete) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // Delete the course from the database
+    await Course.findByIdAndDelete(courseId);
+
+    // If there is a coverImage, remove the associated file
+    if (courseToDelete.coverImage) {
+      const coverImagePath = courseToDelete.coverImage.replace(`${process.env.BASE_URL}/`, 'public/');
+      const filePath = path.join(__dirname, '../', coverImagePath);
+
+      // Check if the file exists before trying to delete it
+      if (fs.existsSync(filePath)) {
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error('Error deleting cover image:', err);
+          } else {
+            console.log('Cover image deleted:', coverImagePath);
+          }
+        });
+      }
+    }
+
+    // Return a success response
+    res.status(200).json({ message: 'Course deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting course:', error);
+    res.status(500).json({
+      message: 'Internal server error',
+      error: error.message,  // Return the specific error message for debugging
+    });
+  }
+});
+
 
 module.exports = router;

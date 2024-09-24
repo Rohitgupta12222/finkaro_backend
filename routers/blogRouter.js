@@ -4,133 +4,166 @@ const Blog = require('../models/blogs');
 const router = express.Router();
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer fil
 const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
-const upload = require('../middelware/multer');
+const  upload = require('../middelware/multer');
+const  processImage = require('../middelware/imagsProcess');
 const uploadDashboard = require('../middelware/dashboarMulter');
-const cloudinary = require('../middelware/Cloudinary'); // Adjust the path to your Cloudinary configuration
-
-const BASE_URL = process.env.BASE_URL; // Change this to your actual base URL
-// const BASE_URL = 'https://finkaro-backend.onrender.com'; // Change this to your actual base URL
 const fs = require('fs');
 const path = require('path');
 
-router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), async (req, res) => {
+
+router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
   const { title, content, status, shortDescription, links } = req.body;
-  const coverImage = req.file ? req.file.path.replace('public/', '') : ''; // Remove 'public/' prefix
 
-  // Log the request body and file information for debugging
+  // Handle the coverImage path correctly when using memoryStorage
+  const coverImage = req.file && req.file.path ? req.file.path.replace('public/', '') : '';
+  const imagePath = `${process.env.BASE_URL}/${coverImage}`;
 
-  const userId = req.user.id
+  // Retrieve the user ID from the authenticated user
+  const userId = req.user.id;
+
+  let newBlog;
+
   try {
-    const newBlog = new Blog({
+    // Create a new Blog instance with the provided data
+    newBlog = new Blog({
       title,
       content,
       status,
       shortDescription,
       links,
-      coverImage: coverImage,
-      userId
+      coverImage: imagePath,
+      userId,
     });
 
-
-
+    // Save the blog to the database
     await newBlog.save();
+
+    // Return the newly created blog in the response
     res.status(201).json(newBlog);
   } catch (error) {
-    console.error('Error adding blog:', error); // Log the error details for debugging
-    res.status(500).json({ error: 'An error occurred while adding the blog' });
-  }
-});
-// ss
-
-router.put('/update/:blogId', jwtAuthMiddleWare, upload.single('coverImage'), async (req, res) => {
-  const { blogId } = req.params;
-  const { title, content, status, shortDescription, links } = req.body;
-  const coverImage = req.file ? req.file.path : ''; // Cloudinary URL
-
-  let updateFields = { title, content, status, shortDescription, links, updatedAt: Date.now() };
-
-  try {
-    // Find the blog by ID
-    const blog = await Blog.findById(blogId);
-
-    // Check if the blog exists
-    if (!blog) {
-      return res.status(404).json({ error: 'Blog not found' });
-    }
-
-    // If a new cover image is uploaded, delete the old one from Cloudinary
-    if (coverImage) {
-      updateFields.coverImage = coverImage;
-
-      // Delete the old image from Cloudinary if it exists
-      if (blog.coverImage) {
-        const publicId = 'uploads/'+blog.coverImage.split('/').pop().split('.')[0]; // Extract the public ID
-
-        console.log(' publicId' ,publicId);
-        await cloudinary.uploader.destroy(publicId, function (error, result) {
-          if (error) {
-            console.error('Error deleting old image from Cloudinary:', error);
+    // Log any errors and send a 500 error response
+    console.error('Error adding blog:', error);
+    
+    // If an error occurred, remove the uploaded image
+    if (req.file && coverImage) {
+      const filePath = path.join(__dirname, '../public', coverImage);
+      
+      // Check if the file exists before trying to delete it
+      if (fs.existsSync(filePath)) {
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error('Error deleting file:', err);
           } else {
-            console.log('Old image deleted from Cloudinary:', result);
+            console.log('Uploaded image deleted due to error:', coverImage);
           }
         });
       }
     }
 
-    // Update the blog with the new data
-    const updatedBlog = await Blog.findByIdAndUpdate(
-      blogId,
-      updateFields,
-      { new: true }
-    );
+    res.status(500).json({ error: 'An error occurred while adding the blog' });
+  }
+});
+router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
+  const { title, content, status, shortDescription, links } = req.body;
+  const blogId = req.params.id;
 
-    // Send the updated blog as a response
-    res.status(200).json(updatedBlog);
+  try {
+    // Find the blog post by ID
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog post not found' });
+    }
 
+    // If a new image is uploaded, delete the old image
+    if (req.file) {
+      const oldImagePath = blog.coverImage.replace(process.env.BASE_URL + '/', '');
+      const oldFilePath = path.join(__dirname, '../public', oldImagePath);
+
+      if (fs.existsSync(oldFilePath)) {
+        fs.unlink(oldFilePath, (err) => {
+          if (err) {
+            console.error('Error deleting old image:', err);
+          } else {
+            console.log('Old image deleted:', oldImagePath);
+          }
+        });
+      }
+
+      // Update the coverImage path with the new uploaded image
+      const newCoverImage = req.file.path.replace('public/', '');
+      blog.coverImage = `${process.env.BASE_URL}/${newCoverImage}`;
+    }
+
+    // Update the other fields
+    blog.title = title || blog.title;
+    blog.content = content || blog.content;
+    blog.status = status || blog.status;
+    blog.shortDescription = shortDescription || blog.shortDescription;
+    blog.links = links || blog.links;
+
+    // Save the updated blog post to the database
+    await blog.save();
+
+    // Return the updated blog post
+    res.status(200).json(blog);
   } catch (error) {
+    console.error('Error updating blog:', error);
+    
+    // If an error occurs after uploading the new image, delete the new image
+    if (req.file) {
+      const newFilePath = req.file.path.replace('public/', '');
+      const filePathToDelete = path.join(__dirname, '../public', newFilePath);
+
+      if (fs.existsSync(filePathToDelete)) {
+        fs.unlink(filePathToDelete, (err) => {
+          if (err) {
+            console.error('Error deleting new image after failed update:', err);
+          } else {
+            console.log('New image deleted due to error during update:', newFilePath);
+          }
+        });
+      }
+    }
+
     res.status(500).json({ error: 'An error occurred while updating the blog' });
   }
 });
 
-
-router.delete('/delete/:blogId', jwtAuthMiddleWare, async (req, res) => {
-  const tokenUser = req.user;
-
-  // Ensure only admin can delete
-  if (tokenUser?.role !== 'admin') {
-    return res.status(403).json({ message: 'User is not an admin' });
-  }
+router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
+  const blogId = req.params.id;
 
   try {
-    const { blogId } = req.params;
-
     // Find the blog post by ID
     const blog = await Blog.findById(blogId);
-
-    // Check if the blog post exists
     if (!blog) {
-      return res.status(404).json({ error: 'Blog not found' });
+      return res.status(404).json({ error: 'Blog post not found' });
     }
 
-    if (blog.coverImage) {
-      const publicId = blog.coverImage.split('/').pop().split('.')[0]; 
-      await cloudinary.uploader
-        .destroy(['uploads/' + publicId],
-          { type: 'upload', resource_type: 'image' })
-        .then(console.log);
-    }
+    // Extract the image path from the blog post
+    const imagePath = blog.coverImage.replace(process.env.BASE_URL + '/', '');
+    const filePath = path.join(__dirname, '../public', imagePath);
 
+    // Delete the blog post from the database
     await Blog.findByIdAndDelete(blogId);
 
-    // Respond with a success message
-    res.status(200).json({ message: 'Blog post and associated cover image deleted successfully' });
+    // If the blog post had an associated image, delete the image file
+    if (fs.existsSync(filePath)) {
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error('Error deleting image:', err);
+        } else {
+          console.log('Image deleted:', imagePath);
+        }
+      });
+    }
+
+    // Return a success response
+    res.status(200).json({ message: 'Blog post and associated image deleted successfully' });
   } catch (error) {
-    // Handle errors
-    res.status(500).json({ error: 'An error occurred while deleting the blog' });
+    console.error('Error deleting blog:', error);
+    res.status(500).json({ error: 'An error occurred while deleting the blog post' });
   }
 });
-
-
 
 
 router.get('/get/:blogId', async (req, res) => {
