@@ -11,7 +11,7 @@ const path = require('path');
 const  multipalprocessImage = require('../middelware/multipalImagesProcess');
 
 
-router.post('/add', jwtAuthMiddleWare, upload.array('coverImage', 12), multipalprocessImage, async (req, res) => {
+router.post('/add', jwtAuthMiddleWare, upload.array('coverImage', 10), multipalprocessImage, async (req, res) => {
   const userId = req.user.id;
   const {
     title,
@@ -23,7 +23,7 @@ router.post('/add', jwtAuthMiddleWare, upload.array('coverImage', 12), multipalp
     offerPrice,
     mail,
     excelFileLink,
-    zipfileLink
+    zipFileLink
   } = req.body;
 
   // Extract uploaded file paths
@@ -45,7 +45,7 @@ router.post('/add', jwtAuthMiddleWare, upload.array('coverImage', 12), multipalp
       mail,
       shortDescription,
       excelFileLink,
-      zipfileLink
+      zipFileLink
     });
 
     const savedDashboard = await newDashboard.save();
@@ -74,7 +74,7 @@ router.post('/add', jwtAuthMiddleWare, upload.array('coverImage', 12), multipalp
 
 
 
-router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 12), multipalprocessImage, async (req, res) => {
+router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), multipalprocessImage, async (req, res) => {
   const dashboardId = req.params.id;
   const userId = req.user.id;
   const {
@@ -87,7 +87,7 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 12), mul
     offerPrice,
     mail,
     excelFileLink,
-    zipfileLink
+    zipFileLink
   } = req.body;
 
   // Extract new uploaded file paths
@@ -130,7 +130,7 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 12), mul
     existingDashboard.mail = mail || existingDashboard.mail;
     existingDashboard.shortDescription = shortDescription || existingDashboard.shortDescription;
     existingDashboard.excelFileLink = excelFileLink || existingDashboard.excelFileLink;
-    existingDashboard.zipfileLink = zipfileLink || existingDashboard.zipfileLink;
+    existingDashboard.zipFileLink = zipFileLink || existingDashboard.zipFileLink;
 
     // If new images are uploaded, update the cover image paths
     if (newCoverImagePaths.length > 0) {

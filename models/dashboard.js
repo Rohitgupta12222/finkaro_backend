@@ -72,7 +72,7 @@ const DashboardSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  zipfileLink: {
+  zipFileLink: {
     type: String,
     default: ''
   },

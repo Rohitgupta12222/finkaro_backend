@@ -6,9 +6,7 @@ const fs = require('fs');
 const multipalprocessImage = async (req, res, next) => {
 
     console.log(req.files , '================ > req.files');
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).send('No files uploaded.');
-  }
+
 
   try {
     // Iterate over all uploaded files and process them

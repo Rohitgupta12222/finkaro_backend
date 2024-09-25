@@ -13,13 +13,14 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 
-console.log('Allowed Origins:', process.env.FRONTEND_LINK, process.env.FRONTEND_LINK_LOCAL);
+console.log('Allowed Origins:',);
 
 app.use(cors({
   origin: '*', // Allow all origins (for testing purposes)
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200,
 }));
 
 // Logging middleware for requests
@@ -68,6 +69,18 @@ app.use('/book', bookRouter);
 // Root route
 app.get('/', (req, res) => {
   res.send('Server connected');
+});
+
+app.get('/uploads/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, 'public', 'uploads', filename);
+  
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Error sending file:', err);
+      res.status(err.status).end(); // End the response in case of error
+    }
+  });
 });
 
 
