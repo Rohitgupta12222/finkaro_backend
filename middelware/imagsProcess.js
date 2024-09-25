@@ -5,7 +5,9 @@ const fs = require('fs');
 
 
 
+
 const processImage = async (req, res, next) => {
+  console.log(req.file , ' ==================== req.file');
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
   }

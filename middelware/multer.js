@@ -1,7 +1,6 @@
 const multer = require('multer');
 const path = require('path');
-const sharp = require('sharp');
-const fs = require('fs');
+
 
 // Set up multer storage to save files locally
 const storage = multer.memoryStorage(); // Store files in memory for processing
@@ -22,6 +21,7 @@ const upload = multer({
     cb(new Error('Error: File type not supported!'));
   },
 });
+
 
 
 

@@ -5,171 +5,200 @@ const router = express.Router();
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer fil
 const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
 const Dashboardupload =require('../middelware/dashboarMulter')
+const upload =  require('../middelware/multer')
 const BASE_URL = process.env.BASE_URL; // Change this to your actual base URL
 const fs = require('fs');
 const path = require('path');
+const  multipalprocessImage = require('../middelware/multipalImagesProcess');
 
 
-router.post('/add', jwtAuthMiddleWare, Dashboardupload.fields([
-  { name: 'coverImage', maxCount: 10 },
-  { name: 'zipfile', maxCount: 1 },
-  { name: 'excelFile', maxCount: 1 }
-]), async (req, res) => {
+router.post('/add', jwtAuthMiddleWare, upload.array('coverImage', 12), multipalprocessImage, async (req, res) => {
+  const userId = req.user.id;
+  const {
+    title,
+    content,
+    status,
+    links,
+    shortDescription,
+    actualPrice,
+    offerPrice,
+    mail,
+    excelFileLink,
+    zipfileLink
+  } = req.body;
+
+  // Extract uploaded file paths
+  const coverImagePaths = req.files ? req.files.map(file =>
+    `${process.env.BASE_URL}/${file.path.replace('public/', '')}`
+  ) : [];
+
   try {
-    const coverImage = req.files['coverImage'] ? req.files['coverImage'].map(file => `${BASE_URL}/uploads/${file.filename}`) : [];
-    const zipfile = req.files['zipfile'] ? `${BASE_URL}/uploads/${req.files['zipfile'][0].filename}` : null;
-    const excelFile = req.files['excelFile'] ? `${BASE_URL}/uploads/${req.files['excelFile'][0].filename}` : null;
-
-    const userId = req.user.id;
-    const { title, content, status, links, mail, shortDescription, actualPrice, offerPrice } = req.body;
-
+    // Create a new dashboard entry
     const newDashboard = new Dashboard({
       title,
       content,
       userId,
-      status,
+      coverImage: coverImagePaths, // Use the array of uploaded file paths
       links,
-      shortDescription,
       actualPrice,
       offerPrice,
+      status,
       mail,
-      coverImage,
-      zipfile,
-      excelFile
+      shortDescription,
+      excelFileLink,
+      zipfileLink
     });
 
-    await newDashboard.save();
+    const savedDashboard = await newDashboard.save();
+    res.status(201).json(savedDashboard);
 
-    res.json({ message: 'Dashboard created successfully', dashboard: newDashboard });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error creating dashboard:', error);
+
+    // Remove uploaded files if error occurs
+    if (req.files) {
+      req.files.forEach(file => {
+        const filePath = file.path;
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error(`Error deleting file ${filePath}:`, err);
+          } else {
+            console.log(`Deleted file: ${filePath}`);
+          }
+        });
+      });
+    }
+
+    res.status(500).json({ message: 'Server error', error });
   }
 });
 
 
 
+router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 12), multipalprocessImage, async (req, res) => {
+  const dashboardId = req.params.id;
+  const userId = req.user.id;
+  const {
+    title,
+    content,
+    status,
+    links,
+    shortDescription,
+    actualPrice,
+    offerPrice,
+    mail,
+    excelFileLink,
+    zipfileLink
+  } = req.body;
 
+  // Extract new uploaded file paths
+  const newCoverImagePaths = req.files ? req.files.map(file =>
+    `${process.env.BASE_URL}/${file.path.replace('public/', '')}`
+  ) : [];
 
-router.put('/update/:id', jwtAuthMiddleWare, Dashboardupload.fields([
-  { name: 'coverImage', maxCount: 10 },
-  { name: 'zipfile', maxCount: 1 },
-  { name: 'excelFile', maxCount: 1 }
-]), async (req, res) => {
   try {
-    // Find the existing dashboard by ID
-    const dashboard = await Dashboard.findById(req.params.id);
-    if (!dashboard) {
+    // Find the existing dashboard entry by ID
+    const existingDashboard = await Dashboard.findById(dashboardId);
+
+    if (!existingDashboard) {
       return res.status(404).json({ message: 'Dashboard not found' });
     }
 
-    // Function to remove old files from the server
-    const removeOldFile = (filePath) => {
-      const fullPath = path.join(__dirname, '../public/uploads', path.basename(filePath));
-      if (fs.existsSync(fullPath)) {
-        fs.unlinkSync(fullPath); // Remove the file
-      }
-    };
+    // Store old image paths before updating
+    const oldCoverImagePaths = existingDashboard.coverImage;
 
-    // Handle cover images
-    if (req.files['coverImage']) {
-      // Remove old cover images
-      if (dashboard.coverImage) {
-        dashboard.coverImage.forEach(filePath => removeOldFile(filePath));
-      }
-      // Set the new cover image paths
-      dashboard.coverImage = req.files['coverImage'].map(file => `${BASE_URL}/uploads/${file.filename}`);
+    // If new images are uploaded, remove the old images from the server
+    if (newCoverImagePaths.length > 0 && oldCoverImagePaths.length > 0) {
+      oldCoverImagePaths.forEach(oldImagePath => {
+        const filePath = `public/${oldImagePath.replace(`${process.env.BASE_URL}/`, '')}`;
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error(`Error deleting old file ${filePath}:`, err);
+          } else {
+            console.log(`Deleted old file: ${filePath}`);
+          }
+        });
+      });
     }
-
-    // Handle zip file
-    if (req.files['zipfile']) {
-      // Remove the old zip file
-      if (dashboard.zipfile) removeOldFile(dashboard.zipfile);
-      // Set the new zip file path
-      dashboard.zipfile = `${BASE_URL}/uploads/${req.files['zipfile'][0].filename}`;
-    }
-
-    // Handle excel file
-    if (req.files['excelFile']) {
-      // Remove the old excel file
-      if (dashboard.excelFile) removeOldFile(dashboard.excelFile);
-      // Set the new excel file path
-      dashboard.excelFile = `${BASE_URL}/uploads/${req.files['excelFile'][0].filename}`;
-    }
-
-    // Update other fields from the request body
-    const { title, content, status, links, mail, shortDescription, actualPrice, offerPrice, start } = req.body;
 
     // Update the dashboard entry
-    dashboard.title = title || dashboard.title;
-    dashboard.content = content || dashboard.content;
-    dashboard.status = status || dashboard.status;
-    dashboard.links = links || dashboard.links;
-    dashboard.shortDescription = shortDescription || dashboard.shortDescription;
-    dashboard.mail = mail || dashboard.mail;
-    dashboard.actualPrice = actualPrice || dashboard.actualPrice;
-    dashboard.offerPrice = offerPrice || dashboard.offerPrice;
-    dashboard.start = start || dashboard.start;
-    dashboard.updatedAt = Date.now();
+    existingDashboard.title = title || existingDashboard.title;
+    existingDashboard.content = content || existingDashboard.content;
+    existingDashboard.status = status || existingDashboard.status;
+    existingDashboard.links = links || existingDashboard.links;
+    existingDashboard.actualPrice = actualPrice || existingDashboard.actualPrice;
+    existingDashboard.offerPrice = offerPrice || existingDashboard.offerPrice;
+    existingDashboard.mail = mail || existingDashboard.mail;
+    existingDashboard.shortDescription = shortDescription || existingDashboard.shortDescription;
+    existingDashboard.excelFileLink = excelFileLink || existingDashboard.excelFileLink;
+    existingDashboard.zipfileLink = zipfileLink || existingDashboard.zipfileLink;
 
-    // Save the updated dashboard to the database
-    await dashboard.save();
+    // If new images are uploaded, update the cover image paths
+    if (newCoverImagePaths.length > 0) {
+      existingDashboard.coverImage = newCoverImagePaths;
+    }
 
-    // Respond with success message and updated dashboard data
-    res.json({ message: 'Dashboard updated successfully', dashboard });
+    // Save the updated dashboard entry
+    const updatedDashboard = await existingDashboard.save();
+    res.status(200).json(updatedDashboard);
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error updating dashboard:', error);
+
+    // Remove newly uploaded files if error occurs during update
+    if (req.files) {
+      req.files.forEach(file => {
+        const filePath = file.path;
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error(`Error deleting new file ${filePath}:`, err);
+          } else {
+            console.log(`Deleted new file: ${filePath}`);
+          }
+        });
+      });
+    }
+
+    res.status(500).json({ message: 'Server error', error });
   }
 });
 
 
+router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
+  const dashboardId = req.params.id;
 
-
-
-router.delete('/delete/:id', async (req, res) => {
   try {
-    const dashboardId = req.params.id;
+    // Find the existing dashboard entry by ID
+    const existingDashboard = await Dashboard.findById(dashboardId);
 
-    // Find the dashboard by ID
-    const dashboard = await Dashboard.findById(dashboardId);
-
-    if (!dashboard) {
-      return res.status(404).json({ error: 'Dashboard not found' });
+    if (!existingDashboard) {
+      return res.status(404).json({ message: 'Dashboard not found' });
     }
 
-    // Function to delete a file
-    const deleteFile = (filePath) => {
-      if (filePath) {
-        const fullPath = path.join(__dirname, '../public/uploads/', path.basename(filePath));
-        fs.unlink(fullPath, (err) => {
-          if (err && err.code !== 'ENOENT') {
-            console.error('Error deleting file:', err);
+    // Extract the cover image paths to delete
+    const coverImagePaths = existingDashboard.coverImage;
+
+    // Delete the cover images from the server
+    if (coverImagePaths && coverImagePaths.length > 0) {
+      coverImagePaths.forEach(imagePath => {
+        const filePath = `public/${imagePath.replace(`${process.env.BASE_URL}/`, '')}`;
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error(`Error deleting file ${filePath}:`, err);
+          } else {
+            console.log(`Deleted file: ${filePath}`);
           }
         });
-      }
-    };
-
-    // Delete associated files if they exist
-    if (dashboard.coverImage) {
-      // Check if coverImage is an array
-      if (Array.isArray(dashboard.coverImage)) {
-        dashboard.coverImage.forEach(filePath => deleteFile(filePath));
-      } else {
-        deleteFile(dashboard.coverImage); // Delete single cover image
-      }
-    }
-    if (dashboard.zipfile) {
-      deleteFile(dashboard.zipfile); // Delete zipfile
-    }
-    if (dashboard.excelFile) {
-      deleteFile(dashboard.excelFile); // Delete excelFile
+      });
     }
 
     // Delete the dashboard entry from the database
     await Dashboard.findByIdAndDelete(dashboardId);
 
-    res.json({ message: 'Dashboard entry and associated files deleted successfully' });
+    res.status(200).json({ message: 'Dashboard deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error deleting dashboard:', error);
+    res.status(500).json({ message: 'Server error', error });
   }
 });
 

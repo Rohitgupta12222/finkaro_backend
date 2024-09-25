@@ -35,6 +35,9 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
       userId,
     });
 
+    console.log(newBlog , 'newBlog =========================');
+    return
+
     // Save the blog to the database
     await newBlog.save();
 

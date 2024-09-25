@@ -72,11 +72,11 @@ const DashboardSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  zipfile: {
+  zipfileLink: {
     type: String,
     default: ''
   },
-   excelFile: {
+   excelFileLink: {
     type: String,
     default: ''
   },
