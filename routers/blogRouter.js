@@ -193,13 +193,21 @@ router.get('/getAllBlogs', async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1; // Default to page 1
     const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
     const title = req.query.title || ''; // Get the title query (default is an empty string)
+    const status = req.query.status; // Get the status query, optional
 
     const skip = (page - 1) * limit;
 
-    // Build the query with case-insensitive title search using a regular expression
-    const query = title ? { title: { $regex: title, $options: 'i' } } : {};
+    // Build the query with case-insensitive title search
+    const query = {
+      title: { $regex: title, $options: 'i' } // Case-insensitive title search
+    };
 
-    // Find blog posts based on title and apply pagination
+    // Conditionally add the status filter to the query if provided
+    if (status) {
+      query.status = status;
+    }
+
+    // Find blog posts based on the query and apply pagination
     const [blogPosts, count] = await Promise.all([
       Blog.find(query).skip(skip).limit(limit),
       Blog.countDocuments(query) // Count documents matching the query
@@ -215,6 +223,7 @@ router.get('/getAllBlogs', async (req, res) => {
     res.status(500).json({ error: 'An error occurred while retrieving blog posts' });
   }
 });
+
 
 
 

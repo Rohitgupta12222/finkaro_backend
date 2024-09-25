@@ -6,7 +6,6 @@ const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to
 const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
 const Dashboardupload =require('../middelware/dashboarMulter')
 const upload =  require('../middelware/multer')
-const BASE_URL = process.env.BASE_URL; // Change this to your actual base URL
 const fs = require('fs');
 const path = require('path');
 const  multipalprocessImage = require('../middelware/multipalImagesProcess');
@@ -208,13 +207,18 @@ router.get('/get', async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1; // Default to page 1
     const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
     const title = req.query.title || ''; // Get the title query (default is an empty string)
+    const status = req.query.status; // Get the status query, optional
     
     const skip = (page - 1) * limit;
 
-    // Build the query with case-insensitive title search using a regular expression
-    const query = title ? { title: { $regex: title, $options: 'i' } } : {};
+    const query = {
+      title: { $regex: title, $options: 'i' } // Case-insensitive title search
+    };
 
-    // Find blog posts based on title and apply pagination
+    if (status) {
+      query.status = status;
+    }
+
     const [dashboards, count] = await Promise.all([
       Dashboard.find(query).skip(skip).limit(limit),
       Dashboard.countDocuments(query) // Count documents matching the query
@@ -228,6 +232,7 @@ router.get('/get', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 
 router.get('/get/:id', async (req, res) => {

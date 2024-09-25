@@ -53,7 +53,7 @@ const courseSchema = new mongoose.Schema({
   published: {
     type: String,
     enum: ['public', 'private'],
-    default: "private",
+    default: "public",
   },
   enrolledStudents: [
     {
