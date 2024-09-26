@@ -35,8 +35,6 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
       userId,
     });
 
-    console.log(newBlog , 'newBlog =========================');
-    return
 
     // Save the blog to the database
     await newBlog.save();
@@ -194,6 +192,8 @@ router.get('/getAllBlogs', async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
     const title = req.query.title || ''; // Get the title query (default is an empty string)
     const status = req.query.status; // Get the status query, optional
+    const sortField = req.query.sortField || 'updatedAt'; // Default sort field
+    const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1; // Ascending or descending order, default is descending
 
     const skip = (page - 1) * limit;
 
@@ -207,20 +207,29 @@ router.get('/getAllBlogs', async (req, res) => {
       query.status = status;
     }
 
-    // Find blog posts based on the query and apply pagination
+    // Create sorting object for Mongoose
+    const sortOptions = {};
+    if (sortField === 'createdAt' || sortField === 'updatedAt') {
+      sortOptions[sortField] = sortOrder; // Add the sorting field and order
+    }
+
+    // Find dashboards based on the query, apply pagination, and sort dynamically
     const [blogPosts, count] = await Promise.all([
-      Blog.find(query).skip(skip).limit(limit),
-      Blog.countDocuments(query) // Count documents matching the query
+      Blog.find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort(sortOptions), // Sort using the constructed sort options
+        Blog.countDocuments(query) // Count documents matching the query
     ]);
 
     // Return the response with paginated results
-    res.status(200).json({
+    res.json({
       count,
-      data: blogPosts
+      data: blogPosts,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: 'An error occurred while retrieving blog posts' });
+    console.error(error);
+    res.status(500).json({ error: error.message });
   }
 });
 

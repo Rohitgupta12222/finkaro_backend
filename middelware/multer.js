@@ -3,12 +3,19 @@ const path = require('path');
 
 
 // Set up multer storage to save files locally
-const storage = multer.memoryStorage(); // Store files in memory for processing
+const storage =  multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './public/uploads');
+  } ,filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
 
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // Limit file size to 10 MB
+    fieldSize: 20 * 1024 * 1024,  // Limit the field size (e.g., 2 MB)
+    fileSize: 50 * 1024 * 1024, 
   },
   fileFilter: (req, file, cb) => {
     // Accept images only

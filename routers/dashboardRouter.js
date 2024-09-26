@@ -27,9 +27,7 @@ router.post('/add', jwtAuthMiddleWare, upload.array('coverImage', 10), multipalp
   } = req.body;
 
   // Extract uploaded file paths
-  const coverImagePaths = req.files ? req.files.map(file =>
-    `${process.env.BASE_URL}/${file.path.replace('public/', '')}`
-  ) : [];
+  const coverImagePaths = req.files ? req.files.map(file => {return file.path ? `${process.env.BASE_URL}/${file.path.replace('public/', '')}` : null}) : [];
 
   try {
     // Create a new dashboard entry
@@ -208,31 +206,46 @@ router.get('/get', async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
     const title = req.query.title || ''; // Get the title query (default is an empty string)
     const status = req.query.status; // Get the status query, optional
-    
+    const sortField = req.query.sortField || 'updatedAt'; // Default sort field
+    const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1; // Ascending or descending order, default is descending
+
     const skip = (page - 1) * limit;
 
+    // Build the query with case-insensitive title search
     const query = {
       title: { $regex: title, $options: 'i' } // Case-insensitive title search
     };
 
+    // Conditionally add the status filter to the query if provided
     if (status) {
       query.status = status;
     }
 
+    // Create sorting object for Mongoose
+    const sortOptions = {};
+    if (sortField === 'createdAt' || sortField === 'updatedAt') {
+      sortOptions[sortField] = sortOrder; // Add the sorting field and order
+    }
+
+    // Find dashboards based on the query, apply pagination, and sort dynamically
     const [dashboards, count] = await Promise.all([
-      Dashboard.find(query).skip(skip).limit(limit),
+      Dashboard.find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort(sortOptions), // Sort using the constructed sort options
       Dashboard.countDocuments(query) // Count documents matching the query
     ]);
 
+    // Return the response with paginated results
     res.json({
       count,
       data: dashboards,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
-
 
 
 router.get('/get/:id', async (req, res) => {

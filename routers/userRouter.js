@@ -260,4 +260,45 @@ router.put('/profile/:id', jwtAuthMiddleWare, async (req, res) => {
 
   }
 })
+router.get('/getAlluser', jwtAuthMiddleWare, async (req, res) => {
+  try {
+    const { search, page = 1, limit = 10 } = req.query; // Extract query parameters
+
+    // Pagination settings
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    // If search is provided, create a filter. Otherwise, return all users.
+    const searchFilter = search
+      ? {
+          $or: [
+            { name: { $regex: search, $options: 'i' } }, // Search by name (case-insensitive)
+            { email: { $regex: search, $options: 'i' } } // Search by email (case-insensitive)
+          ]
+        }
+      : {};
+
+    // Fetch users with optional search, pagination, and sorted by createdAt (descending)
+    const users = await User.find(searchFilter)
+      .sort({ createdAt: -1 }) // Sort by createdAt in descending order
+      .skip(skip)
+      .limit(limitNumber);
+
+    // Get total count of matching users for pagination
+    const count = await User.countDocuments(searchFilter);
+
+    // Return the users and pagination info
+    res.status(200).json({
+      users,
+      totalPages: Math.ceil(totalUsers / limitNumber),
+      currentPage: pageNumber,
+      count
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Error fetching users' });
+  }
+});
+
 module.exports = router;
