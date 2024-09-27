@@ -33,12 +33,6 @@ const courseSchema = new mongoose.Schema({
       videoUrl: {
         type: String,
         trim: true,
-        validate: {
-          validator: function(v) {
-            return /^(https?\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+$/.test(v);
-          },
-          message: props => `${props.value} is not a valid YouTube URL!`
-        }
       },
       duration: {
         type: String, // e.g., "10 minutes"

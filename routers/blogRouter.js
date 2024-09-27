@@ -4,8 +4,8 @@ const Blog = require('../models/blogs');
 const router = express.Router();
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer fil
 const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
-const  upload = require('../middelware/multer');
-const  processImage = require('../middelware/imagsProcess');
+const upload = require('../middelware/multer');
+const processImage = require('../middelware/imagsProcess');
 const uploadDashboard = require('../middelware/dashboarMulter');
 const fs = require('fs');
 const path = require('path');
@@ -44,11 +44,11 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
   } catch (error) {
     // Log any errors and send a 500 error response
     console.error('Error adding blog:', error);
-    
+
     // If an error occurred, remove the uploaded image
     if (req.file && coverImage) {
       const filePath = path.join(__dirname, '../public', coverImage);
-      
+
       // Check if the file exists before trying to delete it
       if (fs.existsSync(filePath)) {
         fs.unlink(filePath, (err) => {
@@ -64,9 +64,10 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
     res.status(500).json({ error: 'An error occurred while adding the blog' });
   }
 });
-router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
+router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'),  async (req, res) => {
   const { title, content, status, shortDescription, links } = req.body;
   const blogId = req.params.id;
+  console.log(req.body);
 
   try {
     // Find the blog post by ID
@@ -109,7 +110,7 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
     res.status(200).json(blog);
   } catch (error) {
     console.error('Error updating blog:', error);
-    
+
     // If an error occurs after uploading the new image, delete the new image
     if (req.file) {
       const newFilePath = req.file.path.replace('public/', '');
@@ -193,7 +194,7 @@ router.get('/getAllBlogs', async (req, res) => {
     const title = req.query.title || ''; // Get the title query (default is an empty string)
     const status = req.query.status; // Get the status query, optional
     const sortField = req.query.sortField || 'updatedAt'; // Default sort field
-    const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1; // Ascending or descending order, default is descending
+    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Ascending or descending order, default is descending
 
     const skip = (page - 1) * limit;
 
@@ -219,7 +220,7 @@ router.get('/getAllBlogs', async (req, res) => {
         .skip(skip)
         .limit(limit)
         .sort(sortOptions), // Sort using the constructed sort options
-        Blog.countDocuments(query) // Count documents matching the query
+      Blog.countDocuments(query) // Count documents matching the query
     ]);
 
     // Return the response with paginated results
@@ -233,6 +234,31 @@ router.get('/getAllBlogs', async (req, res) => {
   }
 });
 
+router.put('/addcomment/:id', async (req, res) => {
+  try {
+    const id = req.params?.id
+    console.log(id);
+   
+    const { name, email, phone, comment } = req.body
+    const blog = await Blog.findById(id)
+    console.log(blog);
+
+    if(!blog) return  res.status(404).json({
+      message: 'Blog not Found'
+    })
+    blog.comments.push({
+      name, email, phone, comment
+    })
+    const response = await blog.save()
+    res.status(201).json({
+      message: 'Comment Added Successfully'
+    })
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 
 

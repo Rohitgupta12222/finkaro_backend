@@ -1,21 +1,9 @@
 const multer = require('multer');
 const path = require('path');
 
-
-// Set up multer storage to save files locally
-const storage =  multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, './public/uploads');
-  } ,filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
-
-const upload = multer({
-  storage: storage,
-  limits: {
-    fieldSize: 20 * 1024 * 1024,  // Limit the field size (e.g., 2 MB)
-    fileSize: 50 * 1024 * 1024, 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/uploads/'); // Define the folder where files will be saved
   },
   fileFilter: (req, file, cb) => {
     // Accept images only
@@ -27,7 +15,18 @@ const upload = multer({
     }
     cb(new Error('Error: File type not supported!'));
   },
-});
+})
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fieldSize: 20 * 1024 * 1024,  // Limit the field size (e.g., 2 MB)
+    fileSize: 50 * 1024 * 1024, 
+  },
+})
+
+
+
 
 
 

@@ -207,7 +207,7 @@ router.get('/get', async (req, res) => {
     const title = req.query.title || ''; // Get the title query (default is an empty string)
     const status = req.query.status; // Get the status query, optional
     const sortField = req.query.sortField || 'updatedAt'; // Default sort field
-    const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1; // Ascending or descending order, default is descending
+    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Ascending or descending order, default is descending
 
     const skip = (page - 1) * limit;
 

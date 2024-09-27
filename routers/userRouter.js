@@ -291,8 +291,6 @@ router.get('/getAlluser', jwtAuthMiddleWare, async (req, res) => {
     // Return the users and pagination info
     res.status(200).json({
       users,
-      totalPages: Math.ceil(totalUsers / limitNumber),
-      currentPage: pageNumber,
       count
     });
   } catch (error) {
