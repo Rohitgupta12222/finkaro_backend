@@ -11,6 +11,14 @@ const subscriptionSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true
   },
+  email: {
+    type: String,
+    required: true
+  },
+  phone: {
+    type: String,
+    required: true
+  },
   plan: {
     type: String,
     enum: ['1-year', '2-year', 'lifetime'],

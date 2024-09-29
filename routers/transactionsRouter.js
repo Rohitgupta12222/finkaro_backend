@@ -10,8 +10,7 @@ const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to
 
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
-    const { 
-        userId, 
+    const {
         productId, 
         plan, 
         price, 
@@ -20,16 +19,12 @@ router.post('/add', async (req, res) => {
         razorpay_signature, 
         status, 
         productsType, 
-        transactionId 
+        transactionId ,
+        prefilldata
     } = req.body;
 
-    console.log(req.body, 'user id ', userId);
-
     try {
-        // Validate input with detailed error messages
-        if (!userId) {
-            return res.status(400).json({ message: 'User ID is required' });
-        }
+    
         if (!productId) {
             return res.status(400).json({ message: 'Product ID is required' });
         }
@@ -64,9 +59,20 @@ router.post('/add', async (req, res) => {
             });
         }
 
-        // Create a new subscription document
-        const newSubscription = new Subscription({
+    
+        const user = await User.findOne({ email: prefilldata?.email }); 
+        const updatedUser = await User.findOneAndUpdate(
+            { email: prefilldata?.email }, // Find the user by email
+            { phoneNumber: prefilldata?.contact, address: prefilldata?.address }, // Fields to update
+            { new: true, runValidators: true } // Options: return the updated document and run validators
+          );
+          
+    const userId = updatedUser?._id
+          
+        const newSubscription = await new Subscription({
             userId,
+            email:prefilldata?.email,
+            phone:user?.phoneNumber,
             productId,
             plan,
             price,
@@ -78,10 +84,9 @@ router.post('/add', async (req, res) => {
             transactionId
         });
 
-        // Save the subscription to the database
+        console.log(newSubscription , '==== newSubscription');
+       
         const savedSubscription = await newSubscription.save();
-
-        // Perform actions based on subscription status
         switch (savedSubscription?.status) {
             case 'dashbard':
                 const dashboard = await Dashboard.findById(userId);

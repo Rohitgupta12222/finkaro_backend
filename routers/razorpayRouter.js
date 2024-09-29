@@ -12,7 +12,6 @@ const razorpay = new Razorpay({
 
 
 router.post('/create-order', async (req, res) => {
-  console.log('calling data razorpay');
 
   const option ={
     amount:req.body.amount,

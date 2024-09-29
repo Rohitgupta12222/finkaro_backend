@@ -9,7 +9,7 @@ const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
 
 
 router.post('/register', async (req, res) => {
-  const { email, password, name, isActive } = req.body;
+  const { email, password, name, isActive ,address ,phoneNumber} = req.body;
 
   try {
 
@@ -17,6 +17,15 @@ router.post('/register', async (req, res) => {
     if (existingUser) {
 
       if (existingUser.isActive) {
+
+        const updatedUser = await User.findOneAndUpdate(
+          { email: email }, // Find the user by email
+          { phoneNumber: phoneNumber, address:address }, // Fields to update
+          { new: true, runValidators: true } // Options: return the updated document and run validators
+        );
+     
+
+
         const payloadJwt = {
           id: existingUser.id,
           email: existingUser.email,
@@ -298,5 +307,6 @@ router.get('/getAlluser', jwtAuthMiddleWare, async (req, res) => {
     res.status(500).json({ message: 'Error fetching users' });
   }
 });
+
 
 module.exports = router;
