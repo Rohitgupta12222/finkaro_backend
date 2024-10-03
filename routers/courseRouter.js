@@ -17,38 +17,39 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
   }
 
   // Handle the coverImage path correctly
-  const coverImage = req.file ? req.file.path.replace('public/', '') : '';
-  const imagePath = coverImage ? `${process.env.BASE_URL}/${coverImage}` : '';
+  const coverImage = req.file ? req.file.path.replace('public/', '') : ''; // Remove 'public/' from path
+  const imagePath = coverImage ? `${process.env.BASE_URL}/${coverImage.replace(/\\/g, '/')}` : ''; // Construct the URL
 
-  const filteredLessons =  req.body.lessons.filter(lesson => lesson !== null);
+  // Filter out null lessons
+  const filteredLessons = req.body.lessons.filter(lesson => lesson !== null);
 
   // Create a new Course instance with the provided data
   const newCourse = new Course({
     title: req.body.title,
     description: req.body.description,
     price: req.body.price,
+    actualPrice: req.body.price,
     duration: req.body.duration,
-    lessons: filteredLessons,  // Default to an empty array if not provided
-    coverImage: imagePath,  // Save the uploaded image path
+    lessons: filteredLessons,
+    coverImage: imagePath, // Updated to remove 'public/'
+    tags: req.body.tags,
     published: req.body.published,
-    enrolledStudents: req.body.enrolledStudents || [],  // Default to an empty array if not provided
-    mail: req.body.published === 'public' ? true : false,  // Conditionally set mail flag
+    enrolledStudents: req.body.enrolledStudents || [],
+    mail: req.body.published === 'public',
   });
 
-  try {
-    // Save the course to the database
-    const response = await newCourse.save();
+  console.log(newCourse); // Log for debugging
 
-    // Return the newly created course in the response
-    res.status(201).json({ response: response, message: "Course created" });
+  try {
+    const response = await newCourse.save();
+    return res.status(201).json({ response, message: "Course created" });
   } catch (error) {
     console.error('Error adding course:', error);
 
-    // If an error occurred, remove the uploaded image
+    // Error handling and file deletion
     if (req.file && coverImage) {
       const filePath = path.join(__dirname, '../public', coverImage);
 
-      // Check if the file exists before trying to delete it
       if (fs.existsSync(filePath)) {
         fs.unlink(filePath, (err) => {
           if (err) {
@@ -60,13 +61,13 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
       }
     }
 
-    // Send a 500 error response
-    res.status(500).json({
+    return res.status(500).json({
       message: "Internal server error",
-      error: error.message  // Return the specific error message for debugging
+      error: error.message
     });
   }
 });
+
 
 router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
   // Check if the user is an admin
@@ -82,6 +83,7 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
     title: req.body.title,
     description: req.body.description,
     price: req.body.price,
+    actualPrice: req.body.actualPrice,
     duration: req.body.duration,
     lessons: filteredLessons,
     published: req.body.published,

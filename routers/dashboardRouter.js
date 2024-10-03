@@ -198,7 +198,19 @@ router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 });
+router.get('/get/:id', async (req, res) => {
+  try {
+    const dashboardId = req.params.id;
 
+    const dashboard = await Dashboard.findById(dashboardId);
+    if (!dashboard) {
+      return res.status(404).json({ error: 'Dashboard not found' });
+    }
+    res.json({dashboard});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 router.get('/get', async (req, res) => {
   try {
@@ -213,7 +225,7 @@ router.get('/get', async (req, res) => {
 
     // Build the query with case-insensitive title search
     const query = {
-      title: { $regex: title, $options: 'i' } // Case-insensitive title search
+      title: { $regex: title, $options: 'i' }, // Case-insensitive title search
     };
 
     // Conditionally add the status filter to the query if provided
@@ -248,21 +260,56 @@ router.get('/get', async (req, res) => {
 });
 
 
-router.get('/get/:id', async (req, res) => {
-  try {
-    const dashboardId = req.params.id;
 
-    const dashboard = await Dashboard.findById(dashboardId);
-    if (!dashboard) {
-      return res.status(404).json({ error: 'Dashboard not found' });
+
+router.get('/userdashboards', jwtAuthMiddleWare, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
+    const title = req.query.title || ''; // Get the title query (default is an empty string)
+    const status = req.query.status; // Get the status query, optional
+    const sortField = req.query.sortField || 'updatedAt'; // Default sort field
+    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Ascending or descending order, default is descending
+    const userId = req.user?.id;
+    console.log(userId);
+  
+    
+    const skip = (page - 1) * limit;
+
+    // Build the query with case-insensitive title search
+    const query = {
+      title: { $regex: title, $options: 'i' },
+      purchaseDashboard: userId, // Case-insensitive title search
+    };
+
+    // Conditionally add the status filter to the query if provided
+    if (status) {
+      query.status = status;
     }
-    res.json({dashboard});
+
+    // Create sorting object for Mongoose
+    const sortOptions = {};
+    if (sortField === 'createdAt' || sortField === 'updatedAt') {
+      sortOptions[sortField] = sortOrder; // Add the sorting field and order
+    }
+
+    // Find dashboards based on the query, apply pagination, and sort dynamically
+    const [dashboards, count] = await Promise.all([
+      Dashboard.find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort(sortOptions), // Sort using the constructed sort options
+      Dashboard.countDocuments(query) // Count documents matching the query
+    ]);
+
+    // Return the response with paginated results
+    res.json({
+      count,
+      data: dashboards,
+    });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
-
-
-
-
 module.exports = router;

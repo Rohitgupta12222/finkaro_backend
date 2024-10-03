@@ -2,29 +2,29 @@ const express = require('express');
 const router = express.Router();
 const Subscription = require('../models/transactions'); // Adjust the path to your model
 const User = require('../models/users')
-const Dashboard =require('../models/dashboard')
-const Course =require('../models/course')
-const Book =require('../models/book')
-const Services =require('../models/servicesModel')
+const Dashboard = require('../models/dashboard')
+const Course = require('../models/course')
+const Book = require('../models/book')
+const Services = require('../models/servicesModel')
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer file
 
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
     const {
-        productId, 
-        plan, 
-        price, 
-        razorpay_payment_id, 
-        razorpay_order_id, 
-        razorpay_signature, 
-        status, 
-        productsType, 
-        transactionId ,
+        productId,
+        plan,
+        price,
+        razorpay_payment_id,
+        razorpay_order_id,
+        razorpay_signature,
+        status,
+        productsType,
+        transactionId,
         prefilldata
     } = req.body;
 
     try {
-    
+
         if (!productId) {
             return res.status(400).json({ message: 'Product ID is required' });
         }
@@ -59,20 +59,24 @@ router.post('/add', async (req, res) => {
             });
         }
 
-    
-        const user = await User.findOne({ email: prefilldata?.email }); 
+
+
+        const user = await User.findOne({ email: prefilldata?.email });
         const updatedUser = await User.findOneAndUpdate(
             { email: prefilldata?.email }, // Find the user by email
-            { phoneNumber: prefilldata?.contact, address: prefilldata?.address }, // Fields to update
+            {
+                phoneNumber: prefilldata?.contact,
+                address: prefilldata?.address
+            }, // Fields to update
             { new: true, runValidators: true } // Options: return the updated document and run validators
-          );
-          
-    const userId = updatedUser?._id
-          
+        );
+
+        const userId = updatedUser?._id
+
         const newSubscription = await new Subscription({
             userId,
-            email:prefilldata?.email,
-            phone:user?.phoneNumber,
+            email: prefilldata?.email,
+            phone: prefilldata?.contact,
             productId,
             plan,
             price,
@@ -84,40 +88,12 @@ router.post('/add', async (req, res) => {
             transactionId
         });
 
-        console.log(newSubscription , '==== newSubscription');
-       
-        const savedSubscription = await newSubscription.save();
-        switch (savedSubscription?.status) {
-            case 'dashbard':
-                const dashboard = await Dashboard.findById(userId);
-                dashboard.enrolled.push({ userId });
-                dashboard.count++;
-                await dashboard.save();
-                break;
-            case 'course':
-                const course = await Course.findById(userId);
-                course.enrolled.push({ userId });
-                course.count++;
-                await course.save();
-                break;
-            case 'book':
-                const book = await Book.findById(userId);
-                book.enrolled.push({ userId });
 
-                book.count++;
-                await book.save();
-                const attachmentPath = `http://localhost:4200/assets/product/Finkaro-Book-Romance-with-Equity.pdf`;
-                sendRegistrationEmail('recipient@example.com', ' Softcopy Received  from Finkaro', 'Please  Find the Attchement And stay connected with Finkaro', attachmentPath);
-                break;
-            case 'services':
-                const services = await Services.findById(userId);
-                services.enrolled.push({ userId });
-                services.count++;
-                await services.save();
-                break;
-            default:
-                break;
-        }
+        const savedSubscription = await newSubscription.save();
+        console.log(savedSubscription?.productsType, '=================== savedSubscription =========');
+
+
+
 
         const users = await User.findById(userId);
 
@@ -127,14 +103,44 @@ router.post('/add', async (req, res) => {
             status: savedSubscription?.status,
             plan: savedSubscription?.plan,
             startDate: savedSubscription?.startDate,
+            phoneNumber: prefilldata?.contact,
+            email: prefilldata?.email,
             endDate: savedSubscription?.endDate,
             order_id: savedSubscription?.razorpay_order_id
         };
-        console.log(Subscriptiondata);
         users.enrolled.push(Subscriptiondata);
         let updateUserData = await users.save();
+        if (savedSubscription?.productsType == 'dashboard') {
+            const dashboard = await Dashboard.findById(userId);
+            dashboard.enrolled.push({ userId });
+            dashboard.count++;
+            const dash = await dashboard.save();
+            console.log(dash, 'after Purched dashboard ');
 
-       
+        } else if (savedSubscription?.productsType == 'course') {
+            const course = await Course.findById(userId);
+            course.enrolled.push({ userId });
+            course.count++;
+            await course.save();
+
+        } else if (savedSubscription?.productsType == 'book') {
+            const book = await Book.findById(userId);
+            book.enrolled.push({ userId });
+
+            book.count++;
+            await book.save();
+            const attachmentPath = `http://localhost:4200/assets/product/Finkaro-Book-Romance-with-Equity.pdf`;
+            sendRegistrationEmail(savedSubscription?.email, ' Softcopy Received  from Finkaro', 'Please  Find the Attchement And stay connected with Finkaro', attachmentPath);
+
+
+        } else if (savedSubscription?.productsType == 'services') {
+            const services = await Services.findById(userId);
+            services.enrolled.push({ userId });
+            services.count++;
+            await services.save();
+        }
+
+
         res.status(201).json({
             message: 'Subscription created successfully',
             data: savedSubscription,
