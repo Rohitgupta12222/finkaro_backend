@@ -1,37 +1,43 @@
+
+const path = require('path');
 const sharp = require('sharp');
 const fs = require('fs');
-const path = require('path');
+
 
 const processImage = async (req, res, next) => {
   try {
+    // Check if req.file exists (i.e., if a file was uploaded)
     if (!req.file) {
-      // No file uploaded, skip processing
+      // No file uploaded, skip image processing
       return next();
     }
 
-    console.log(req.file);
-    
-
     // Convert the uploaded image to WebP format
-    const processedImage = await sharp(req.file.path)
-      .toFormat('webp')
-      .webp({ quality: 80 })
+    const processedImage = await sharp(req.file.buffer)
+      .toFormat('webp') // Convert to WebP format
+      .webp({ quality: 80 }) // Set WebP quality (80% in this case)
       .toBuffer();
 
-    const newFilename = `${Date.now()}-${path.parse(req.file.originalname).name}.webp`;
-    const newFilePath = path.join('public/uploads/', newFilename);
-    
+    // Define the filename and relative path where you want to save the WebP image
+    const filename = `${Date.now()}-${path.parse(req.file.originalname).name}.webp`;
+    const relativeFilePath = path.join('uploads', filename);
+    const absoluteFilePath = path.join(__dirname, '../public', relativeFilePath);
 
-    // Save the processed image
-    fs.writeFileSync(newFilePath, processedImage);
+    // Create the directory if it doesn't exist
+    if (!fs.existsSync(path.dirname(absoluteFilePath))) {
+      fs.mkdirSync(path.dirname(absoluteFilePath), { recursive: true });
+    }
 
-    // Replace the file path in the request to point to the new image
-    req.file.path = newFilePath;
+    // Save the processed WebP image to the filesystem
+    fs.writeFileSync(absoluteFilePath, processedImage);
+
+    // Update req.file.path to the relative path where the image was saved
+    req.file.path = relativeFilePath;
 
     next(); // Continue to the next middleware or route handler
   } catch (error) {
     console.error('Error processing image:', error);
-    res.status(500).send('Error processing image');
+    res.status(500).send('Error processing image: ' + error.message);
   }
 };
 

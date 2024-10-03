@@ -15,7 +15,8 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
   const { title, content, status, shortDescription, links } = req.body;
 
   // Handle the coverImage path correctly when using memoryStorage
-  const coverImage = req.file && req.file.path ? req.file.path.replace('public/', '') : '';
+  const coverImage = req.file && req.file.path ? req.file.path.replace('public/', '').replace(/\\/g, '/') : '';
+
   const imagePath = `${process.env.BASE_URL}/${coverImage}`;
 
   // Retrieve the user ID from the authenticated user
@@ -64,7 +65,7 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
     res.status(500).json({ error: 'An error occurred while adding the blog' });
   }
 });
-router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'),  async (req, res) => {
+router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'),processImage,  async (req, res) => {
   const { title, content, status, shortDescription, links } = req.body;
   const blogId = req.params.id;
   console.log(req.body);
@@ -78,6 +79,8 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'),  async
 
     // If a new image is uploaded, delete the old image
     if (req.file) {
+      console.log(req.file ,);
+      
       const oldImagePath = blog.coverImage.replace(process.env.BASE_URL + '/', '');
       const oldFilePath = path.join(__dirname, '../public', oldImagePath);
 
@@ -92,8 +95,10 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'),  async
       }
 
       // Update the coverImage path with the new uploaded image
-      const newCoverImage = req.file.path.replace('public/', '');
+      const newCoverImage = req.file.path.replace('public/', '').replace(/\\/g, '/');
+      
       blog.coverImage = `${process.env.BASE_URL}/${newCoverImage}`;
+      console.log( blog.coverImage , ' blog.coverImage');
     }
 
     // Update the other fields

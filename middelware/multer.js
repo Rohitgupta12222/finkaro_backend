@@ -1,20 +1,34 @@
 const multer = require('multer');
 const path = require('path');
 
-// Configure Multer storage
-const storage = multer.diskStorage({
+const storage = multer.memoryStorage({
   destination: (req, file, cb) => {
-    cb(null, './public/uploads/');
+    cb(null, 'public/uploads/'); // Define the folder where files will be saved
   },
-  filename: (req, file, cb) => {
-    const filename = `${Date.now()}-${file.originalname}`;
-    cb(null, filename); // Define the file name
+  fileFilter: (req, file, cb) => {
+    // Accept images only
+    const filetypes = /jpeg|jpg|png|gif|webp/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Error: File type not supported!'));
   },
-});
+})
 
 const upload = multer({
   storage: storage,
-  fieldSize: 20 * 1024 * 1024,  // Limit the field size (e.g., 2 MB)
-  fileSize: 50 * 1024 * 1024, });
+  limits: {
+    fieldSize: 20 * 1024 * 1024,  // Limit the field size (e.g., 2 MB)
+    fileSize: 50 * 1024 * 1024, 
+  },
+})
 
-module.exports = upload;
+
+
+
+
+
+
+module.exports = upload
