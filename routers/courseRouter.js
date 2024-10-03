@@ -93,7 +93,9 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
 
   // Handle the coverImage path correctly
   if (req.file) {
-    const coverImage = req.file.path.replace('public/', '');
+    
+    const coverImage = req.file && req.file.path ? req.file.path.replace('public/', '').replace(/\\/g, '/') : '';
+
     updateData.coverImage = `${process.env.BASE_URL}/${coverImage}`;
   }
 
