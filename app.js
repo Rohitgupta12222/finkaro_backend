@@ -16,7 +16,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 console.log('Allowed Origins:',);
 
 app.use(cors({
-  origin: 'https://finkaro.vercel.app', // Allow all origins (for testing purposes)
+  origin: '*', // Allow all origins (for testing purposes)
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
