@@ -16,9 +16,19 @@ const courseSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
+  actualPrice: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  
   duration: {
     type: String, // e.g., "5 hours", "3 weeks"
     required: true
+  },
+  tags: {
+    type: [String], // Define tags as an array of strings
+    default: [] // Default to an empty array if no tags are provided
   },
   lessons: [
     {
