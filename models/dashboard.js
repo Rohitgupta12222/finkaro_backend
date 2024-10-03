@@ -10,6 +10,10 @@ const DashboardSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  tags:{
+    type:[String],
+    default:[]
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -76,10 +80,7 @@ const DashboardSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-   excelFileLink: {
-    type: String,
-    default: ''
-  },
+
   actualPrice: {
     type: String,
     default: ''

@@ -22,7 +22,6 @@ router.post('/add', jwtAuthMiddleWare, upload.array('coverImage', 10), multipalp
     actualPrice,
     offerPrice,
     mail,
-    excelFileLink,
     zipFileLink
   } = req.body;
 
@@ -42,7 +41,6 @@ router.post('/add', jwtAuthMiddleWare, upload.array('coverImage', 10), multipalp
       status,
       mail,
       shortDescription,
-      excelFileLink,
       zipFileLink
     });
 
@@ -84,7 +82,6 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
     actualPrice,
     offerPrice,
     mail,
-    excelFileLink,
     zipFileLink
   } = req.body;
 
@@ -120,14 +117,13 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
 
     // Update the dashboard entry
     existingDashboard.title = title || existingDashboard.title;
-    existingDashboard.content = content || existingDashboard.content;
+    existingDashboard.content = content || existingDashboard.content;   
     existingDashboard.status = status || existingDashboard.status;
     existingDashboard.links = links || existingDashboard.links;
     existingDashboard.actualPrice = actualPrice || existingDashboard.actualPrice;
     existingDashboard.offerPrice = offerPrice || existingDashboard.offerPrice;
     existingDashboard.mail = mail || existingDashboard.mail;
     existingDashboard.shortDescription = shortDescription || existingDashboard.shortDescription;
-    existingDashboard.excelFileLink = excelFileLink || existingDashboard.excelFileLink;
     existingDashboard.zipFileLink = zipFileLink || existingDashboard.zipFileLink;
 
     // If new images are uploaded, update the cover image paths
