@@ -4,7 +4,6 @@ const Razorpay = require('razorpay');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
-// Start server on specified port (from .env or default 3000)
 const PORT = process.env.PORT || 3000;
 const db = require('./db');
 
@@ -16,7 +15,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 console.log('Allowed Origins:',);
 
 app.use(cors({
-  origin: '*', // Allow all origins (for testing purposes)
+  origin: '*', 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
