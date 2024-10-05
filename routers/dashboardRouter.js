@@ -11,63 +11,42 @@ const path = require('path');
 const  multipalprocessImage = require('../middelware/multipalImagesProcess');
 
 
-router.post('/add', jwtAuthMiddleWare, upload.array('coverImage', 10), multipalprocessImage, async (req, res) => {
-  const userId = req.user.id;
-  const {
-    title,
-    content,
-    status,
-    links,
-    shortDescription,
-    actualPrice,
-    offerPrice,
-    mail,
-    zipFileLink
-  } = req.body;
 
-  // Extract uploaded file paths
-  const coverImagePaths = req.files ? req.files.map(file => {return file.path ? `${process.env.BASE_URL}/${file.path.replace('public/', '')}` : null}) : [];
+router.post('/add',jwtAuthMiddleWare, upload.array('coverImage', 10), multipalprocessImage, async (req, res) => {
+  const userId = req.user.id; // Get user ID from the token
+  const { title, content, links, actualPrice, offerPrice, status, mail, shortDescription, zipFileLink ,tags } = req.body;
+
+  const coverImagePaths = req.files ? req.files.map(file => {
+    const coverImage = file.path; // Path without 'public/' because of earlier replacement
+    const imagePath = coverImage ? `${process.env.BASE_URL}/${coverImage.replace(/\\/g, '/')}` : '';
+    return imagePath; // Return full image URL
+  }) : [];
+  console.log(coverImagePaths , 'coverImagePaths');
+  
 
   try {
-    // Create a new dashboard entry
     const newDashboard = new Dashboard({
       title,
       content,
       userId,
-      coverImage: coverImagePaths, // Use the array of uploaded file paths
+      coverImage: coverImagePaths,
       links,
       actualPrice,
       offerPrice,
       status,
       mail,
+      tags,
       shortDescription,
       zipFileLink
     });
 
     const savedDashboard = await newDashboard.save();
     res.status(201).json(savedDashboard);
-
   } catch (error) {
     console.error('Error creating dashboard:', error);
-
-    // Remove uploaded files if error occurs
-    if (req.files) {
-      req.files.forEach(file => {
-        const filePath = file.path;
-        fs.unlink(filePath, (err) => {
-          if (err) {
-            console.error(`Error deleting file ${filePath}:`, err);
-          } else {
-            console.log(`Deleted file: ${filePath}`);
-          }
-        });
-      });
-    }
-
     res.status(500).json({ message: 'Server error', error });
   }
 });
-
 
 
 router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), multipalprocessImage, async (req, res) => {
@@ -81,14 +60,14 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
     shortDescription,
     actualPrice,
     offerPrice,
+    tags,
     mail,
     zipFileLink
   } = req.body;
 
   // Extract new uploaded file paths
   const newCoverImagePaths = req.files ? req.files.map(file =>
-    `${process.env.BASE_URL}/${file.path.replace('public/', '')}`
-  ) : [];
+    `${process.env.BASE_URL}/${file.path.replace('public/', '')}`) : [];
 
   try {
     // Find the existing dashboard entry by ID
@@ -102,7 +81,7 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
     const oldCoverImagePaths = existingDashboard.coverImage;
 
     // If new images are uploaded, remove the old images from the server
-    if (newCoverImagePaths.length > 0 && oldCoverImagePaths.length > 0) {
+    if (newCoverImagePaths.length > 0) {
       oldCoverImagePaths.forEach(oldImagePath => {
         const filePath = `public/${oldImagePath.replace(`${process.env.BASE_URL}/`, '')}`;
         fs.unlink(filePath, (err) => {
@@ -113,9 +92,12 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
           }
         });
       });
+
+      // Update the cover image paths with the new images
+      existingDashboard.coverImage = newCoverImagePaths;
     }
 
-    // Update the dashboard entry
+    // Update other fields only if they are provided
     existingDashboard.title = title || existingDashboard.title;
     existingDashboard.content = content || existingDashboard.content;   
     existingDashboard.status = status || existingDashboard.status;
@@ -123,13 +105,9 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
     existingDashboard.actualPrice = actualPrice || existingDashboard.actualPrice;
     existingDashboard.offerPrice = offerPrice || existingDashboard.offerPrice;
     existingDashboard.mail = mail || existingDashboard.mail;
+    existingDashboard.tags = tags || existingDashboard.tags;
     existingDashboard.shortDescription = shortDescription || existingDashboard.shortDescription;
     existingDashboard.zipFileLink = zipFileLink || existingDashboard.zipFileLink;
-
-    // If new images are uploaded, update the cover image paths
-    if (newCoverImagePaths.length > 0) {
-      existingDashboard.coverImage = newCoverImagePaths;
-    }
 
     // Save the updated dashboard entry
     const updatedDashboard = await existingDashboard.save();
@@ -156,7 +134,6 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
   }
 });
 
-
 router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
   const dashboardId = req.params.id;
 
@@ -174,7 +151,7 @@ router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
     // Delete the cover images from the server
     if (coverImagePaths && coverImagePaths.length > 0) {
       coverImagePaths.forEach(imagePath => {
-        const filePath = `public/${imagePath.replace(`${process.env.BASE_URL}/`, '')}`;
+        const filePath = path.join(__dirname, '../public', imagePath.replace(`${process.env.BASE_URL}/`, ''));
         fs.unlink(filePath, (err) => {
           if (err) {
             console.error(`Error deleting file ${filePath}:`, err);
@@ -194,6 +171,7 @@ router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 });
+
 router.get('/get/:id', async (req, res) => {
   try {
     const dashboardId = req.params.id;

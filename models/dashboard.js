@@ -10,21 +10,21 @@ const DashboardSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  tags:{
-    type:[String],
-    default:[]
+  tags: {
+    type: [String], 
+    default: [] 
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  coverImage: [
+  coverImage: 
     {
-      type: String,  // Stores the file paths of multiple cover images
+      type: [String],  // Stores the file paths of multiple cover images
       required: true
     }
-  ],
+  ,
   views: {
     type: Number,
     default: 0

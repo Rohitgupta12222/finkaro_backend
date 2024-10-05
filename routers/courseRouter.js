@@ -85,6 +85,7 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
     price: req.body.price,
     actualPrice: req.body.actualPrice,
     duration: req.body.duration,
+    tags: req.body.tags,
     lessons: filteredLessons,
     published: req.body.published,
     enrolledStudents: req.body.enrolledStudents || [],

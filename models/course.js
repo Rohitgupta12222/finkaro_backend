@@ -47,6 +47,10 @@ const courseSchema = new mongoose.Schema({
       duration: {
         type: String, // e.g., "10 minutes"
         required: true
+      },
+      status: {
+        type: Boolean, // e.g., "10 minutes"
+       default:false
       }
     }
   ],
