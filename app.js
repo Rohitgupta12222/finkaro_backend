@@ -45,6 +45,8 @@ const dashboardRouter = require('./routers/dashboardRouter')
 const subscriptionRouter = require('./routers/transactionsRouter')
 const servicesRouter = require('./routers/servicesRouter')
 const bookRouter = require('./routers/bookRouter')
+const cardRouter = require('./routers/cardRouter')
+
 
 
 
@@ -59,6 +61,9 @@ app.use('/payment', razorpayRouter);
 app.use('/dashboard', dashboardRouter);
 app.use('/subscription', subscriptionRouter);
 app.use('/book', bookRouter);
+app.use('/cards', cardRouter);
+
+
 
 
 
