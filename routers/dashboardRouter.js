@@ -8,6 +8,7 @@ const Dashboardupload =require('../middelware/dashboarMulter')
 const upload =  require('../middelware/multer')
 const fs = require('fs');
 const path = require('path');
+const { unlink } = require('fs/promises'); // Use fs/promises for async/await unlink
 const  multipalprocessImage = require('../middelware/multipalImagesProcess');
 
 
@@ -48,6 +49,8 @@ router.post('/add',jwtAuthMiddleWare, upload.array('coverImage', 10), multipalpr
   }
 });
 
+
+
 router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), multipalprocessImage, async (req, res) => {
   const dashboardId = req.params.id;
   const userId = req.user.id;
@@ -65,8 +68,11 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
   } = req.body;
 
   // Extract new uploaded file paths
-  const newCoverImagePaths = req.files ? req.files.map(file =>
-    `${process.env.BASE_URL}/${file.path.replace('public/', '')}`) : [];
+  const newCoverImagePaths = req.files ? req.files.map(file => {
+    const coverImage = file.path; // Path without 'public/' because of earlier replacement
+    const imagePath = coverImage ? `${process.env.BASE_URL}/${coverImage.replace(/\\/g, '/')}` : '';
+    return imagePath; // Return full image URL
+  }) : [];
 
   try {
     // Find the existing dashboard entry by ID
@@ -76,22 +82,22 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
       return res.status(404).json({ message: 'Dashboard not found' });
     }
 
-    // Check if new images are uploaded
-    if (newCoverImagePaths.length > 0) {
-      // Remove all existing images from the file system
-      if (existingDashboard.coverImage && existingDashboard.coverImage.length > 0) {
-        await Promise.all(existingDashboard.coverImage.map(async (imagePath) => {
-          const filePath = `public/${imagePath.split(`${process.env.BASE_URL}/`)[1]}`;
-          try {
-            await unlinkFile(filePath); // Delete old file
-            console.log(`Deleted old file: ${filePath}`);
-          } catch (err) {
-            console.error(`Error deleting old file ${filePath}:`, err);
-          }
-        }));
-      }
+    // Delete old images from the file system if they exist
+    if (existingDashboard.coverImage && existingDashboard.coverImage.length > 0) {
+      // Iterate over old image paths and delete each one
+      await Promise.all(existingDashboard.coverImage.map(async (imagePath) => {
+        const filePath = `public/${imagePath.split(`${process.env.BASE_URL}/`)[1]}`;
+        try {
+          await unlink(filePath); // Delete old file
+          console.log(`Deleted old file: ${filePath}`);
+        } catch (err) {
+          console.error(`Error deleting old file ${filePath}:`, err);
+        }
+      }));
+    }
 
-      // Update the coverImage field with new image paths
+    // Update the coverImage field with new image paths if provided
+    if (newCoverImagePaths.length > 0) {
       existingDashboard.coverImage = newCoverImagePaths;
     }
 
@@ -113,12 +119,12 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
   } catch (error) {
     console.error('Error updating dashboard:', error);
 
-    // Remove newly uploaded files if error occurs during update
+    // If any error occurs, attempt to delete new files to prevent orphaned files
     if (req.files) {
       await Promise.all(req.files.map(async (file) => {
         const filePath = file.path;
         try {
-          await unlinkFile(filePath); // Delete new file
+          await unlink(filePath); // Delete new file
           console.log(`Deleted new file: ${filePath}`);
         } catch (err) {
           console.error(`Error deleting new file ${filePath}:`, err);
@@ -129,6 +135,7 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
     res.status(500).json({ message: 'Server error', error });
   }
 });
+
 
 
 
