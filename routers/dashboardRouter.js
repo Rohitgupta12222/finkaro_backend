@@ -48,7 +48,6 @@ router.post('/add',jwtAuthMiddleWare, upload.array('coverImage', 10), multipalpr
   }
 });
 
-
 router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), multipalprocessImage, async (req, res) => {
   const dashboardId = req.params.id;
   const userId = req.user.id;
@@ -77,29 +76,28 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
       return res.status(404).json({ message: 'Dashboard not found' });
     }
 
-    // Store old image paths before updating
-    const oldCoverImagePaths = existingDashboard.coverImage;
-
-    // If new images are uploaded, remove the old images from the server
+    // Check if new images are uploaded
     if (newCoverImagePaths.length > 0) {
-      oldCoverImagePaths.forEach(oldImagePath => {
-        const filePath = `public/${oldImagePath.replace(`${process.env.BASE_URL}/`, '')}`;
-        fs.unlink(filePath, (err) => {
-          if (err) {
-            console.error(`Error deleting old file ${filePath}:`, err);
-          } else {
+      // Remove all existing images from the file system
+      if (existingDashboard.coverImage && existingDashboard.coverImage.length > 0) {
+        await Promise.all(existingDashboard.coverImage.map(async (imagePath) => {
+          const filePath = `public/${imagePath.split(`${process.env.BASE_URL}/`)[1]}`;
+          try {
+            await unlinkFile(filePath); // Delete old file
             console.log(`Deleted old file: ${filePath}`);
+          } catch (err) {
+            console.error(`Error deleting old file ${filePath}:`, err);
           }
-        });
-      });
+        }));
+      }
 
-      // Update the cover image paths with the new images
+      // Update the coverImage field with new image paths
       existingDashboard.coverImage = newCoverImagePaths;
     }
 
     // Update other fields only if they are provided
     existingDashboard.title = title || existingDashboard.title;
-    existingDashboard.content = content || existingDashboard.content;   
+    existingDashboard.content = content || existingDashboard.content;
     existingDashboard.status = status || existingDashboard.status;
     existingDashboard.links = links || existingDashboard.links;
     existingDashboard.actualPrice = actualPrice || existingDashboard.actualPrice;
@@ -112,27 +110,27 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
     // Save the updated dashboard entry
     const updatedDashboard = await existingDashboard.save();
     res.status(200).json(updatedDashboard);
-
   } catch (error) {
     console.error('Error updating dashboard:', error);
 
     // Remove newly uploaded files if error occurs during update
     if (req.files) {
-      req.files.forEach(file => {
+      await Promise.all(req.files.map(async (file) => {
         const filePath = file.path;
-        fs.unlink(filePath, (err) => {
-          if (err) {
-            console.error(`Error deleting new file ${filePath}:`, err);
-          } else {
-            console.log(`Deleted new file: ${filePath}`);
-          }
-        });
-      });
+        try {
+          await unlinkFile(filePath); // Delete new file
+          console.log(`Deleted new file: ${filePath}`);
+        } catch (err) {
+          console.error(`Error deleting new file ${filePath}:`, err);
+        }
+      }));
     }
 
     res.status(500).json({ message: 'Server error', error });
   }
 });
+
+
 
 router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
   const dashboardId = req.params.id;
@@ -171,6 +169,10 @@ router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 });
+
+
+
+
 
 router.get('/get/:id', async (req, res) => {
   try {

@@ -1,15 +1,15 @@
 const multer = require('multer');
 const path = require('path');
 
-
-
-var storage = multer.diskStorage({
+const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './public/uploads/');
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname)
+    // You can customize the filename if needed, e.g., using a unique ID or timestamp
+    cb(null, Date.now() + '-' + file.originalname);
   }
-})
-var Dashboardupload = multer({ storage: storage })
+});
+
+const Dashboardupload = multer({ storage: storage });
 module.exports = Dashboardupload;
