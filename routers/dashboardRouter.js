@@ -8,14 +8,14 @@ const Dashboardupload =require('../middelware/dashboarMulter')
 const upload =  require('../middelware/multer')
 const fs = require('fs');
 const path = require('path');
-const { unlink } = require('fs/promises'); // Use fs/promises for async/await unlink
+const { unlink } = require('fs/promises'); // Use fs/promises for async/await unlink  
 const  multipalprocessImage = require('../middelware/multipalImagesProcess');
 
 
 
 router.post('/add',jwtAuthMiddleWare, upload.array('coverImage', 10), multipalprocessImage, async (req, res) => {
   const userId = req.user.id; // Get user ID from the token
-  const { title, content, links, actualPrice, offerPrice, status, mail, shortDescription, zipFileLink ,tags } = req.body;
+  const { title, content, links, actualPrice, offerPrice, status, mail, zipFileLink ,tags } = req.body;
 
   const coverImagePaths = req.files ? req.files.map(file => {
     const coverImage = file.path; // Path without 'public/' because of earlier replacement
@@ -37,7 +37,6 @@ router.post('/add',jwtAuthMiddleWare, upload.array('coverImage', 10), multipalpr
       status,
       mail,
       tags,
-      shortDescription,
       zipFileLink
     });
 
@@ -59,7 +58,6 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
     content,
     status,
     links,
-    shortDescription,
     actualPrice,
     offerPrice,
     tags,
@@ -110,7 +108,6 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
     existingDashboard.offerPrice = offerPrice || existingDashboard.offerPrice;
     existingDashboard.mail = mail || existingDashboard.mail;
     existingDashboard.tags = tags || existingDashboard.tags;
-    existingDashboard.shortDescription = shortDescription || existingDashboard.shortDescription;
     existingDashboard.zipFileLink = zipFileLink || existingDashboard.zipFileLink;
 
     // Save the updated dashboard entry

@@ -89,10 +89,6 @@ const DashboardSchema = new mongoose.Schema({
       type: String,
     default: ''
   },
-  shortDescription:{
-     type: String,
-    default: ''
-  },
   enrolled: [
     {
       users:
