@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Card = require('../models/card');
 
-router.get('/get', async (req, res) => {
+router.get('/getcard', async (req, res) => {
     try {
         const cards = await Card.find();
         res.json(cards);

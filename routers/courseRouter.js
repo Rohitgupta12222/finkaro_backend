@@ -185,6 +185,55 @@ router.get('/getcourses', async (req, res) => {
   }
 });
 
+router.get('/getUsercourses', jwtAuthMiddleWare, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
+    const title = req.query.title || ''; // Get the title query (default is an empty string)
+    const published = req.query.published; // Published filter, optional
+    const sortField = req.query.sortField || 'updatedAt'; // Default sort field
+    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Ascending or descending order, default is descending
+    const userId = req.user?.id; // Get user ID from the authenticated user (assuming JWT is used)
+
+    const skip = (page - 1) * limit;
+
+    // Build the query with case-insensitive title search and filtering by enrolled array
+    const query = {
+      title: { $regex: title, $options: 'i' }, // Case-insensitive title search
+      enrolled: { $in: [userId] } // Filter by enrolled array
+    };
+
+    // Conditionally add the published filter to the query if provided
+    if (published) {
+      query.published = published;
+    }
+
+    // Create sorting object for Mongoose
+    const sortOptions = {};
+    if (sortField === 'createdAt' || sortField === 'updatedAt') {
+      sortOptions[sortField] = sortOrder;
+    }
+
+    // Find courses based on the query, apply pagination, and sort dynamically
+    const [courses, count] = await Promise.all([
+      Course.find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort(sortOptions), // Sort using the constructed sort options
+      Course.countDocuments(query) // Count documents matching the query
+    ]);
+
+    // Return the response with paginated results
+    res.status(200).json({
+      count,
+      data: courses
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'An error occurred while retrieving courses' });
+  }
+});
+
 
 
 router.get('/getcourses/:id', async (req, res) => {

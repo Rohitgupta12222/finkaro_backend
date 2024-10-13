@@ -9,6 +9,7 @@ const processImage = require('../middelware/imagsProcess');
 const uploadDashboard = require('../middelware/dashboarMulter');
 const fs = require('fs');
 const path = require('path');
+const jsonwebtoken = require('jsonwebtoken');
 
 
 router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
@@ -264,6 +265,88 @@ router.put('/addcomment/:id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+router.put('/updatecomment/:blogId/:commentId', jwtAuthMiddleWare, async (req, res) => {
+  const tokenUser = req.user;
+  if (tokenUser?.role !== 'admin') {
+    return res.status(403).json({ message: 'User is not an admin' });
+  }
+  try {
+    const { blogId, commentId } = req.params;
+    const { name, email, phone, comment } = req.body;
+
+    // Find the blog by its ID
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({
+        message: 'Blog not Found'
+      });
+    }
+
+    // Find the comment by its ID in the blog's comments array
+    const commentToUpdate = blog.comments.id(commentId);
+    if (!commentToUpdate) {
+      return res.status(404).json({
+        message: 'Comment not Found'
+      });
+    }
+    commentToUpdate.status = true
+
+    // Save the updated blog
+    await blog.save();
+
+    res.status(200).json({
+      message: 'Comment Updated Successfully',
+      updatedComment: commentToUpdate
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete('/deletecomment/:blogId/:commentId',jwtAuthMiddleWare, async (req, res) => {
+  const tokenUser = req.user;
+  if (tokenUser?.role !== 'admin') {
+    return res.status(403).json({ message: 'User is not an admin' });
+  }
+  try {
+    const { blogId, commentId } = req.params;
+
+    // Find the blog by its ID
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({
+        message: 'Blog not Found'
+      });
+    }
+
+    // Find the index of the comment to delete
+    const commentIndex = blog.comments.findIndex(comment => comment.id === commentId);
+    if (commentIndex === -1) {
+      return res.status(404).json({
+        message: 'Comment not Found'
+      });
+    }
+
+    // Remove the comment from the comments array
+    blog.comments.splice(commentIndex, 1);
+
+    // Save the updated blog
+    await blog.save();
+
+    res.status(200).json({
+      message: 'Comment Deleted Successfully'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+
 
 
 

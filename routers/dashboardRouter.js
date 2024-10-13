@@ -252,14 +252,13 @@ router.get('/userdashboards', jwtAuthMiddleWare, async (req, res) => {
     const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Ascending or descending order, default is descending
     const userId = req.user?.id;
     console.log(userId);
-  
-    
+
     const skip = (page - 1) * limit;
 
-    // Build the query with case-insensitive title search
+    // Build the query with case-insensitive title search and filtering by enrolled array
     const query = {
       title: { $regex: title, $options: 'i' },
-      purchaseDashboard: userId, // Case-insensitive title search
+      enrolled: { $in: [userId] }, // Check if userId exists in the enrolled array
     };
 
     // Conditionally add the status filter to the query if provided
@@ -292,4 +291,5 @@ router.get('/userdashboards', jwtAuthMiddleWare, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 module.exports = router;
