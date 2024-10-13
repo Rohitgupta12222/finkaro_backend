@@ -64,17 +64,13 @@ const BookSchema = new mongoose.Schema({
   },
 
 
-  enrolled: [
+  enrolled: 
     {
-      users:
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-      },
+      type:[String],
+      default:[]
 
     }
-  ],
+  ,
   count:{
     type:Number,
     default:0

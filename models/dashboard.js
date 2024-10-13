@@ -89,17 +89,10 @@ const DashboardSchema = new mongoose.Schema({
       type: String,
     default: ''
   },
-  enrolled: [
-    {
-      users:
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-      },
-
-    }
-  ],
+  enrolled: {
+    type:[String],
+    default:[]
+  },
   count:{
     type:Number,
     default:0

@@ -30,6 +30,7 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
     price: req.body.price,
     actualPrice: req.body.price,
     duration: req.body.duration,
+    link: req.body.link,
     lessons: filteredLessons,
     coverImage: imagePath, // Updated to remove 'public/'
     tags: req.body.tags,
@@ -86,6 +87,7 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
     actualPrice: req.body.actualPrice,
     duration: req.body.duration,
     tags: req.body.tags,
+    link: req.body.link,
     lessons: filteredLessons,
     published: req.body.published,
     enrolledStudents: req.body.enrolledStudents || [],
@@ -94,7 +96,6 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
 
   // Handle the coverImage path correctly
   if (req.file) {
-    
     const coverImage = req.file && req.file.path ? req.file.path.replace('public/', '').replace(/\\/g, '/') : '';
 
     updateData.coverImage = `${process.env.BASE_URL}/${coverImage}`;

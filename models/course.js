@@ -11,6 +11,10 @@ const courseSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  link: {
+    type: String,
+    required: true,
+  },
   price: {
     type: Number,
     required: true,
@@ -21,7 +25,7 @@ const courseSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
-  
+
   duration: {
     type: String, // e.g., "5 hours", "3 weeks"
     required: true
@@ -50,7 +54,7 @@ const courseSchema = new mongoose.Schema({
       },
       status: {
         type: Boolean, // e.g., "10 minutes"
-       default:false
+        default: false
       }
     }
   ],
@@ -76,25 +80,18 @@ const courseSchema = new mongoose.Schema({
   updatedAt: {
     type: Date
   },
-  enrolled: [
-    {
-      users:
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-      },
-
-    }
-  ],
-  count:{
-    type:Number,
-    default:0
+  enrolled: {
+    type: [String],
+    default: []
+  },
+  count: {
+    type: Number,
+    default: 0
   }
 });
 
 // Pre-save hook to update the `updatedAt` field
-courseSchema.pre('save', function(next) {
+courseSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });

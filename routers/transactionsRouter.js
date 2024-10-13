@@ -109,23 +109,25 @@ router.post('/add', async (req, res) => {
             order_id: savedSubscription?.razorpay_order_id
         };
         users.enrolled.push(Subscriptiondata);
-        let updateUserData = await users.save();
+        let updateUserData = await users.save();    
         if (savedSubscription?.productsType == 'dashboard') {
-            const dashboard = await Dashboard.findById(userId);
-            dashboard.enrolled.push({ userId });
-            dashboard.count++;
-            const dash = await dashboard.save();
-            console.log(dash, 'after Purched dashboard ');
-
+            const dashboard = await Dashboard.findById(productId);
+       
+            dashboard.enrolled.push(userId); // Directly push userId (string) into the array
+            dashboard.count++; // Increment the count
+            const updatedDashboard = await dashboard.save(); // Save the updated dashboard
+            
         } else if (savedSubscription?.productsType == 'course') {
-            const course = await Course.findById(userId);
-            course.enrolled.push({ userId });
+      
+            const course = await Course.findById(productId);
+    
+            course.enrolled.push( userId );
             course.count++;
             await course.save();
 
         } else if (savedSubscription?.productsType == 'book') {
-            const book = await Book.findById(userId);
-            book.enrolled.push({ userId });
+            const book = await Book.findById(productId);
+            book.enrolled.push( userId );
 
             book.count++;
             await book.save();
@@ -134,8 +136,10 @@ router.post('/add', async (req, res) => {
 
 
         } else if (savedSubscription?.productsType == 'services') {
-            const services = await Services.findById(userId);
-            services.enrolled.push({ userId });
+            const services = await Services.findById(productId);
+            console.log(services);
+            
+            services.enrolled.push( userId );
             services.count++;
             await services.save();
         }
