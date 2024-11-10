@@ -13,12 +13,23 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 
 
+// app.use(cors({
+//   origin: 'https://finkaro.com', 
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   credentials: true,
+//   optionsSuccessStatus: 200,
+// }));
+
+const allowedOrigins = [process.env.FRONTEND_LINK, process.env.FRONTEND_LINK_LOCAL];
 app.use(cors({
-  origin: 'https://finkaro.com', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 200,
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
 }));
 
 // Logging middleware for requests
