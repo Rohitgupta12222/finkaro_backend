@@ -10,12 +10,16 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendsubscribemail = async (email, name, subject, contant) => {
+
   const data = {
     email: email,
     name: name,
     subject: subject,
     contant: contant
   }
+
+  console.log('3rd step ',data);
+  
   try {
     await transporter.sendMail({
       from: email,// Sender address,

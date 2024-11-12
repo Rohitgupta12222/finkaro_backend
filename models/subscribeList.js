@@ -11,7 +11,7 @@ const subscribeSchema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
-  phoneNumber: {
+  contant: {
     type: String,
     required: true
   },
