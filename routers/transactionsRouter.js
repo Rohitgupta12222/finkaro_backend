@@ -125,8 +125,7 @@ router.post('/add', async (req, res) => {
             course.count++;
             await course.save();
 
-        } else if (savedSubscription?.productsType == 'book') {
-            console.log(savedSubscription , '========== savedSubscription');
+        } else if (savedSubscription?.productsType == 'softcopyBook') {
             
             const book = await Book.findById(productId);
             book.enrolled.push( userId );
@@ -136,7 +135,22 @@ router.post('/add', async (req, res) => {
             sendRegistrationEmail(savedSubscription?.email, ' Softcopy Received  from Finkaro', 'Please  Find the Attchement And stay connected with Finkaro', attachmentPath);
 
 
-        } else if (savedSubscription?.productsType == 'services') {
+        }
+          else if (savedSubscription?.productsType == 'Hardcopybook') {
+            
+            const book = await Book.findById(productId);
+            book.enrolled.push( userId );
+            book.count++;
+            await book.save();
+            const attachmentPath = `${process.env.FRONTEND_LINK}/assets/product/Finkaro-Book-Romance-with-Equity.pdf`;
+            sendRegistrationEmail(savedSubscription?.email, ' test Hard copy Received  from Finkaro', 'Please  Find the Attchement And stay connected with Finkaro', attachmentPath);
+
+
+        }
+        
+        
+        
+        else if (savedSubscription?.productsType == 'services') {
             const services = await Services.findById(productId);
             console.log(services);
             

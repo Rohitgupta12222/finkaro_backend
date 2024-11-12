@@ -66,7 +66,7 @@ const subscriptionSchema = new Schema({
   },
   productsType:{
     type: String,
-    enum: ['course', 'dashboard', 'book','services'],
+    enum: ['course', 'dashboard', 'Hardcopybook','softcopyBook','services'],
     default:'services'
   },
 
