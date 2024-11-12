@@ -6,13 +6,10 @@ const fs = require('fs');
 
 const processImage = async (req, res, next) => {
   try {
-    // Check if req.file exists (i.e., if a file was uploaded)
     if (!req.file) {
-      // No file uploaded, skip image processing
       return next();
     }
 
-    // Convert the uploaded image to WebP format
     const processedImage = await sharp(req.file.buffer)
       .toFormat('webp') // Convert to WebP format
       .webp({ quality: 80 }) // Set WebP quality (80% in this case)
@@ -28,10 +25,8 @@ const processImage = async (req, res, next) => {
       fs.mkdirSync(path.dirname(absoluteFilePath), { recursive: true });
     }
 
-    // Save the processed WebP image to the filesystem
     fs.writeFileSync(absoluteFilePath, processedImage);
 
-    // Update req.file.path to the relative path where the image was saved
     req.file.path = relativeFilePath;
 
     next(); // Continue to the next middleware or route handler

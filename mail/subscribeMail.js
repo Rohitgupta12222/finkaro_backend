@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 // Configure the transporter
 const transporter = nodemailer.createTransport({
@@ -17,13 +18,14 @@ const sendsubscribemail = async (email, name, subject, contant) => {
     subject: subject,
     contant: contant
   }
+  let emailto = "finkaro2025@gmail.com"
 
-  console.log('3rd step ',data);
+  console.log('3rd step ',data , ' ================= ',process.env.EMAIL_USER);
   
   try {
     await transporter.sendMail({
       from: email,// Sender address,
-      to: process.env.EMAIL_USER,// List of recipients
+      to:process.env.EMAIL_USER,// List of recipients
       subject,
       html: mailContant(data) 
 
