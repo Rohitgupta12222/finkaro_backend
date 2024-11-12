@@ -7,7 +7,7 @@ const Course = require('../models/course')
 const Book = require('../models/book')
 const Services = require('../models/servicesModel')
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer file
-
+require('dotenv').config();
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
     const {
@@ -126,12 +126,13 @@ router.post('/add', async (req, res) => {
             await course.save();
 
         } else if (savedSubscription?.productsType == 'book') {
+            console.log(savedSubscription , '========== savedSubscription');
+            
             const book = await Book.findById(productId);
             book.enrolled.push( userId );
-
             book.count++;
             await book.save();
-            const attachmentPath = `http://localhost:4200/assets/product/Finkaro-Book-Romance-with-Equity.pdf`;
+            const attachmentPath = `${process.env.FRONTEND_LINK}/assets/product/Finkaro-Book-Romance-with-Equity.pdf`;
             sendRegistrationEmail(savedSubscription?.email, ' Softcopy Received  from Finkaro', 'Please  Find the Attchement And stay connected with Finkaro', attachmentPath);
 
 
