@@ -66,10 +66,11 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
     res.status(500).json({ error: 'An error occurred while adding the blog' });
   }
 });
-router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'),processImage,  async (req, res) => {
+
+
+router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
   const { title, content, status, shortDescription, links } = req.body;
   const blogId = req.params.id;
-  console.log(req.body);
 
   try {
     // Find the blog post by ID
@@ -80,26 +81,20 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'),process
 
     // If a new image is uploaded, delete the old image
     if (req.file) {
-      console.log(req.file ,);
-      
-      const oldImagePath = blog.coverImage.replace(process.env.BASE_URL + '/', '');
+      const oldImagePath = blog.coverImage.replace(`${process.env.BASE_URL}/`, '');
       const oldFilePath = path.join(__dirname, '../public', oldImagePath);
 
+      // Delete the old image if it exists
       if (fs.existsSync(oldFilePath)) {
         fs.unlink(oldFilePath, (err) => {
-          if (err) {
-            console.error('Error deleting old image:', err);
-          } else {
-            console.log('Old image deleted:', oldImagePath);
-          }
+          if (err) console.error('Error deleting old image:', err);
+          else console.log('Old image deleted:', oldImagePath);
         });
       }
 
       // Update the coverImage path with the new uploaded image
       const newCoverImage = req.file.path.replace('public/', '').replace(/\\/g, '/');
-      
       blog.coverImage = `${process.env.BASE_URL}/${newCoverImage}`;
-      console.log( blog.coverImage , ' blog.coverImage');
     }
 
     // Update the other fields
@@ -112,23 +107,19 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'),process
     // Save the updated blog post to the database
     await blog.save();
 
-    // Return the updated blog post
     res.status(200).json(blog);
   } catch (error) {
     console.error('Error updating blog:', error);
 
-    // If an error occurs after uploading the new image, delete the new image
+    // Delete the new image if the update fails
     if (req.file) {
       const newFilePath = req.file.path.replace('public/', '');
       const filePathToDelete = path.join(__dirname, '../public', newFilePath);
 
       if (fs.existsSync(filePathToDelete)) {
         fs.unlink(filePathToDelete, (err) => {
-          if (err) {
-            console.error('Error deleting new image after failed update:', err);
-          } else {
-            console.log('New image deleted due to error during update:', newFilePath);
-          }
+          if (err) console.error('Error deleting new image after failed update:', err);
+          else console.log('New image deleted due to error during update:', newFilePath);
         });
       }
     }
@@ -136,6 +127,7 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'),process
     res.status(500).json({ error: 'An error occurred while updating the blog' });
   }
 });
+
 
 router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
   const blogId = req.params.id;
