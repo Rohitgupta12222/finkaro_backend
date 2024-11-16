@@ -138,12 +138,14 @@ router.post('/add', async (req, res) => {
         }
           else if (savedSubscription?.productsType == 'Hardcopybook') {
             
+
+            console.log('Hardcopybook test data ');
+            
             const book = await Book.findById(productId);
             book.enrolled.push( userId );
             book.count++;
             await book.save();
-            const attachmentPath = `${process.env.FRONTEND_LINK}/assets/product/Finkaro-Book-Romance-with-Equity.pdf`;
-            sendRegistrationEmail(savedSubscription?.email, ' test Hard copy Received  from Finkaro', 'Please  Find the Attchement And stay connected with Finkaro', attachmentPath);
+            sendRegistrationEmail(savedSubscription?.email, 'Hardcopy has been deliver on your address Received from Finkaro', 'Please And stay connected with Finkaro.');
 
 
         }
