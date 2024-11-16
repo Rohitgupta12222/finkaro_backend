@@ -83,6 +83,45 @@ router.get('/get/:id', async (req, res) => {
     });
   }
 });
+router.put('/update/:id', async (req, res) => {
+  try {
+    const { title, shortDescription, plan } = req.body;
+    const serviceId = req.params.id;
+
+    if (!title || !shortDescription || !plan) {
+      return res.status(400).json({
+        message: 'All fields are required'
+      });
+    }
+
+    // Find the service by ID and update it
+    const updatedService = await Services.findByIdAndUpdate(
+      serviceId,
+      {
+        title,
+        shortDescription,
+        plan
+      },
+      { new: true } // To return the updated document
+    );
+
+    if (!updatedService) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    res.status(200).json({
+      message: 'Service updated successfully',
+      data: updatedService
+    });
+  } catch (error) {
+    console.error('Error updating service:', error);
+    res.status(500).json({
+      message: 'Error updating service',
+      error: error.message
+    });
+  }
+});
+
 
 
 
