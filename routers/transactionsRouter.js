@@ -109,26 +109,26 @@ router.post('/add', async (req, res) => {
             order_id: savedSubscription?.razorpay_order_id
         };
         users.enrolled.push(Subscriptiondata);
-        let updateUserData = await users.save();    
+        let updateUserData = await users.save();
         if (savedSubscription?.productsType == 'dashboard') {
             const dashboard = await Dashboard.findById(productId);
-       
+
             dashboard.enrolled.push(userId); // Directly push userId (string) into the array
             dashboard.count++; // Increment the count
             const updatedDashboard = await dashboard.save(); // Save the updated dashboard
-            
+
         } else if (savedSubscription?.productsType == 'course') {
-      
+
             const course = await Course.findById(productId);
-    
-            course.enrolled.push( userId );
+
+            course.enrolled.push(userId);
             course.count++;
             await course.save();
 
         } else if (savedSubscription?.productsType == 'softcopyBook') {
-            
+
             const book = await Book.findById(productId);
-            book.enrolled.push( userId );
+            book.enrolled.push(userId);
             book.count++;
             await book.save();
             const attachmentPath = `${process.env.FRONTEND_LINK}/assets/product/Finkaro-Book-Romance-with-Equity.pdf`;
@@ -136,27 +136,27 @@ router.post('/add', async (req, res) => {
 
 
         }
-          else if (savedSubscription?.productsType == 'Hardcopybook') {
-            
+        else if (savedSubscription?.productsType == 'Hardcopybook') {
+
 
             console.log('Hardcopybook test data ');
-            
+
             const book = await Book.findById(productId);
-            book.enrolled.push( userId );
+            book.enrolled.push(userId);
             book.count++;
             await book.save();
             sendRegistrationEmail(savedSubscription?.email, 'Hardcopy has been deliver on your address Received from Finkaro', 'Please And stay connected with Finkaro.');
 
 
         }
-        
-        
-        
+
+
+
         else if (savedSubscription?.productsType == 'services') {
             const services = await Services.findById(productId);
             console.log(services);
-            
-            services.enrolled.push( userId );
+
+            services.enrolled.push(userId);
             services.count++;
             await services.save();
         }
@@ -195,14 +195,15 @@ router.get('/get', async (req, res) => {
         const { page, limit, search } = req.query;
 
         // Convert page and limit to numbers
-        const pageNumber = parseInt(page, 10);
-        const pageSize = parseInt(limit, 10);
+        const pageNumber = parseInt(page, 10) || 1; // Default to page 1
+        const pageSize = parseInt(limit, 10) || 10; // Default to 10 items per page
 
         // Create a filter for search
         const searchFilter = search ? { $text: { $search: search } } : {};
 
-        // Fetch paginated subscriptions
+        // Fetch paginated subscriptions in descending order
         const subscriptions = await Subscription.find(searchFilter)
+            .sort({ _id: -1 }) // Sort by `_id` in descending order
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .exec();
@@ -214,16 +215,17 @@ router.get('/get', async (req, res) => {
             total,
             page: pageNumber,
             totalPages: Math.ceil(total / pageSize),
-            subscriptions
+            subscriptions,
         });
     } catch (error) {
         console.error('Error fetching subscriptions:', error);
         res.status(500).json({
             message: 'Error fetching subscriptions',
-            error: error.message
+            error: error.message,
         });
     }
 });
+
 router.get('/get/:id', async (req, res) => {
     try {
         const subscriptionId = req.params.id;

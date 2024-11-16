@@ -39,62 +39,41 @@ router.post('/add', jwtAuthMiddleWare, async (req, res) => {
 router.put('/update/:id', jwtAuthMiddleWare, async (req, res) => {
     try {
         const tokenUser = req.user;
+
         if (tokenUser?.role !== 'admin') {
             return res.status(401).json({ message: 'User is not an admin' });
         }
 
-        const Book = await Book.findById(req.params.id);
-        if (!Book) {
+        // Find the book by ID
+        const book = await Book.findById(req.params.id);
+        if (!book) {
             return res.status(404).json({ message: 'Book not found' });
         }
-        const coverImage = req.file ? req.file.path : ''; // Cloudinary URL
 
-
-        // Initialize the fields to update
+        // Fields to update
         const updateFields = {
-            title: req.body.title || Book.title,
-            description: req.body.description || Book.description,
-            price: req.body.price || Book.price,
-            duration: req.body.duration || Book.duration,
-            lessons: req.body.lessons || Book.lessons,
-            published: req.body.published || Book.published,
-            mail: req.body.published === 'public' ? true : Book.mail, // Conditionally update mail field
-            updatedAt: Date.now() // Update timestamp
+            actualEbookPrice: req.body.actualEbookPrice || book.actualEbookPrice,
+            offerEbookPrice: req.body.offerEbookPrice || book.offerEbookPrice,
+            actualHardPrice: req.body.actualHardPrice || book.actualHardPrice,
+            offerHardPrice: req.body.offerHardPrice || book.offerHardPrice,
+            shippingPrice: req.body.shippingPrice || book.shippingPrice,
+            count: req.body.count || book.count,
+            updatedAt: Date.now() // Update the timestamp
         };
 
-        if (coverImage) {
-            updateFields.coverImage = coverImage;
-
-            // Delete the old image from Cloudinary if it exists
-            if (Book.coverImage) {
-                const publicId = 'uploads/' + Book.coverImage.split('/').pop().split('.')[0]; // Extract the public ID
-
-                console.log(' publicId', publicId);
-                await cloudinary.uploader.destroy(publicId, function (error, result) {
-                    if (error) {
-                        console.error('Error deleting old image from Cloudinary:', error);
-                    } else {
-                        console.log('Old image deleted from Cloudinary:', result);
-                    }
-                });
-            }
-        }
-
-
-        // Update the Book
+        // Update the book
         const updatedBook = await Book.findByIdAndUpdate(req.params.id, updateFields, { new: true });
-
         if (!updatedBook) {
-            return res.status(404).json({ message: 'Book not found' });
+            return res.status(404).json({ message: 'Book not found after update attempt' });
         }
 
-        res.status(200).json({ updatedBook, message: "Book updated successfully" });
-
+        res.status(200).json({ response: updatedBook, message: 'Book updated successfully' });
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ message: "Internal server error", error: error.message });
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 });
+
 
 router.get('/get', async (req, res) => {
     try {

@@ -1,4 +1,4 @@
-const express = require('express'); 
+const express = require('express');
 const router = express.Router();
 const Card = require('../models/card');
 
@@ -10,6 +10,20 @@ router.get('/getcard', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+router.get('/getcard/:id', async (req, res) => {
+    try {
+        const card = await Card.findById(req.params.id);
+
+        if (!card) {
+            return res.status(404).json({ message: 'Card not found' });
+        }
+
+        res.json(card);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 router.post('/add', async (req, res) => {
     const { percentage, companyName, duration, logo } = req.body;
 
