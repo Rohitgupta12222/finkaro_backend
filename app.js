@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const bodyParser = require('body-parser');
 const Razorpay = require('razorpay');
 const cors = require('cors');
 const path = require('path');
