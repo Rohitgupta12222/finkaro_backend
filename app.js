@@ -15,7 +15,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 
 app.use(cors({
-  origin: ['http://localhost:4200', 'https://finkaro.com'], 
+  origin: ['http://localhost:4200', 'https://www.finkaro.com/#/'], 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
