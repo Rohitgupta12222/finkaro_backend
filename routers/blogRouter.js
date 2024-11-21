@@ -237,15 +237,21 @@ router.put('/addcomment/:id', async (req, res) => {
     const id = req.params?.id
     console.log(id);
    
-    const { name, email, phone, comment } = req.body
+    const { name, comment } = req.body
+    if(name !== '')return  res.status(404).json({
+      message: 'Name is Required'
+    })
+    if(comment !== '')return  res.status(404).json({
+      message: 'Comment is Required'
+    })
     const blog = await Blog.findById(id)
-    console.log(blog);
+
 
     if(!blog) return  res.status(404).json({
       message: 'Blog not Found'
     })
     blog.comments.push({
-      name, email, phone, comment
+      name, comment
     })
     const response = await blog.save()
     res.status(201).json({

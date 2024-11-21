@@ -39,14 +39,7 @@ const blogSchema = new mongoose.Schema({
       
         required: true
       },
-      email: {
-        type: String,
-        required: true
-      },
-      phone: {
-        type: String,
-        required: true
-      },
+   
       comment: {
         type: String,
         required: true
