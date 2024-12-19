@@ -137,95 +137,110 @@ router.post('/add', async (req, res) => {
 
 
         }
-        else if (savedSubscription?.productsType == 'Hardcopybook') {
-            const book = await Book.findById(productId);
-            book.enrolled.push(userId);
-            book.count++;
-            await book.save();
-        
+        else if (savedSubscription?.productsType === 'Hardcopybook') {
             try {
+                const book = await Book.findById(productId);
+                if (!book) {
+                    throw new Error('Book not found');
+                }
+        
+                // Update book details
+                book.enrolled.push(userId);
+                book.count++;
+                await book.save();
+        
+                // Login to Shiprocket
                 const loginResponse = await axios.post(
                     'https://apiv2.shiprocket.in/v1/external/auth/login',
                     {
-                        email: process.env.shipprocketEmail,
-                        password: process.env.shiprockentpass,
+                        email: "anilmg8898@gmail.com",
+                        password: "Finkaro@2025",
                     },
                     {
                         headers: {
-                            'Content-Type': 'application/json', // Specify JSON content type
+                            'Content-Type': 'application/json',
                         },
                     }
                 );
         
                 const { token } = loginResponse.data;
+                const shipRocketToken = `Bearer ${token}`;
+                console.log(shipRocketToken, '==================== shipRocketToken =====================');
+        
+                // Generate current date and time
                 const now = new Date();
                 const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');  // Months are 0-indexed, so add 1
+                const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
                 const day = String(now.getDate()).padStart(2, '0');
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 const order_date = `${year}-${month}-${day} ${hours}:${minutes}`;
-                const shipRocketToken = `Bearer ${token}`;
-        console.log( shipRocketToken, '====================shipRocketToken=====================');
         
+                // Prepare order data
                 const orderData = {
-                    "order_id": generateUniqueId(),
-                    "order_date": order_date,
-                    "pickup_location": "Primary",
-                    "billing_customer_name": users?.name,
-                    "billing_address": users?.address,
-                    "billing_city": "",
-                    "billing_last_name": "",
-                    "billing_pincode": extractDataAfterPincode(users?.address),
-                    "billing_state": "maharashtra",
-                    "billing_country": "India",
-                    "billing_email": users?.email,
-                    "billing_phone": users?.contact,
-                    "shipping_is_billing": true,
-                    "order_items": [
+                    order_id: generateUniqueId(),
+                    order_date: order_date,
+                    pickup_location: "Primary",
+                    billing_customer_name: users?.name || "N/A",
+                    billing_address: users?.address || "N/A",
+                    billing_city: "", // Needs to be populated
+                    billing_last_name: "",
+                    billing_pincode: extractDataAfterPincode(users?.address) || "000000",
+                    billing_state: "Maharashtra",
+                    billing_country: "India",
+                    billing_email: users?.email || "N/A",
+                    billing_phone: users?.contact || "0000000000",
+                    shipping_is_billing: true,
+                    order_items: [
                         {
-                            "name": "Finkaro-Book-Romance-with-Equity",
-                            "sku": "SKU1234",
-                            "units": 1,
-                            "selling_price": +savedSubscription?.price,
-                        }
-                    ],
-                    "payment_method": "Prepaid",
-                    "shipping_charges": 0,
-                    "giftwrap_charges": 0,
-                    "transaction_charges": 0,
-                    "total_discount": 0,
-                    "sub_total": +savedSubscription?.prices,
-                    "length": 10,
-                    "breadth": 15,
-                    "height": 20,
-                    "weight": 2.5
-                };
-        log(orderData, '====================orderData=====================');
-                try {
-                    const apiUrl = 'https://apiv2.shiprocket.in/v1/external/orders/create/adhoc';
-                    const response = await axios.post(apiUrl, orderData, {  // Corrected payload to orderData
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': shipRocketToken, // Pass the token here
+                            name: "Finkaro-Book-Romance-with-Equity",
+                            sku: "SKU1234",
+                            units: 1,
+                            selling_price: Number(savedSubscription?.price) || 0,
                         },
-                    });
+                    ],
+                    payment_method: "Prepaid",
+                    shipping_charges: 0,
+                    giftwrap_charges: 0,
+                    transaction_charges: 0,
+                    total_discount: 0,
+                    sub_total: Number(savedSubscription?.price) || 0, // Fixed typo `prices` to `price`
+                    length: 10,
+                    breadth: 15,
+                    height: 20,
+                    weight: 2.5,
+                };
+                console.log(orderData, '==================== orderData =====================');
         
-
-                    console.log('Order created successfully: shiprocket', response.data);
-                } catch (error) {
-                    console.error('Error creating order: shiprocket', error.response?.data || error.message);
-                }
+                // Create order in Shiprocket
+                const apiUrl = 'https://apiv2.shiprocket.in/v1/external/orders/create/adhoc';
+                const response = await axios.post(apiUrl, orderData, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': shipRocketToken,
+                    },
+                });
+        
+                console.log('Order created successfully: Shiprocket', response.data);
         
             } catch (error) {
-                console.error('Error during Shiprocket login:', error.response?.data || error.message);
+                if (error.response?.data) {
+                    console.error('API Error:', error.response.data);
+                } else {
+                    console.error('Error:', error.message);
+                }
             }
         
-            sendRegistrationEmail(
-                savedSubscription?.email,
-                'Hardcopy has been delivered to your address. Received from Finkaro',
-                'Please stay connected with Finkaro.'
-            );
+            // Send email notification
+            try {
+                await sendRegistrationEmail(
+                    savedSubscription?.email,
+                    'Hardcopy has been delivered to your address. Received from Finkaro',
+                    'Please stay connected with Finkaro.'
+                );
+            } catch (emailError) {
+                console.error('Error sending email:', emailError.message);
+            }
         }
         
         else if (savedSubscription?.productsType == 'services') {
