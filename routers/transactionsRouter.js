@@ -7,6 +7,7 @@ const Course = require('../models/course')
 const Book = require('../models/book')
 const Services = require('../models/servicesModel')
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer file
+const axios = require('axios');
 require('dotenv').config();
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
@@ -137,21 +138,96 @@ router.post('/add', async (req, res) => {
 
         }
         else if (savedSubscription?.productsType == 'Hardcopybook') {
-
-
-            console.log('Hardcopybook test data ');
-
             const book = await Book.findById(productId);
             book.enrolled.push(userId);
             book.count++;
             await book.save();
-            sendRegistrationEmail(savedSubscription?.email, 'Hardcopy has been deliver on your address Received from Finkaro', 'Please And stay connected with Finkaro.');
+        
+            try {
+                const loginResponse = await axios.post(
+                    'https://apiv2.shiprocket.in/v1/external/auth/login',
+                    {
+                        email: process.env.shipprocketEmail,
+                        password: process.env.shiprockentpass,
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json', // Specify JSON content type
+                        },
+                    }
+                );
+        
+                const { token } = loginResponse.data;
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');  // Months are 0-indexed, so add 1
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const order_date = `${year}-${month}-${day} ${hours}:${minutes}`;
+                const shipRocketToken = `Bearer ${token}`;
+        console.log( shipRocketToken, '====================shipRocketToken=====================');
+        
+                const orderData = {
+                    "order_id": generateUniqueId(),
+                    "order_date": order_date,
+                    "pickup_location": "Primary",
+                    "billing_customer_name": users?.name,
+                    "billing_address": users?.address,
+                    "billing_city": "",
+                    "billing_last_name": "",
+                    "billing_pincode": extractDataAfterPincode(users?.address),
+                    "billing_state": "maharashtra",
+                    "billing_country": "India",
+                    "billing_email": users?.email,
+                    "billing_phone": users?.contact,
+                    "shipping_is_billing": true,
+                    "order_items": [
+                        {
+                            "name": "Finkaro-Book-Romance-with-Equity",
+                            "sku": "SKU1234",
+                            "units": 1,
+                            "selling_price": +savedSubscription?.price,
+                        }
+                    ],
+                    "payment_method": "Prepaid",
+                    "shipping_charges": 0,
+                    "giftwrap_charges": 0,
+                    "transaction_charges": 0,
+                    "total_discount": 0,
+                    "sub_total": +savedSubscription?.prices,
+                    "length": 10,
+                    "breadth": 15,
+                    "height": 20,
+                    "weight": 2.5
+                };
+        log(orderData, '====================orderData=====================');
+                try {
+                    const apiUrl = 'https://apiv2.shiprocket.in/v1/external/orders/create/adhoc';
+                    const response = await axios.post(apiUrl, orderData, {  // Corrected payload to orderData
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': shipRocketToken, // Pass the token here
+                        },
+                    });
+        
 
-
+                    console.log('Order created successfully: shiprocket', response.data);
+                } catch (error) {
+                    console.error('Error creating order: shiprocket', error.response?.data || error.message);
+                }
+        
+            } catch (error) {
+                console.error('Error during Shiprocket login:', error.response?.data || error.message);
+            }
+        
+            sendRegistrationEmail(
+                savedSubscription?.email,
+                'Hardcopy has been delivered to your address. Received from Finkaro',
+                'Please stay connected with Finkaro.'
+            );
         }
-
-
-
+        
         else if (savedSubscription?.productsType == 'services') {
             const services = await Services.findById(productId);
             console.log(services);
@@ -379,8 +455,17 @@ router.get('/check/purchased', async (req, res) => {
         });
     }
 });
-
-
-
+function extractDataAfterPincode(input) {
+    const pincodeIndex = input.indexOf('pincode -');
+    if (pincodeIndex !== -1) {
+      return input.substring(pincodeIndex + 10).trim();
+    }
+    return '';
+  }
+  function generateUniqueId() {
+    const timestamp = Date.now(); // Get the current timestamp in milliseconds
+    const randomNum = Math.floor(Math.random() * 1000); // Generate a random number between 0 and 999
+    return `${timestamp}${randomNum}`.slice(-7); // Concatenate and take the last 7 digits
+}
 
 module.exports = router;
