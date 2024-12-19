@@ -189,7 +189,7 @@ router.post('/add', async (req, res) => {
                     billing_state: "Maharashtra",
                     billing_country: "India",
                     billing_email: users?.email || "N/A",
-                    billing_phone: users?.contact || "0000000000",
+                    billing_phone: users?.phoneNumber || "0000000000",
                     shipping_is_billing: true,
                     order_items: [
                         {
