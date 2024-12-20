@@ -149,12 +149,12 @@ router.post('/add', async (req, res) => {
                 book.count++;
                 await book.save();
         
-                // Login to Shiprocket
+                // Login to Shiprocket 
                 const loginResponse = await axios.post(
                     'https://apiv2.shiprocket.in/v1/external/auth/login',
                     {
-                        email: "anilmg8898@gmail.com",
-                        password: "Finkaro@2025",
+                        email: "anilmg8898@gmail.com", // Shiprocket email
+                        password: "Finkaro@2025", // Shiprocket password
                     },
                     {
                         headers: {
@@ -165,7 +165,6 @@ router.post('/add', async (req, res) => {
         
                 const { token } = loginResponse.data;
                 const shipRocketToken = `Bearer ${token}`;
-                console.log(shipRocketToken, '==================== shipRocketToken =====================');
         
                 // Generate current date and time
                 const now = new Date();
@@ -210,7 +209,6 @@ router.post('/add', async (req, res) => {
                     height: 20,
                     weight: 2.5,
                 };
-                console.log(orderData, '==================== orderData =====================');
         
                 // Create order in Shiprocket
                 const apiUrl = 'https://apiv2.shiprocket.in/v1/external/orders/create/adhoc';
@@ -221,7 +219,6 @@ router.post('/add', async (req, res) => {
                     },
                 });
         
-                console.log('Order created successfully: Shiprocket', response.data);
         
             } catch (error) {
                 if (error.response?.data) {
