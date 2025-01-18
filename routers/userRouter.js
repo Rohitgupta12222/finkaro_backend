@@ -9,7 +9,7 @@ const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
 
 
 router.post('/register', async (req, res) => {
-  const { email, password, name, isActive ,address ,phoneNumber} = req.body;
+  const { email, password, name, isActive, address, phoneNumber } = req.body;
 
   try {
 
@@ -20,10 +20,10 @@ router.post('/register', async (req, res) => {
 
         const updatedUser = await User.findOneAndUpdate(
           { email: email }, // Find the user by email
-          { phoneNumber: phoneNumber, address:address }, // Fields to update
+          { phoneNumber: phoneNumber, address: address }, // Fields to update
           { new: true, runValidators: true } // Options: return the updated document and run validators
         );
-     
+
 
 
         const payloadJwt = {
@@ -38,10 +38,146 @@ router.post('/register', async (req, res) => {
         return res.status(200).json({ response: existingUser, token: token })
 
       } else {
-        const smsContent = `Hi ${existingUser?.name}, your account is activated!.Please keep it safe. Login here:${process.env.FRONTEND_LINK}/activate/${existingUser.id}`;
+        const smsContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Welcome To FINKARO</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 0;
+              font-family: Arial, sans-serif;
+              background-color: #f9f9f9;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 20px auto;
+              background-color: #fff;
+              border: 1px solid #e0e0e0;
+              border-radius: 8px;
+              overflow: hidden;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+              padding-left: 20px;
+              padding-right: 20px;
+            }
+            .header {
+              text-align: center;
+              padding: 20px 0;
+            }
+            .header img {
+              max-width: 100px;
+            }
+            .content {
+              padding: 20px;
+              text-align: left;
+            }
+            .content h1 {
+              font-size: 24px;
+              font-weight: bold;
+              margin: 10px 0;
+              color: #333333;
+            }
+            .content h1 span {
+              font-size: 24px;
+              font-weight: bold;
+              margin: 10px 0;
+              color: #333333;
+            }
+            .content p {
+              font-size: 16px;
+              line-height: 1.5;
+              margin: 10px 0;
+            }
+            /* Remove style for all links */
+            .content a {
+              color: inherit;
+              text-decoration: none;
+            }
+            .content a:hover {
+              text-decoration: none;
+            }
+            .button {
+              display: inline-block;
+              background-color: #FFC307;
+              color: #fff;
+              padding: 12px 24px;
+              text-decoration: none;
+              font-size: 16px;
+              border-radius: 5px;
+              margin: 20px 0;
+            }
+            /* Center the button */
+            .button-container {
+              text-align: center;
+            }
+            .button:hover {
+              background-color: #FFC307;
+              color: #fff;
+            }
+            .footer {
+              font-size: 14px;
+              color: #666;
+              padding: 20px;
+              text-align: center;
+              border-top: 1px solid #e0e0e0;
+            }
+            .footer a {
+              color: black;
+              text-decoration: none;
+            }
+            .footer a:hover {
+              text-decoration: underline;
+            }
+            .divider {
+              height: 1px;
+              background-color: #000;
+              margin: 20px 0;
+            }
+          </style>
+        </head>
+        <body>
+          <table class="container" cellpadding="0" cellspacing="0">
+            <tr>
+              <td>
+                <div class="header">
+                  <img src="https://yt3.googleusercontent.com/8j_6ZffEecoiSDm1XjvivBruW3td8dOjCnCMwufXg_4XuV00StCL9gjSQMvuROT7aq07oRhewj4=s900-c-k-c0x00ffffff-no-rj" alt="Finkaro Logo" />
+                </div>
+                <div class="content">
+                  <h1>Welcome <span>${existingUser.email}</span>!</h1>
+                  <br/>
+                  <p>Thank you for joining FINKARO</p>
+                  <br/>
+                  <p>Please click the confirmation button below and start using FINKARO:</p>
+                  <div class="button-container">
+                    <a href="${process.env.FRONTEND_LINK}/activate/${existingUser.id}" class="button" target="_blank">Confirm</a>
+                  </div>
+                  <p>
+                    If the button is not working, please open this link in any browser: 
+                    <a href="${process.env.FRONTEND_LINK}/activate/${existingUser.id}" target="_blank">${process.env.FRONTEND_LINK}/activate/${existingUser.id}</a>
+                  </p>
+                  <div class="divider"></div>
+                  <p>Feel free to reach out if you need any assistance. Just respond to this email, and we’ll be sure to respond as soon as possible.</p>
+                </div>
+                <div class="footer">
+                  <p>&copy; 2025 Finkaro. All rights reserved.</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        `;
+        
+        
+        
+
         res.status(404).json({ message: "Please visit your email to activate your account." })
 
-        return sendRegistrationEmail(email, 'Account activated', smsContent);
+        return sendRegistrationEmail(email, 'Welcome To FINKARO', '', '', smsContent);
 
       }
 
@@ -253,22 +389,57 @@ router.put('/profile/password', jwtAuthMiddleWare, async (req, res) => {
 router.put('/profile/:id', jwtAuthMiddleWare, async (req, res) => {
   try {
     const id = req.params.id;
-    const data = req.body
+    const { name, address, phoneNumber, pincode } = req.body;
 
-    const response = await User.findByIdAndUpdate(id, data, {
-      new: true,
-      runValidators: true
-    })
-    if (!response) {
-      res.status(404).json('No person found');
+    // Find the user by ID
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'No person found' });
     }
-    res.status(200).json(response);
+
+    // Validate and update only the provided fields
+    let updated = false;
+
+    if (name) {
+      user.name = name;
+      updated = true;
+    } else {
+      res.status(400).json({ message: 'Name is required to update' });
+      return;
+    }
+
+    if (address) {
+      user.address = address;
+      updated = true;
+    }
+
+    if (phoneNumber) {
+      user.phoneNumber = phoneNumber;
+      updated = true;
+    }
+
+    if (pincode) {
+      user.pincode = pincode;
+      updated = true;
+    }
+
+    // If no fields were updated, return a message
+    if (!updated) {
+      return res.status(400).json({ message: 'At least one field (name, address, phone, or pincode) must be provided to update' });
+    }
+
+    // Save the updated user
+    const updatedUser = await user.save();
+
+    // Return the updated user response
+    res.status(200).json(updatedUser);
 
   } catch (message) {
-    res.status(500).json(message);
-
+    res.status(500).json({ message: 'Server error', error: message });
   }
-})
+});
+
 router.get('/getAlluser', jwtAuthMiddleWare, async (req, res) => {
   try {
     const { search, page = 1, limit = 10 } = req.query; // Extract query parameters
@@ -281,11 +452,11 @@ router.get('/getAlluser', jwtAuthMiddleWare, async (req, res) => {
     // If search is provided, create a filter. Otherwise, return all users.
     const searchFilter = search
       ? {
-          $or: [
-            { name: { $regex: search, $options: 'i' } }, // Search by name (case-insensitive)
-            { email: { $regex: search, $options: 'i' } } // Search by email (case-insensitive)
-          ]
-        }
+        $or: [
+          { name: { $regex: search, $options: 'i' } }, // Search by name (case-insensitive)
+          { email: { $regex: search, $options: 'i' } } // Search by email (case-insensitive)
+        ]
+      }
       : {};
 
     // Fetch users with optional search, pagination, and sorted by createdAt (descending)

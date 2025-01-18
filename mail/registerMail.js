@@ -9,13 +9,15 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-const sendRegistrationEmail = async (to, subject, text, attachmentPath) => {
+const sendRegistrationEmail = async (to, subject, text, attachmentPath,html) => {
   try {
     const mailOptions = {
       from: process.env.EMAIL_USER, // Sender address
       to, // List of recipients
       subject, // Subject line
-      text, // Plain text body
+      text,
+      html, // Plain text body
+
       // html: '<b>Hello world?</b>', // If you want to send HTML content
     };
 

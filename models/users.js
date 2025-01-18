@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt')
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
     trim: true
   },
   email: {
@@ -27,6 +26,10 @@ const userSchema = new mongoose.Schema({
     default: null
   },
   phoneNumber: {
+    type: String,
+    default: null
+  },
+  pincode: {
     type: String,
     default: null
   },
