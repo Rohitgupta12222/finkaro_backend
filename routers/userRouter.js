@@ -50,13 +50,13 @@ router.post('/register', async (req, res) => {
               margin: 0;
               padding: 0;
               font-family: Arial, sans-serif;
-              background-color: #f9f9f9;
+              background-color: #E9EAEC;
               color: #333;
             }
             .container {
               max-width: 600px;
               margin: 20px auto;
-              background-color: #fff;
+              background-color:rgb(249, 251, 253);
               border: 1px solid #e0e0e0;
               border-radius: 8px;
               overflow: hidden;
@@ -100,16 +100,19 @@ router.post('/register', async (req, res) => {
             .content a:hover {
               text-decoration: none;
             }
-            .button {
-              display: inline-block;
-              background-color: #FFC307;
-              color: #fff;
-              padding: 12px 24px;
-              text-decoration: none;
-              font-size: 16px;
-              border-radius: 5px;
-              margin: 20px 0;
-            }
+          .button {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background-color: #FFC307;
+  color: #fff !important;
+  padding: 12px 24px;
+  text-decoration: none;
+  font-size: 16px;
+  border-radius: 5px;
+  margin: 20px 0;
+  box-sizing: border-box; /* Ensures padding doesn't affect the width */
+}
             /* Center the button */
             .button-container {
               text-align: center;
@@ -127,7 +130,7 @@ router.post('/register', async (req, res) => {
             }
             .footer a {
               color: black;
-              text-decoration: none;
+           
             }
             .footer a:hover {
               text-decoration: underline;
@@ -150,14 +153,14 @@ router.post('/register', async (req, res) => {
                   <h1>Welcome <span>${existingUser.email}</span>!</h1>
                   <br/>
                   <p>Thank you for joining FINKARO</p>
-                  <br/>
-                  <p>Please click the confirmation button below and start using FINKARO:</p>
+              
+                  <p>Please click the confirmation button below and start using FINKARO.</p>
                   <div class="button-container">
                     <a href="${process.env.FRONTEND_LINK}/activate/${existingUser.id}" class="button" target="_blank">Confirm</a>
                   </div>
                   <p>
                     If the button is not working, please open this link in any browser: 
-                    <a href="${process.env.FRONTEND_LINK}/activate/${existingUser.id}" target="_blank">${process.env.FRONTEND_LINK}/activate/${existingUser.id}</a>
+                    <a style = "color: blue !important" href="${process.env.FRONTEND_LINK}/activate/${existingUser.id}" target="_blank">${process.env.FRONTEND_LINK}/activate/${existingUser.id}</a>
                   </p>
                   <div class="divider"></div>
                   <p>Feel free to reach out if you need any assistance. Just respond to this email, and we’ll be sure to respond as soon as possible.</p>
@@ -171,9 +174,9 @@ router.post('/register', async (req, res) => {
         </body>
         </html>
         `;
-        
-        
-        
+
+
+
 
         res.status(404).json({ message: "Please visit your email to activate your account." })
 
