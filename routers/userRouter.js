@@ -488,7 +488,6 @@ router.put('/updateRole/:id', jwtAuthMiddleWare, async (req, res) => {
     // Assuming `req.user` contains the authenticated user
 
     const tokenUser = req.user;
-  console.log(tokenUser,"chjjj");
   
     if (tokenUser?.role !== 'superadmin') {
       return res.status(403).json({message: 'Forbidden: Only superadmin can perform this action' });

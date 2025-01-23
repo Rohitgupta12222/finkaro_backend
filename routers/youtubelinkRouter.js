@@ -10,7 +10,7 @@ const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
 router.post('/add', jwtAuthMiddleWare, async (req, res) => {
   const { title, alt, video, status } = req.body;
   const tokenUser = req.user
-  if (tokenUser?.role !== 'admin'  || tokenUser?.role !==  'superadmin') return res.status(401).json({ message: 'User is not a admin ' });
+  if (tokenUser?.role !== 'admin' ) return res.status(401).json({ message: 'User is not a admin ' });
   try {
     const count = await YouTubeLink.countDocuments();
 
@@ -51,7 +51,7 @@ router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
   try {
 
     const tokenUser = req.user
-    if (tokenUser?.role !== 'admin' || tokenUser?.role !==  'superadmin' ) return res.status(40).json({ message: 'User is not a admin ' });
+    if (tokenUser?.role !== 'admin' ) return res.status(40).json({ message: 'User is not a admin ' });
 
 
     const id = req.params.id;

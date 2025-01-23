@@ -10,7 +10,7 @@ router.post('/add', jwtAuthMiddleWare, async (req, res) => {
     try {
         const tokenUser = req.user
         console.log(tokenUser);
-        if (tokenUser?.role !== 'admin' || tokenUser?.role !==  'superadmin') return res.status(40).json({ message: 'User is not a admin ' });
+        if (tokenUser?.role !== 'admin') return res.status(40).json({ message: 'User is not a admin ' });
 
         const newBook = new Book({
             userId: tokenUser?.id,
@@ -40,7 +40,7 @@ router.put('/update/:id', jwtAuthMiddleWare, async (req, res) => {
     try {
         const tokenUser = req.user;
 
-        if (tokenUser?.role !== 'admin' || tokenUser?.role !==  'superadmin') {
+        if (tokenUser?.role !== 'admin') {
             return res.status(401).json({ message: 'User is not an admin' });
         }
 
