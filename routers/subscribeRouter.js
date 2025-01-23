@@ -45,6 +45,63 @@ router.post('/mail', async (req, res) => {
   }
 }
 )
+router.post('/add', async (req, res) => {
+  try {
+    const { name, email, contant } = req.body;
+
+    // Validate input
+    if (!email || !contant) {
+      return res.status(400).json({ message: 'Email and contant are required' });
+    }
+
+    // Check if the email is already subscribed
+    const existingSubscription = await Subscribe.findOne({ email });
+    if (existingSubscription) {
+      return res.status(409).json({ message: 'This user is already subscribed' }); // 409 Conflict
+    }
+
+    // Create a new subscription
+    const newSubscription = new Subscribe({
+      name,
+      email,
+      contant,
+    });
+
+    await newSubscription.save();
+    res.status(201).json({ message: 'Subscription added successfully', data: newSubscription });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error', error });
+  }
+});
+
+
+router.get('/list', async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query; // Default page = 1, limit = 10
+
+    // Calculate the number of documents to skip
+    const skip = (page - 1) * limit;
+
+    // Retrieve subscriptions with pagination
+    const subscriptions = await Subscribe.find()
+      .skip(skip)
+      .limit(Number(limit));
+
+    // Get the total count of documents
+    const totalCount = await Subscribe.countDocuments();
+
+    res.status(200).json({
+      message: 'Subscriptions retrieved successfully',
+      data: subscriptions,
+      count: totalCount,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error', error });
+  }
+});
+
 
 
 module.exports = router;
