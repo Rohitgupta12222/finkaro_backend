@@ -12,31 +12,28 @@ router.post('/register', async (req, res) => {
   const { email, password, name, isActive, address, phoneNumber } = req.body;
 
   try {
-
     const existingUser = await User.findOne({ email });
+
     if (existingUser) {
-
       if (existingUser.isActive) {
-
         const updatedUser = await User.findOneAndUpdate(
-          { email: email }, // Find the user by email
-          { phoneNumber: phoneNumber, address: address }, // Fields to update
-          { new: true, runValidators: true } // Options: return the updated document and run validators
+          { email },
+          { phoneNumber, address },
+          { new: true, runValidators: true }
         );
 
-
-
         const payloadJwt = {
-          id: existingUser.id,
-          email: existingUser.email,
-          role: existingUser.role,
-        }
-        console.log(payloadJwt, 'already payloadJwt');
+          id: updatedUser.id,
+          email: updatedUser.email,
+          role: updatedUser.role,
+        };
 
+        const token = genrateToken(payloadJwt);
 
-        const token = genrateToken(payloadJwt)
-        return res.status(200).json({ response: existingUser, token: token })
-
+        return res.status(200).json({
+          response: updatedUser,
+          token,
+        });
       } else {
         const smsContent = `
         <!DOCTYPE html>
@@ -46,222 +43,103 @@ router.post('/register', async (req, res) => {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Welcome To FINKARO</title>
           <style>
-            body {
-              margin: 0;
-              padding: 0;
-              font-family: Arial, sans-serif;
-              background-color: #E9EAEC;
-              color: #333;
-            }
-            .container {
-              max-width: 600px;
-              margin: 20px auto;
-              background-color:rgb(249, 251, 253);
-              border: 1px solid #e0e0e0;
-              border-radius: 8px;
-              overflow: hidden;
-              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-              padding-left: 20px;
-              padding-right: 20px;
-            }
-            .header {
-              text-align: center;
-              padding: 20px 0;
-            }
-            .header img {
-              max-width: 100px;
-            }
-            .content {
-              padding: 20px;
-              text-align: left;
-            }
-            .content h1 {
-              font-size: 24px;
-              font-weight: bold;
-              margin: 10px 0;
-              color: #333333;
-            }
-            .content h1 span {
-              font-size: 24px;
-              font-weight: bold;
-              margin: 10px 0;
-              color: #333333;
-            }
-            .content p {
-              font-size: 16px;
-              line-height: 1.5;
-              margin: 10px 0;
-            }
-            /* Remove style for all links */
-            .content a {
-              color: inherit;
-              text-decoration: none;
-            }
-            .content a:hover {
-              text-decoration: none;
-            }
-          .button {
-  display: block;
-  width: 100%;
-  text-align: center;
-  background-color: #FFC307;
-  color: #fff !important;
-  padding: 12px 24px;
-  text-decoration: none;
-  font-size: 16px;
-  border-radius: 5px;
-  margin: 20px 0;
-  box-sizing: border-box; /* Ensures padding doesn't affect the width */
-}
-            /* Center the button */
-            .button-container {
-              text-align: center;
-            }
-            .button:hover {
-              background-color: #FFC307;
-              color: #fff;
-            }
-            .footer {
-              font-size: 14px;
-              color: #666;
-              padding: 20px;
-              text-align: center;
-              border-top: 1px solid #e0e0e0;
-            }
-            .footer a {
-              color: black;
-           
-            }
-            .footer a:hover {
-              text-decoration: underline;
-            }
-            .divider {
-              height: 1px;
-              background-color: #000;
-              margin: 20px 0;
-            }
+            /* Add your CSS styles */
           </style>
         </head>
         <body>
-          <table class="container" cellpadding="0" cellspacing="0">
-            <tr>
-              <td>
-                <div class="header">
-                  <img src="https://yt3.googleusercontent.com/8j_6ZffEecoiSDm1XjvivBruW3td8dOjCnCMwufXg_4XuV00StCL9gjSQMvuROT7aq07oRhewj4=s900-c-k-c0x00ffffff-no-rj" alt="Finkaro Logo" />
-                </div>
-                <div class="content">
-                  <h1>Welcome <span>${existingUser.email}</span>!</h1>
-                  <br/>
-                  <p>Thank you for joining FINKARO</p>
-              
-                  <p>Please click the confirmation button below and start using FINKARO.</p>
-                  <div class="button-container">
-                    <a href="${process.env.FRONTEND_LINK}/activate/${existingUser.id}" class="button" target="_blank">Confirm</a>
-                  </div>
-                  <p>
-                    If the button is not working, please open this link in any browser: 
-                    <a style = "color: blue !important" href="${process.env.FRONTEND_LINK}/activate/${existingUser.id}" target="_blank">${process.env.FRONTEND_LINK}/activate/${existingUser.id}</a>
-                  </p>
-                  <div class="divider"></div>
-                  <p>Feel free to reach out if you need any assistance. Just respond to this email, and we’ll be sure to respond as soon as possible.</p>
-                </div>
-                <div class="footer">
-                  <p>&copy; 2025 Finkaro. All rights reserved.</p>
-                </div>
-              </td>
-            </tr>
-          </table>
+          <p>Welcome <strong>${existingUser.email}</strong>!</p>
+          <p>Thank you for joining FINKARO.</p>
+          <p>Please click the confirmation button below:</p>
+          <a href="${process.env.FRONTEND_LINK}/activate/${existingUser.id}">Confirm</a>
         </body>
         </html>
         `;
 
+        await sendRegistrationEmail(email, 'Welcome To FINKARO', smsContent);
 
-
-
-        res.status(404).json({ message: "Please visit your email to activate your account." })
-
-        return sendRegistrationEmail(email, 'Welcome To FINKARO', '', '', smsContent);
-
+        return res.status(201).json({
+          data: existingUser,
+          message: "Please visit your email to activate your account.",
+        });
       }
-
-
-
     }
-    const userData = new User(req.body)
-    const response = await userData.save()
 
-    const activationLink = `${process.env.FRONTEND_LINK}/activate/${response.id}`
+    // If the user doesn't exist, register a new user
+    const newUser = new User(req.body);
+    const response = await newUser.save();
+
+    const activationLink = `${process.env.FRONTEND_LINK}/activate/${response.id}`;
+
     if (!isActive) {
-
       const smsContent = `
-  Subject: Activate Your Account
+      Subject: Activate Your Account
 
-  Dear ${name},
+      Dear ${name},
 
-  Welcome to Our Service!
+      Welcome to Our Service!
 
-  Your account has been successfully created. To start using your account, please activate it by clicking the link below:
+      Your account has been successfully created. To start using your account, please activate it by clicking the link below:
 
-  ${activationLink}
+      ${activationLink}
 
-  Here are your account details:
-  - **Email**: ${response?.email}
-  - **Password**: ${password}
+      Here are your account details:
+      - **Email**: ${response?.email}
+      - **Password**: ${password}
 
-  Please keep this information safe and secure. You can use these credentials to log in after activating your account.
+      Please keep this information safe and secure. You can use these credentials to log in after activating your account.
 
-  If you didn't create this account, please ignore this email.
+      Thank you,
+      FINKARO
+      `;
 
-  Thank you,
-  FINKARO
-`;
+      await sendRegistrationEmail(email, 'Activate Your Account', smsContent);
 
-      res.status(404).json({ message: "Please visit your email to activate your account." })
-      return sendRegistrationEmail(email, 'Account activated', smsContent);
-
+      return res.status(201).json({
+        data: response,
+        message: "Please visit your email to activate your account.",
+      });
     } else {
       const payloadJwt = {
         id: response.id,
         email: response.email,
         role: response.role,
-      }
-      console.log(payloadJwt, 'register payloadJwt');
+      };
 
-      const token = genrateToken(payloadJwt)
-      console.log(' this is token ', token);
+      const token = genrateToken(payloadJwt);
+
       const emailContent = `
       Subject: Welcome to Our Service
-    
+
       Dear ${response?.name},
-    
+
       Welcome to Our Service!
-    
+
       Here are your account details:
       - **Email**: ${response.email}
       - **Password**: ${password}
-    
+
       Please keep this information safe and secure. You can use these credentials to log in and start using our services.
-    
+
       Thank you,
-      FINKARO 
-    `;
+      FINKARO
+      `;
 
+      await sendRegistrationEmail(email, 'Registration Successful', emailContent);
 
-      sendRegistrationEmail(email, 'Registration Successful', emailContent);
-      res.status(201).json({ response: response, token: token })
-
+      return res.status(201).json({
+        response,
+        token,
+      });
     }
+  } catch (error) {
+    console.error('Error:', error.message);
 
-  } catch (message) {
-
-    console.log('message ', message);
-    res.status(500).json({
-      message: "internal Server message",
-      message: message
-    })
+    return res.status(500).json({
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
-}
-)
+});
 
 
 router.post('/login', async (req, res) => {

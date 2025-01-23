@@ -70,6 +70,8 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
 
 router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
   const { title, content, status, shortDescription, links } = req.body;
+  
+
   const blogId = req.params.id;
 
   try {
@@ -102,7 +104,7 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
     blog.content = content || blog.content;
     blog.status = status || blog.status;
     blog.shortDescription = shortDescription || blog.shortDescription;
-    blog.links = links || blog.links;
+    blog.links = links ;
 
     // Save the updated blog post to the database
     await blog.save();
