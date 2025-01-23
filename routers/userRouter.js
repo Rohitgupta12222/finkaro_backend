@@ -55,19 +55,22 @@ router.post('/register', async (req, res) => {
         </html>
         `;
 
-        await sendRegistrationEmail(email, 'Welcome To FINKARO', smsContent);
- 
-        const payloadJwts = {
+        const payloadJwt = {
           id: existingUser.id,
           email: existingUser.email,
           role: existingUser.role,
         };
 
-        const tokens = genrateToken(payloadJwts);
+        console.log(payloadJwt , 'payloadJwt');
+        
+
+        const token =  genrateToken(payloadJwt);
+        await sendRegistrationEmail(email, 'Welcome To FINKARO', smsContent);
+ 
 
         return res.status(201).json({
           data: existingUser,
-          token:tokens,
+          token:token,
           message: "Please visit your email to activate your account.",
         });
       }
