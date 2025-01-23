@@ -104,6 +104,11 @@ router.post('/register', async (req, res) => {
 
       return res.status(201).json({
         data: response,
+        token: genrateToken({
+          id: existingUser.id,
+          email: existingUser.email,
+          role: existingUser.role,
+        }),
         message: "Please visit your email to activate your account.",
       });
     } else {
