@@ -443,6 +443,7 @@ router.put('/profile/:id', jwtAuthMiddleWare, async (req, res) => {
   }
 });
 
+
 router.get('/getAlluser', jwtAuthMiddleWare, async (req, res) => {
   try {
     const { search, page = 1, limit = 10 } = req.query; // Extract query parameters
@@ -479,6 +480,40 @@ router.get('/getAlluser', jwtAuthMiddleWare, async (req, res) => {
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ message: 'Error fetching users' });
+  }
+});
+
+router.put('/updateRole/:id', jwtAuthMiddleWare, async (req, res) => {
+  try {
+    // Assuming `req.user` contains the authenticated user
+
+    const tokenUser = req.user;
+  console.log(tokenUser,"chjjj");
+  
+    if (tokenUser?.role !== 'superadmin') {
+      return res.status(403).json({message: 'Forbidden: Only superadmin can perform this action' });
+    }
+
+    const userId = req.params.id;
+
+    // Find and update the user
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      req.body, // Fields to update
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({
+      message: 'User updated successfully',
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error', error });
   }
 });
 
