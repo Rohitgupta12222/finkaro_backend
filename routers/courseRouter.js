@@ -12,7 +12,7 @@ const fs = require('fs'); // To delete files if necessary
 router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
   // Check if the user is an admin
   const tokenUser = req.user;
-  if (tokenUser?.role !== 'admin') {
+  if (tokenUser?.role !== 'admin' || tokenUser?.role !==  'superadmin') {
     return res.status(403).json({ message: 'User is not an admin' });
   }
 
@@ -73,7 +73,7 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
 router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
   // Check if the user is an admin
   const tokenUser = req.user;
-  if (tokenUser?.role !== 'admin') {
+  if (tokenUser?.role !== 'admin' || tokenUser?.role !==  'superadmin') {
     return res.status(403).json({ message: 'User is not an admin' });
   }
 
@@ -260,7 +260,7 @@ router.get('/getcourses/:id', async (req, res) => {
 router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
   // Check if the user is an admin
   const tokenUser = req.user;
-  if (tokenUser?.role !== 'admin') {
+  if (tokenUser?.role !== 'admin' || tokenUser?.role !==  'superadmin') {
     return res.status(403).json({ message: 'User is not an admin' });
   }
 

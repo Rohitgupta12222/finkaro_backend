@@ -265,7 +265,7 @@ router.put('/addcomment/:id', async (req, res) => {
 });
 router.put('/updatecomment/:blogId/:commentId', jwtAuthMiddleWare, async (req, res) => {
   const tokenUser = req.user;
-  if (tokenUser?.role !== 'admin') {
+  if (tokenUser?.role !== 'admin' || tokenUser?.role !==  'superadmin' ) {
     return res.status(403).json({ message: 'User is not an admin' });
   }
   try {
@@ -305,7 +305,7 @@ router.put('/updatecomment/:blogId/:commentId', jwtAuthMiddleWare, async (req, r
 
 router.delete('/deletecomment/:blogId/:commentId',jwtAuthMiddleWare, async (req, res) => {
   const tokenUser = req.user;
-  if (tokenUser?.role !== 'admin') {
+  if (tokenUser?.role !== 'admin' || tokenUser?.role !==  'superadmin') {
     return res.status(403).json({ message: 'User is not an admin' });
   }
   try {
