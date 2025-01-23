@@ -56,9 +56,12 @@ router.post('/register', async (req, res) => {
         `;
 
         await sendRegistrationEmail(email, 'Welcome To FINKARO', smsContent);
+ 
+
 
         return res.status(201).json({
           data: existingUser,
+          token,
           message: "Please visit your email to activate your account.",
         });
       }
