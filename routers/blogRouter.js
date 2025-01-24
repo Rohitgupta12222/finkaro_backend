@@ -2,14 +2,11 @@
 const express = require('express');
 const Blog = require('../models/blogs');
 const router = express.Router();
-const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer fil
-const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
+const { jwtAuthMiddleWare } = require('../jwt/jwt')
 const upload = require('../middelware/multer');
 const processImage = require('../middelware/imagsProcess');
-const uploadDashboard = require('../middelware/dashboarMulter');
 const fs = require('fs');
 const path = require('path');
-const jsonwebtoken = require('jsonwebtoken');
 
 
 router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
@@ -193,8 +190,8 @@ router.get('/getAllBlogs', async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
     const title = req.query.title || ''; // Get the title query (default is an empty string)
     const status = req.query.status; // Get the status query, optional
-    const sortField = req.query.sortField || 'updatedAt'; // Default sort field
-    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Ascending or descending order, default is descending
+    const sortField = req.query.sortField || 'createdAt'; // Default sort field is createdAt
+    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Default is descending
 
     const skip = (page - 1) * limit;
 
@@ -209,10 +206,7 @@ router.get('/getAllBlogs', async (req, res) => {
     }
 
     // Create sorting object for Mongoose
-    const sortOptions = {};
-    if (sortField === 'createdAt' || sortField === 'updatedAt') {
-      sortOptions[sortField] = sortOrder; // Add the sorting field and order
-    }
+    const sortOptions = { [sortField]: sortOrder };
 
     // Find dashboards based on the query, apply pagination, and sort dynamically
     const [blogPosts, count] = await Promise.all([
@@ -255,7 +249,6 @@ router.put('/addcomment/:id', async (req, res) => {
     blog.comments.push({
       name, comment
     })
-    const response = await blog.save()
     res.status(201).json({
       message: 'Comment Added Successfully'
     })
