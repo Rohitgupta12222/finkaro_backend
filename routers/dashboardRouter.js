@@ -80,9 +80,13 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
       return res.status(404).json({ message: 'Dashboard not found' });
     }
 
-    // Delete old images from the file system if they exist
-    if (existingDashboard.coverImage && existingDashboard.coverImage.length > 0) {
-      // Iterate over old image paths and delete each one
+    // **Optional Logic**: Merge old and new images if desired
+    const updatedCoverImages = newCoverImagePaths.length > 0
+      ? newCoverImagePaths // Use new images if provided
+      : existingDashboard.coverImage; // Otherwise, retain old images
+
+    // Delete old images only if new images are uploaded
+    if (newCoverImagePaths.length > 0 && existingDashboard.coverImage && existingDashboard.coverImage.length > 0) {
       await Promise.all(existingDashboard.coverImage.map(async (imagePath) => {
         const filePath = `public/${imagePath.split(`${process.env.BASE_URL}/`)[1]}`;
         try {
@@ -94,12 +98,7 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
       }));
     }
 
-    // Update the coverImage field with new image paths if provided
-    if (newCoverImagePaths.length > 0) {
-      existingDashboard.coverImage = newCoverImagePaths;
-    }
-
-    // Update other fields only if they are provided
+    // Update fields only if provided
     existingDashboard.title = title || existingDashboard.title;
     existingDashboard.content = content || existingDashboard.content;
     existingDashboard.status = status || existingDashboard.status;
@@ -107,8 +106,9 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
     existingDashboard.actualPrice = actualPrice || existingDashboard.actualPrice;
     existingDashboard.offerPrice = offerPrice || existingDashboard.offerPrice;
     existingDashboard.mail = mail || existingDashboard.mail;
-    existingDashboard.tags = tags || existingDashboard.tags;
+    existingDashboard.tags = tags ? [...new Set(tags)] : existingDashboard.tags; // Deduplicate tags
     existingDashboard.zipFileLink = zipFileLink || existingDashboard.zipFileLink;
+    existingDashboard.coverImage = updatedCoverImages; // Update with new/merged image paths
 
     // Save the updated dashboard entry
     const updatedDashboard = await existingDashboard.save();
@@ -132,7 +132,6 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
     res.status(500).json({ message: 'Server error', error });
   }
 });
-
 
 
 
