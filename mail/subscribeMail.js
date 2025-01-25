@@ -131,7 +131,7 @@ async function sendBulkEmails(subject, blogDescription, url) {
       const subscriberEmails = subscribers.map((subscriber) => subscriber.email);
   
       // Fetch email addresses from the User model where role is 'user'
-      const users = await User.find({}, 'email'); // Fetch only email field
+      const users = await User.find({ role: 'user' }, 'email'); // Fetch only email field
       const userEmails = users.map((user) => user.email);
   
       // Combine all email recipients and ensure they are unique
@@ -146,27 +146,27 @@ async function sendBulkEmails(subject, blogDescription, url) {
         },
       });
   
-      // Email options
-      const mailOptions = {
-        from: process.env.EMAIL_USER, // Sender address
-        to: recipients, // List of unique recipients
-        subject, // Subject line
-        html: `
-          <h1>${subject}</h1>
-          <p>${blogDescription}</p>
-          <p>Read more on our website.</p>
-          <br/>
-                    <br/>
-
-          <a href="${url}">Read more</a>
-        `,
-      };
+      // Loop through all recipients and send individual emails
+      for (const recipient of recipients) {
+        const mailOptions = {
+          from: process.env.EMAIL_USER, // Sender address
+          to: recipient, // Individual recipient
+          subject, // Subject line
+          html: `
+            <h1>${subject}</h1>
+            <p>${blogDescription}</p>
+            <br />
+            <p>Read more on our website:</p>
+            <a href="${url}">${url}</a>
+          `,
+        };
   
-      console.log('Sending bulk emails to unique recipients:', recipients);
+        console.log(`Sending email to: ${recipient}`);
   
-      // Send the emails
-      await transporter.sendMail(mailOptions);
-      console.log('Bulk emails sent successfully');
+        // Send the email
+        await transporter.sendMail(mailOptions);
+        console.log(`Email sent successfully to: ${recipient}`);
+      }
     } catch (error) {
       console.error('Error sending bulk emails:', error);
     }
