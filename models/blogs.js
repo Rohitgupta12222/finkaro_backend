@@ -73,7 +73,7 @@ const blogSchema = new mongoose.Schema({
   },
   mail: {
     type: Boolean,
-    default: true
+    default: false
   }
   
 });

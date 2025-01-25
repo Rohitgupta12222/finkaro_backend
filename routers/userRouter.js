@@ -4,7 +4,6 @@ const User = require('../models/users');
 const router = express.Router();
 const bcrypt = require('bcrypt')
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer file
-
 const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
 
 
@@ -55,7 +54,7 @@ router.post('/register', async (req, res) => {
         </html>
         `;
 
-    s
+    
         await sendRegistrationEmail(email, 'Welcome To FINKARO', smsContent);
         
 

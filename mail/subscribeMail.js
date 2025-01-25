@@ -20,7 +20,6 @@ const sendsubscribemail = async (email, name, subject, contant) => {
   }
   let emailto = "finkaro2025@gmail.com"
 
-  console.log('3rd step ',data , ' ================= ',process.env.EMAIL_USER);
   
   try {
     await transporter.sendMail({
@@ -122,5 +121,53 @@ return `
 
 }
 
+async function sendBulkEmails(subject, blogDescription, url) {
+    try {
+      // Fetch email addresses from the Subscribe model
+      const subscribers = await Subscribe.find({}, 'email'); // Fetch only email field
+      const subscriberEmails = subscribers.map((subscriber) => subscriber.email);
+  
+      // Fetch email addresses from the User model where role is 'user'
+      const users = await User.find({ role: 'user' }, 'email'); // Fetch only email field
+      const userEmails = users.map((user) => user.email);
+  
+      // Combine all email recipients and ensure they are unique
+      const recipients = [...new Set([...subscriberEmails, ...userEmails])];
+  
+      // Set up the email transporter
+      const transporter = nodemailer.createTransport({
+        service: 'gmail', // Replace with your email service
+        auth: {
+          user: process.env.EMAIL_USER, // Your email address
+          pass: process.env.EMAIL_PASS, // Your email password or app password
+        },
+      });
+  
+      // Email options
+      const mailOptions = {
+        from: process.env.EMAIL_USER, // Sender address
+        to: recipients, // List of unique recipients
+        subject, // Subject line
+        html: `
+          <h1>${subject}</h1>
+          <p>${blogDescription}</p>
+          <p>Read more on our website.</p>
+          <br/>
+                    <br/>
 
-module.exports = sendsubscribemail;
+          <a href="${url}">Read more</a>
+        `,
+      };
+  
+      console.log('Sending bulk emails to unique recipients:', recipients);
+  
+      // Send the emails
+      await transporter.sendMail(mailOptions);
+      console.log('Bulk emails sent successfully');
+    } catch (error) {
+      console.error('Error sending bulk emails:', error);
+    }
+  }
+  
+
+module.exports = {sendsubscribemail,sendBulkEmails};

@@ -1,12 +1,18 @@
 
 const express = require('express');
 const Blog = require('../models/blogs');
+const nodemailer = require('nodemailer');
 const router = express.Router();
 const { jwtAuthMiddleWare } = require('../jwt/jwt')
 const upload = require('../middelware/multer');
 const processImage = require('../middelware/imagsProcess');
 const fs = require('fs');
+const {sendsubscribemail,sendBulkEmails} = require('../mail/subscribeMail');
 const path = require('path');
+require('dotenv').config();
+
+
+
 
 
 router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
@@ -14,7 +20,6 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
 
   // Handle the coverImage path correctly when using memoryStorage
   const coverImage = req.file && req.file.path ? req.file.path.replace('public/', '').replace(/\\/g, '/') : '';
-
   const imagePath = `${process.env.BASE_URL}/${coverImage}`;
 
   // Retrieve the user ID from the authenticated user
@@ -23,6 +28,9 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
   let newBlog;
 
   try {
+    // Determine the value of the mail field based on the status
+    const mail = status === 'public';
+
     // Create a new Blog instance with the provided data
     newBlog = new Blog({
       title,
@@ -32,14 +40,21 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
       links,
       coverImage: imagePath,
       userId,
+      mail,
     });
-
 
     // Save the blog to the database
     await newBlog.save();
 
-    // Return the newly created blog in the response
+    // If mail is true, send bulk emails
     res.status(201).json(newBlog);
+    console.log(process.env.BULK_EMAIL_SEND , 'check env');
+    
+    if (mail && process.env.BULK_EMAIL_SEND !== 'false') {
+      await sendBulkEmails(title + 'New Blog Post', shortDescription ,process.env.FRONTEND_LINK +'/#/blog/'+newBlog._id);
+    }
+
+    // Return the newly created blog in the response
   } catch (error) {
     // Log any errors and send a 500 error response
     console.error('Error adding blog:', error);
@@ -65,9 +80,10 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
 });
 
 
+
+
 router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
   const { title, content, status, shortDescription, links } = req.body;
-  
 
   const blogId = req.params.id;
 
@@ -96,15 +112,30 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
       blog.coverImage = `${process.env.BASE_URL}/${newCoverImage}`;
     }
 
-    // Update the other fields
+    // Update other fields
     blog.title = title || blog.title;
     blog.content = content || blog.content;
     blog.status = status || blog.status;
     blog.shortDescription = shortDescription || blog.shortDescription;
-    blog.links = links ;
+    blog.links = links || blog.links;
 
-    // Save the updated blog post to the database
+    // Handle mail and updatedAt logic
+    if (blog.mail === false) {
+      if ( blog.mail == false && process.env.BULK_EMAIL_SEND !== 'false' && blog.status === 'public') {
+        blog.mail = true;
+        blog.createdAt = new Date();
+        blog.updatedAt = new Date();
+        await sendBulkEmails(blog.title + 'New Blog Post', blog.shortDescription ,process.env.FRONTEND_LINK +'/#/blog/'+blog._id);
+      }
+     
+    
+    } else {
+      // If mail is not false, set mail to true and update updatedAt to current date
+      blog.updatedAt = new Date();
+    }
+
     await blog.save();
+   
 
     res.status(200).json(blog);
   } catch (error) {
@@ -126,6 +157,7 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
     res.status(500).json({ error: 'An error occurred while updating the blog' });
   }
 });
+
 
 
 router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
