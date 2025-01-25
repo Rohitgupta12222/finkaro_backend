@@ -131,7 +131,7 @@ async function sendBulkEmails(subject, blogDescription, url) {
       const subscriberEmails = subscribers.map((subscriber) => subscriber.email);
   
       // Fetch email addresses from the User model where role is 'user'
-      const users = await User.find({ role: 'user' }, 'email'); // Fetch only email field
+      const users = await User.find({}, 'email'); // Fetch only email field
       const userEmails = users.map((user) => user.email);
   
       // Combine all email recipients and ensure they are unique
