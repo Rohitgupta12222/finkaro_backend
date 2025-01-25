@@ -1,5 +1,8 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
+const Subscribe = require('../models/subscribeList'); // Adjust the path to your Subscribe model
+const User = require('../models/users'); // Adjust the path to your User model
+
 
 // Configure the transporter
 const transporter = nodemailer.createTransport({
