@@ -16,6 +16,7 @@ require('dotenv').config();
 
 
 router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
+
   const { title, content, status, shortDescription, links } = req.body;
 
   // Handle the coverImage path correctly when using memoryStorage

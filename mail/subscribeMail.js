@@ -136,6 +136,8 @@ async function sendBulkEmails(subject, blogDescription, url) {
   
       // Combine all email recipients and ensure they are unique
       const recipients = [...new Set([...subscriberEmails, ...userEmails])];
+            // const recipients = ["rohitgupta.dec13@gmail.com","anilmg8898@gmail.com"];
+// 
   
       // Set up the email transporter
       const transporter = nodemailer.createTransport({
@@ -152,13 +154,84 @@ async function sendBulkEmails(subject, blogDescription, url) {
           from: process.env.EMAIL_USER, // Sender address
           to: recipient, // Individual recipient
           subject, // Subject line
-          html: `
-            <h1>${subject}</h1>
-            <p>${blogDescription}</p>
-            <br />
-            <p>Read more on our website:</p>
-            <a href="${url}">Read more</a>
-          `,
+          html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome Email - Finkaro</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Inter', sans-serif; text-align: center;">
+
+    <!-- Email Wrapper -->
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f3f4f6">
+        <tr>
+            <td align="center" style="padding: 20px;">
+                <!-- Main Container -->
+                <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="max-width: 600px; width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
+                    
+                    <!-- Header Section -->
+                    <tr>
+                        <td align="center" style="background-color: #f9fafb; padding: 20px;">
+                            <img src="https://ci3.googleusercontent.com/meips/ADKq_NbdwhXy8Q_DwbDJ5PskRQuUwPXrzanb_52edOxqOLTQ7tpsia4_Jx5TBtLsS41VleNyLAlIuuIds5BHSaUKlahCkRl_68DJXWixjJgH987JQaN6_omM6Q=s0-d-e1-ft#https://email-assets.Finkaro.ai/automations/welcome/header.png?v=2"
+                                 alt="Finkaro Header Image" width="100%" style="display: block; border: 0;">
+                        </td>
+                    </tr>
+
+                    <!-- Centered Welcome Message -->
+                    <tr>
+                        <td align="center" style="padding: 20px;">
+                            <h1 style="font-size: 22px; font-weight: bold; color: #111827; margin: 0;">Welcome to <span style="color: #000;">Finkaro</span>!</h1>
+                        </td>
+                    </tr>
+
+                    <!-- Content Section -->
+                    <tr>
+                        <td align="left" style="padding: 30px; color: #4b5563;">
+                            <p style="font-size: 16px; margin: 15px 0 20px;">Hello Anil,</p>
+                            <p style="font-size: 15px; line-height: 1.5;">
+                                Welcome to Finkaro, where your content gets a visual upgrade. Whether it's slides for your next big talk, 
+                                a technical blog post, or your next LinkedIn update, we're here to unlock the visual potential of your text content.
+                            </p>
+
+                            <h2 style="font-size: 16px; margin: 20px 0 10px;">Here are 4 ways you can use Finkaro today:</h2>
+                            
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                <tr>
+                                    <td>
+                                        <p>📊 <strong>Presentations:</strong> Generate simple diagrams from your slide text.</p>
+                                        <p>📰 <strong>Blogs + Newsletters:</strong> Create shareable visuals from key paragraphs.</p>
+                                        <p>📱 <strong>Social Media:</strong> Convert your post into an engaging graphic.</p>
+                                        <p>📄 <strong>Documentation:</strong> Make easy-to-read docs with visuals.</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- CTA Button -->
+                            <div style="text-align: center; margin-top: 30px;">
+                                <a href="https://finkaro.com" style="background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 6px; display: inline-block;">
+                                    Go to Finkaro
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Footer Section -->
+                    <tr>
+                        <td align="center" style="background-color: #111827; color: #ffffff; padding: 20px;">
+                            <p style="font-size: 14px; margin: 0;">Happy creating! <br> <strong>The Finkaro Team</strong></p>
+                            <p style="font-size: 12px; margin: 10px 0 0; color: #9ca3af;">Copyright © 2024 Finkaro AI. All rights reserved.</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+         `,
         };
   
   
