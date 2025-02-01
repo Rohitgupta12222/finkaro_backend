@@ -236,7 +236,7 @@ async function sendBulkEmails(subject, blogDescription, url) {
   
   
         // Send the email
-        await transporter.sendMail(mailOptions);
+         transporter.sendMail(mailOptions);
       }
     } catch (error) {
       console.error('Error sending bulk emails:', error);

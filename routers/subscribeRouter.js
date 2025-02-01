@@ -2,13 +2,12 @@
 const express = require('express');
 const Subscribe = require('../models/subscribeList.js');
 const router = express.Router();
-
 const sendsubscribemail = require('../mail/subscribeMail.js'); // Adjust path to your mailer file
 
 
 router.post('/mail', async (req, res) => {
   console.log(req.body , '============ req.body 1');
-  const { email, name ,subject ,contant} = req.body;
+  const { email, name ,subject ,contact} = req.body;
   
  
   try {
@@ -16,19 +15,19 @@ router.post('/mail', async (req, res) => {
     const existingUser = await Subscribe.findOne({ email });
     if (existingUser) {
       console.log('exiestion user',existingUser);
-      await sendsubscribemail(email, name,subject,contant);
+      await sendsubscribemail(email, name,subject,contact);
       res.status(201).json({message:"Subscribe mail sended successfully"})
       console.log("Subscribe mail sended successfully")
 
     }else{
    data = req.body
-   data.phoneNumber = contant
+   data.phoneNumber = contact
    console.log(data , 'request body ');
 
       const userData = new Subscribe(req.body)
      const response = await userData.save()
    
-     await sendsubscribemail(email, name,subject,contant);
+     await sendsubscribemail(email, name,subject,contact);
      res.status(201).json({message:"Subscribe mail sended successfully"})
 
       console.log("Subscribe mail sended successfully")
@@ -47,11 +46,11 @@ router.post('/mail', async (req, res) => {
 )
 router.post('/add', async (req, res) => {
   try {
-    const { name, email, contant } = req.body;
+    const { name, email, contact } = req.body;
 
     // Validate input
-    if (!email || !contant) {
-      return res.status(400).json({ message: 'Email and contant are required' });
+    if (!email || !contact) {
+      return res.status(400).json({ message: 'Email and contact are required' });
     }
 
     // Check if the email is already subscribed
@@ -64,7 +63,7 @@ router.post('/add', async (req, res) => {
     const newSubscription = new Subscribe({
       name,
       email,
-      contant,
+      contact,
     });
 
     await newSubscription.save();

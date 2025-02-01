@@ -10,14 +10,26 @@ const processImage = async (req, res, next) => {
       return next();
     }
 
-    const processedImage = await sharp(req.file.buffer)
-      .toFormat('webp') // Convert to WebP format
-      .webp({ quality: 80 }) // Set WebP quality (80% in this case)
-      .toBuffer();
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    const filename = `${Date.now()}-${path.parse(req.file.originalname).name}`;
+    let processedImage;
+    let finalFilename;
 
-    // Define the filename and relative path where you want to save the WebP image
-    const filename = `${Date.now()}-${path.parse(req.file.originalname).name}.webp`;
-    const relativeFilePath = path.join('uploads', filename);
+    if (ext === '.gif') {
+      // Save GIF as is
+      processedImage = req.file.buffer;
+      finalFilename = `${filename}.gif`;
+    } else {
+      // Convert to WebP
+      processedImage = await sharp(req.file.buffer)
+        .toFormat('webp')
+        .webp({ quality: 80 })
+        .toBuffer();
+      finalFilename = `${filename}.webp`;
+    }
+
+    // Define the relative and absolute file paths
+    const relativeFilePath = path.join('uploads', finalFilename);
     const absoluteFilePath = path.join(__dirname, '../public', relativeFilePath);
 
     // Create the directory if it doesn't exist
@@ -26,7 +38,6 @@ const processImage = async (req, res, next) => {
     }
 
     fs.writeFileSync(absoluteFilePath, processedImage);
-
     req.file.path = relativeFilePath;
 
     next(); // Continue to the next middleware or route handler
@@ -37,3 +48,4 @@ const processImage = async (req, res, next) => {
 };
 
 module.exports = processImage;
+
