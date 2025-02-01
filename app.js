@@ -51,7 +51,7 @@ const subscriptionRouter = require('./routers/transactionsRouter')
 const servicesRouter = require('./routers/servicesRouter')
 const bookRouter = require('./routers/bookRouter')
 const cardRouter = require('./routers/cardRouter')
-
+const testimonialRouter = require('./routers/testimonialRouter')
 
 
 
@@ -67,6 +67,9 @@ app.use('/dashboard', dashboardRouter);
 app.use('/subscription', subscriptionRouter);
 app.use('/book', bookRouter);
 app.use('/cards', cardRouter);
+app.use('/testimonials', testimonialRouter);
+
+
 
 
 
