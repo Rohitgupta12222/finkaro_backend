@@ -10,12 +10,8 @@ const multipalprocessImage = async (req, res, next) => {
   try {
     const processedFiles = await Promise.all(
       req.files.map(async (file) => {
-        const processedImage = await sharp(file.buffer)
-          .toFormat('webp')
-          .webp({ quality: 80 })
-          .toBuffer();
-
-        const filename = `${Date.now()}-${path.parse(file.originalname).name}.webp`;
+        const ext = path.extname(file.originalname).toLowerCase();
+        const filename = `${Date.now()}-${path.parse(file.originalname).name}${ext}`;
         const relativeFilePath = path.join('uploads', filename);
         const absoluteFilePath = path.join(__dirname, '../public', relativeFilePath);
 
@@ -23,7 +19,18 @@ const multipalprocessImage = async (req, res, next) => {
           fs.mkdirSync(path.dirname(absoluteFilePath), { recursive: true });
         }
 
-        fs.writeFileSync(absoluteFilePath, processedImage);
+        if (ext === '.gif') {
+          // Save GIF as it is without compression
+          fs.writeFileSync(absoluteFilePath, file.buffer);
+        } else {
+          // Convert other images to WebP format
+          const processedImage = await sharp(file.buffer)
+            .toFormat('webp')
+            .webp({ quality: 80 })
+            .toBuffer();
+
+          fs.writeFileSync(absoluteFilePath, processedImage);
+        }
 
         return { ...file, path: relativeFilePath };
       })
