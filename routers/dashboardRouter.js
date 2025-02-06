@@ -197,8 +197,8 @@ router.get('/get', async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
     const title = req.query.title || ''; // Get the title query (default is an empty string)
     const status = req.query.status; // Get the status query, optional
-    const sortField = req.query.sortField || 'updatedAt'; // Default sort field
-    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Ascending or descending order, default is descending
+    const sortField = req.query.sortField || 'createdAt'; // Default sort field is 'createdAt'
+    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Default to descending order
 
     const skip = (page - 1) * limit;
 
@@ -213,10 +213,7 @@ router.get('/get', async (req, res) => {
     }
 
     // Create sorting object for Mongoose
-    const sortOptions = {};
-    if (sortField === 'createdAt' || sortField === 'updatedAt') {
-      sortOptions[sortField] = sortOrder; // Add the sorting field and order
-    }
+    const sortOptions = { [sortField]: sortOrder };
 
     // Find dashboards based on the query, apply pagination, and sort dynamically
     const [dashboards, count] = await Promise.all([
@@ -237,6 +234,7 @@ router.get('/get', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 
 

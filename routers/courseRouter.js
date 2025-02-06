@@ -191,7 +191,7 @@ router.get('/getUsercourses', jwtAuthMiddleWare, async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
     const title = req.query.title || ''; // Get the title query (default is an empty string)
     const published = req.query.published; // Published filter, optional
-    const sortField = req.query.sortField || 'updatedAt'; // Default sort field
+    const sortField = req.query.sortField || 'createdAt'; // Default sort field
     const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Ascending or descending order, default is descending
     const userId = req.user?.id; // Get user ID from the authenticated user (assuming JWT is used)
 

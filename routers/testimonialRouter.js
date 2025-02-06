@@ -29,7 +29,27 @@ router.post('/create', jwtAuthMiddleWare, async (req, res) => {
 
 router.get('/get', async (req, res) => {
     try {
-        const testimonials = await Testimonial.find();
+        const name = req.query.name || ''; // Search by name
+        const status = req.query.status; // Optional status filter
+        const sortField = req.query.sortField || 'createdAt'; // Default sorting field
+        const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Default to descending
+
+        // Build query with case-insensitive name search
+        const query = {
+            name: { $regex: name, $options: 'i' }
+        };
+
+        // Conditionally add the status filter if provided
+        if (status) {
+            query.status = status;
+        }
+
+        // Create sorting object
+        const sortOptions = { [sortField]: sortOrder };
+
+        // Fetch all testimonials with filtering and sorting
+        const testimonials = await Testimonial.find(query).sort(sortOptions);
+
         res.status(200).json({
             data: testimonials
         });
@@ -38,6 +58,7 @@ router.get('/get', async (req, res) => {
         res.status(500).json({ message: 'Error fetching testimonials', error: error.message });
     }
 });
+
 
 router.delete('/delete/:id',jwtAuthMiddleWare, async (req, res) => {
     const { id } = req.params;
