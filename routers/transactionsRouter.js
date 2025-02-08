@@ -297,12 +297,10 @@ router.get('/get', async (req, res) => {
             .exec();
 
         // Count total number of documents
-        const total = await Subscription.countDocuments(searchFilter);
+        const count = await Subscription.countDocuments(searchFilter);
 
         res.json({
-            total,
-            page: pageNumber,
-            totalPages: Math.ceil(total / pageSize),
+            count,
             subscriptions,
         });
     } catch (error) {
