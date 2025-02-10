@@ -8,22 +8,24 @@ const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
 const upload = require('../middelware/multer');
 const processImage = require('../middelware/imagsProcess');
 const fs = require('fs'); // To delete files if necessary
+const { sendsubscribemail, sendBulkEmailsCourse } = require('../mail/subscribeMail');
+
 
 router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
-  // Check if the user is an admin
   const tokenUser = req.user;
   if (tokenUser?.role !== 'admin') {
     return res.status(403).json({ message: 'User is not an admin' });
   }
 
   // Handle the coverImage path correctly
-  const coverImage = req.file ? req.file.path.replace('public/', '') : ''; // Remove 'public/' from path
-  const imagePath = coverImage ? `${process.env.BASE_URL}/${coverImage.replace(/\\/g, '/')}` : ''; // Construct the URL
+  const coverImage = req.file ? req.file.path.replace('public/', '') : '';
+  const imagePath = coverImage ? `${process.env.BASE_URL}/${coverImage.replace(/\\/g, '/')}` : '';
 
   // Filter out null lessons
-  const filteredLessons = req.body.lessons.filter(lesson => lesson !== null);
+  const filteredLessons = req.body.lessons ? req.body.lessons.filter(lesson => lesson !== null) : [];
 
-  // Create a new Course instance with the provided data
+  const mail = req.body.published === 'public';
+
   const newCourse = new Course({
     title: req.body.title,
     description: req.body.description,
@@ -32,25 +34,34 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
     duration: req.body.duration,
     link: req.body.link,
     lessons: filteredLessons,
-    coverImage: imagePath, // Updated to remove 'public/'
+    coverImage: imagePath,
     tags: req.body.tags,
     published: req.body.published,
     enrolledStudents: req.body.enrolledStudents || [],
-    mail: req.body.published === 'public',
+    mail
   });
 
-  console.log(newCourse); // Log for debugging
+  console.log(newCourse);
 
   try {
     const response = await newCourse.save();
-    return res.status(201).json({ response, message: "Course created" });
+    res.status(201).json({ response, message: "Course created" });
+
+    console.log(process.env.BULK_EMAIL_SEND, 'check env');
+
+    // Send bulk emails if mail is true and bulk email sending is enabled
+    if (mail && process.env.BULK_EMAIL_SEND !== 'false') {
+      await sendBulkEmailsCourse(
+        `${req.body.title} - New Course Available`,
+        `${process.env.FRONTEND_LINK}/#/courses/${response._id}`
+      );
+    }
+
   } catch (error) {
     console.error('Error adding course:', error);
 
-    // Error handling and file deletion
     if (req.file && coverImage) {
       const filePath = path.join(__dirname, '../public', coverImage);
-
       if (fs.existsSync(filePath)) {
         fs.unlink(filePath, (err) => {
           if (err) {
@@ -71,70 +82,88 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
 
 
 router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), processImage, async (req, res) => {
-  // Check if the user is an admin
-  const tokenUser = req.user;
-  if (tokenUser?.role !== 'admin') {
-    return res.status(403).json({ message: 'User is not an admin' });
-  }
-
-  const filteredLessons =  req.body.lessons.filter(lesson => lesson !== null);
-
-  const courseId = req.params.id;
-  const updateData = {
-    title: req.body.title,
-    description: req.body.description,
-    price: req.body.price,
-    actualPrice: req.body.actualPrice,
-    duration: req.body.duration,
-    tags: req.body.tags,
-    link: req.body.link,
-    lessons: filteredLessons,
-    published: req.body.published,
-    enrolledStudents: req.body.enrolledStudents || [],
-    mail: req.body.published === 'public' ? true : false,
-  };
-
-  // Handle the coverImage path correctly
-  if (req.file) {
-    const coverImage = req.file && req.file.path ? req.file.path.replace('public/', '').replace(/\\/g, '/') : '';
-
-    updateData.coverImage = `${process.env.BASE_URL}/${coverImage}`;
-  }
-
   try {
-    // Find the course by ID and update it
-    const updatedCourse = await Course.findByIdAndUpdate(courseId, updateData, { new: true, runValidators: true });
+    // Check if the user is an admin
+    const tokenUser = req.user;
+    if (tokenUser?.role !== 'admin') {
+      return res.status(403).json({ message: 'User is not an admin' });
+    }
 
-    if (!updatedCourse) {
+    const courseId = req.params.id;
+    const course = await Course.findById(courseId);
+    if (!course) {
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    // Return the updated course in the response
+    // Filter lessons to remove null values
+    const filteredLessons = req.body.lessons?.filter(lesson => lesson !== null) || [];
+
+    const updateData = {
+      title: req.body.title || course.title,
+      description: req.body.description || course.description,
+      price: req.body.price || course.price,
+      actualPrice: req.body.actualPrice || course.actualPrice,
+      duration: req.body.duration || course.duration,
+      tags: req.body.tags || course.tags,
+      link: req.body.link || course.link,
+      lessons: filteredLessons.length > 0 ? filteredLessons : course.lessons,
+      published: req.body.published || course.published,
+      enrolledStudents: req.body.enrolledStudents || course.enrolledStudents,
+      updatedAt: new Date(),
+    };
+
+    // Handle coverImage updates
+    if (req.file) {
+      // Delete old cover image if exists
+      if (course.coverImage) {
+        const oldImagePath = course.coverImage.replace(`${process.env.BASE_URL}/`, '');
+        const oldFilePath = path.join(__dirname, '../public', oldImagePath);
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlink(oldFilePath, (err) => {
+            if (err) console.error('Error deleting old image:', err);
+            else console.log('Old image deleted:', oldImagePath);
+          });
+        }
+      }
+
+      // Update coverImage with new image
+      const newCoverImage = req.file.path.replace('public/', '').replace(/\\/g, '/');
+      updateData.coverImage = `${process.env.BASE_URL}/${newCoverImage}`;
+    }
+
+    // Handle mail logic
+    if (course.mail === false && process.env.BULK_EMAIL_SEND !== 'false' && updateData.published === 'public') {
+      updateData.mail = true;
+      updateData.createdAt = new Date();
+      await sendBulkEmailsCourse(
+        `${updateData.title} - New Course Available`,
+        `${process.env.FRONTEND_LINK}/#/course/${courseId}`
+      );
+    }
+
+    // Update the course in the database
+    const updatedCourse = await Course.findByIdAndUpdate(courseId, updateData, { new: true, runValidators: true });
+
     res.status(200).json({ response: updatedCourse, message: "Course updated successfully" });
   } catch (error) {
     console.error('Error updating course:', error);
 
-    // If an error occurred while trying to delete the previously uploaded image
+    // If an error occurred and a new image was uploaded, delete it
     if (req.file) {
-      const filePath = path.join(__dirname, '../public', req.file.path.replace('public/', ''));
-      if (fs.existsSync(filePath)) {
-        fs.unlink(filePath, (err) => {
-          if (err) {
-            console.error('Error deleting previous image:', err);
-          } else {
-            console.log('Previous image deleted due to update error');
-          }
+      const newFilePath = req.file.path.replace('public/', '');
+      const filePathToDelete = path.join(__dirname, '../public', newFilePath);
+      if (fs.existsSync(filePathToDelete)) {
+        fs.unlink(filePathToDelete, (err) => {
+          if (err) console.error('Error deleting new image after failed update:', err);
+          else console.log('New image deleted due to update error:', newFilePath);
         });
       }
     }
 
-    // Send a 500 error response
-    res.status(500).json({
-      message: "Internal server error",
-      error: error.message  // Return the specific error message for debugging
-    });
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
 });
+
 
 
 

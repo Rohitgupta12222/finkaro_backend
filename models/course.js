@@ -80,13 +80,14 @@ const courseSchema = new mongoose.Schema({
   updatedAt: {
     type: Date
   },
-  enrolled: {
-    type: [String],
-    default: []
-  },
+
   count: {
     type: Number,
     default: 0
+  },
+  mail: {
+    type: Boolean,
+    default: false
   }
 });
 

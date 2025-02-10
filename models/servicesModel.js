@@ -39,11 +39,6 @@ const servicesSchema = new Schema({
       required: true
     }
   }],
-    enrolled:  {
-      type:[String],
-      default:[]
-
-    },
 
     count:{
       type:Number,

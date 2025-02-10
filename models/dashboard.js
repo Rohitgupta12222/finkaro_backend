@@ -89,10 +89,6 @@ const DashboardSchema = new mongoose.Schema({
       type: String,
     default: ''
   },
-  enrolled: {
-    type:[String],
-    default:[]
-  },
   count:{
     type:Number,
     default:0

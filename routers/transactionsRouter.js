@@ -64,7 +64,7 @@ router.post('/add', async (req, res) => {
 
         const user = await User.findOne({ email: prefilldata?.email });
         const updatedUser = await User.findOneAndUpdate(
-            { email: prefilldata?.email }, // Find the user by email
+            { email: prefilldata?.email },
             {
                 phoneNumber: prefilldata?.contact,
                 address: prefilldata?.address
@@ -91,9 +91,6 @@ router.post('/add', async (req, res) => {
 
 
         const savedSubscription = await newSubscription.save();
-        console.log(savedSubscription?.productsType, '=================== savedSubscription =========');
-
-
 
 
         const users = await User.findById(userId);
@@ -267,7 +264,6 @@ router.post('/add', async (req, res) => {
         });
     }
 });
-
 
 router.get('/get', async (req, res) => {
     try {

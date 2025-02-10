@@ -10,20 +10,22 @@ const fs = require('fs');
 const path = require('path');
 const { unlink } = require('fs/promises'); // Use fs/promises for async/await unlink  
 const  multipalprocessImage = require('../middelware/multipalImagesProcess');
+const {sendsubscribemail,sendBulkEmailsDashboard} = require('../mail/subscribeMail');
 
-
-
-router.post('/add',jwtAuthMiddleWare, upload.array('coverImage', 10), multipalprocessImage, async (req, res) => {
+router.post('/add', jwtAuthMiddleWare, upload.array('coverImage', 10), multipalprocessImage, async (req, res) => {
   const userId = req.user.id; // Get user ID from the token
-  const { title, content, links, actualPrice, offerPrice, status, mail, zipFileLink ,tags } = req.body;
+  const { title, content, links, actualPrice, offerPrice, status, zipFileLink, tags } = req.body;
 
+  // Determine mail field value based on status
+  const mail = status === 'public';
+
+  // Process cover image paths
   const coverImagePaths = req.files ? req.files.map(file => {
-    const coverImage = file.path; // Path without 'public/' because of earlier replacement
-    const imagePath = coverImage ? `${process.env.BASE_URL}/${coverImage.replace(/\\/g, '/')}` : '';
-    return imagePath; // Return full image URL
+    const coverImage = file.path;
+    return coverImage ? `${process.env.BASE_URL}/${coverImage.replace(/\\/g, '/')}` : '';
   }) : [];
-  console.log(coverImagePaths , 'coverImagePaths');
-  
+
+  console.log(coverImagePaths, 'coverImagePaths');
 
   try {
     const newDashboard = new Dashboard({
@@ -40,17 +42,47 @@ router.post('/add',jwtAuthMiddleWare, upload.array('coverImage', 10), multipalpr
       zipFileLink
     });
 
+    // Save to database
     const savedDashboard = await newDashboard.save();
+
+    // Send response
     res.status(201).json(savedDashboard);
+
+    console.log(process.env.BULK_EMAIL_SEND, 'check env');
+
+    // Send bulk emails if mail is true and bulk email sending is enabled
+    if (mail && process.env.BULK_EMAIL_SEND !== 'false') {
+      await sendBulkEmailsDashboard(
+        `${title} -New Dashboard Available for Purchase`,
+        `${process.env.FRONTEND_LINK}/#/dashboard/${savedDashboard._id}`
+      ); 
+    }
+
   } catch (error) {
     console.error('Error creating dashboard:', error);
+
+    // Delete uploaded images if an error occurs
+    if (req.files && coverImagePaths.length > 0) {
+      coverImagePaths.forEach(imagePath => {
+        const filePath = path.join(__dirname, '../public', imagePath.replace(process.env.BASE_URL + '/', ''));
+        if (fs.existsSync(filePath)) {
+          fs.unlink(filePath, (err) => {
+            if (err) {
+              console.error('Error deleting file:', err);
+            } else {
+              console.log('Uploaded image deleted due to error:', imagePath);
+            }
+          });
+        }
+      });
+    }
+
     res.status(500).json({ message: 'Server error', error });
   }
 });
 
 
-
-router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), multipalprocessImage, async (req, res) => {
+router.put('/dashboard/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), multipalprocessImage, async (req, res) => {
   const dashboardId = req.params.id;
   const userId = req.user.id;
   const {
@@ -61,42 +93,40 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
     actualPrice,
     offerPrice,
     tags,
-    mail,
     zipFileLink
   } = req.body;
 
-  // Extract new uploaded file paths
-  const newCoverImagePaths = req.files ? req.files.map(file => {
-    const coverImage = file.path; // Path without 'public/' because of earlier replacement
-    const imagePath = coverImage ? `${process.env.BASE_URL}/${coverImage.replace(/\\/g, '/')}` : '';
-    return imagePath; // Return full image URL
-  }) : [];
-
   try {
-    // Find the existing dashboard entry by ID
+    // Find the existing dashboard entry
     const existingDashboard = await Dashboard.findById(dashboardId);
-
     if (!existingDashboard) {
       return res.status(404).json({ message: 'Dashboard not found' });
     }
 
-    // **Optional Logic**: Merge old and new images if desired
-    const updatedCoverImages = newCoverImagePaths.length > 0
-      ? newCoverImagePaths // Use new images if provided
-      : existingDashboard.coverImage; // Otherwise, retain old images
+    // Extract new uploaded file paths
+    const newCoverImagePaths = req.files ? req.files.map(file => {
+      const coverImage = file.path;
+      return coverImage ? `${process.env.BASE_URL}/${coverImage.replace(/\\/g, '/')}` : '';
+    }) : [];
+
+    // Merge new and old images if needed
+    const updatedCoverImages = newCoverImagePaths.length > 0 ? newCoverImagePaths : existingDashboard.coverImage;
 
     // Delete old images only if new images are uploaded
     if (newCoverImagePaths.length > 0 && existingDashboard.coverImage && existingDashboard.coverImage.length > 0) {
       await Promise.all(existingDashboard.coverImage.map(async (imagePath) => {
         const filePath = `public/${imagePath.split(`${process.env.BASE_URL}/`)[1]}`;
         try {
-          await unlink(filePath); // Delete old file
+          await unlink(filePath);
           console.log(`Deleted old file: ${filePath}`);
         } catch (err) {
           console.error(`Error deleting old file ${filePath}:`, err);
         }
       }));
     }
+
+    // Preserve `createdAt` field
+    const createdAt = existingDashboard.createdAt;
 
     // Update fields only if provided
     existingDashboard.title = title || existingDashboard.title;
@@ -105,31 +135,42 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.array('coverImage', 10), mul
     existingDashboard.links = links || existingDashboard.links;
     existingDashboard.actualPrice = actualPrice || existingDashboard.actualPrice;
     existingDashboard.offerPrice = offerPrice || existingDashboard.offerPrice;
-    existingDashboard.mail = mail || existingDashboard.mail;
     existingDashboard.tags = tags ? [...new Set(tags)] : existingDashboard.tags; // Deduplicate tags
     existingDashboard.zipFileLink = zipFileLink || existingDashboard.zipFileLink;
-    existingDashboard.coverImage = updatedCoverImages; // Update with new/merged image paths
+    existingDashboard.coverImage = updatedCoverImages; // Use new/merged image paths
+
+    // If status is 'public', send bulk mail
+    if (status === 'public' && !existingDashboard.mail) {
+      existingDashboard.mail = true; // Mark as mailed
+      await sendBulkEmailsDashboard(
+        `${title} - New Dashboard Available for Purchase`,
+        `${process.env.FRONTEND_LINK}/#/dashboard/${savedDashboard._id}`
+      ); 
+       }
+
+    // Ensure `createdAt` is preserved
+    existingDashboard.createdAt = createdAt;
 
     // Save the updated dashboard entry
     const updatedDashboard = await existingDashboard.save();
-    res.status(200).json(updatedDashboard);
+    res.status(200).json({ message: 'Dashboard updated successfully', updatedDashboard });
+
   } catch (error) {
     console.error('Error updating dashboard:', error);
 
-    // If any error occurs, attempt to delete new files to prevent orphaned files
+    // Cleanup newly uploaded files if an error occurs
     if (req.files) {
       await Promise.all(req.files.map(async (file) => {
-        const filePath = file.path;
         try {
-          await unlink(filePath); // Delete new file
-          console.log(`Deleted new file: ${filePath}`);
+          await unlink(file.path);
+          console.log(`Deleted new file: ${file.path}`);
         } catch (err) {
-          console.error(`Error deleting new file ${filePath}:`, err);
+          console.error(`Error deleting new file ${file.path}:`, err);
         }
       }));
     }
 
-    res.status(500).json({ message: 'Server error', error });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

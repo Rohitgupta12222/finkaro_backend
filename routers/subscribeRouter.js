@@ -6,10 +6,7 @@ const sendsubscribemail = require('../mail/subscribeMail.js'); // Adjust path to
 
 
 router.post('/mail', async (req, res) => {
-  console.log(req.body , '============ req.body 1');
   const { email, name ,subject ,contact} = req.body;
-  
- 
   try {
 
     const existingUser = await Subscribe.findOne({ email });
