@@ -114,22 +114,19 @@ router.post('/add', async (req, res) => {
         if (savedSubscription?.productsType == 'dashboard') {
             const dashboard = await Dashboard.findById(productId);
 
-            dashboard.enrolled.push(userId); // Directly push userId (string) into the array
             dashboard.count++; // Increment the count
-            const updatedDashboard = await dashboard.save(); // Save the updated dashboard
+         await dashboard.save(); // Save the updated dashboard
 
         } else if (savedSubscription?.productsType == 'course') {
 
             const course = await Course.findById(productId);
 
-            course.enrolled.push(userId);
             course.count++;
             await course.save();
 
         } else if (savedSubscription?.productsType == 'softcopyBook') {
 
             const book = await Book.findById(productId);
-            book.enrolled.push(userId);
             book.count++;
             await book.save();
             const attachmentPath = `${process.env.FRONTEND_LINK}/assets/product/Finkaro-Book-Romance-with-Equity.pdf`;
@@ -143,9 +140,7 @@ router.post('/add', async (req, res) => {
                 if (!book) {
                     throw new Error('Book not found');
                 }
-        
-                // Update book details
-                book.enrolled.push(userId);
+
                 book.count++;
                 await book.save();
         
@@ -242,10 +237,7 @@ router.post('/add', async (req, res) => {
         
         else if (savedSubscription?.productsType == 'services') {
             const services = await Services.findById(productId);
-            console.log(services);
-
-            services.enrolled.push(userId);
-            services.count++;
+                  services.count++;
             await services.save();
         }
 
