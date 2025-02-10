@@ -50,12 +50,6 @@ const DashboardSchema = new mongoose.Schema({
       }
     }
   ],
-  purchaseDashboard: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'  // Reference to the User model for students
-    }
-  ],
   links: {
     type: String,
     default: ''
