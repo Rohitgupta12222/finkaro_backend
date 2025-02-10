@@ -112,7 +112,7 @@ router.put(
       title,
       content,
       status,
-      links,
+      links, 
       actualPrice,
       offerPrice,
       tags,
