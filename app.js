@@ -7,7 +7,7 @@ const path = require('path');
 require('dotenv').config();
 const PORT = process.env.PORT || 3000;
 const db = require('./db');
-
+require('./cornJob/deletedSubscribe');
 app.use(express.json({ limit: '200mb' }));
 app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
