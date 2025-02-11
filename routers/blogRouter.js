@@ -219,45 +219,46 @@ router.get('/get/:blogId', async (req, res) => {
 });
 router.get('/getAllBlogs', async (req, res) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1; // Default to page 1
-    const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
-    const title = req.query.title || ''; // Get the title query (default is an empty string)
-    const status = req.query.status; // Get the status query, optional
-    const sortField = req.query.sortField || 'createdAt'; // Default sort field is createdAt
-    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Default is descending
+      const page = parseInt(req.query.page, 10) || 1; // Default to page 1
+      const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
+      const title = req.query.title || ''; // Get the title query (default is an empty string)
+      const status = req.query.status; // Get the status query, optional
+      const sortField = req.query.sortField || 'createdAt'; // Default sort field is createdAt
+      const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Default is descending
 
-    const skip = (page - 1) * limit;
+      const skip = (page - 1) * limit;
 
-    // Build the query with case-insensitive title search
-    const query = {
-      title: { $regex: title, $options: 'i' } // Case-insensitive title search
-    };
+      // Build the query with case-insensitive title search
+      const query = {
+          title: { $regex: title, $options: 'i' } // Case-insensitive title search
+      };
 
-    // Conditionally add the status filter to the query if provided
-    if (status) {
-      query.status = status;
-    }
+      // Conditionally add the status filter to the query if provided
+      if (status) {
+          query.status = status;
+      }
 
-    // Create sorting object for Mongoose
-    const sortOptions = { [sortField]: sortOrder };
+      // Create sorting object for Mongoose
+      const sortOptions = { [sortField]: sortOrder };
 
-    // Find dashboards based on the query, apply pagination, and sort dynamically
-    const [blogPosts, count] = await Promise.all([
-      Blog.find(query)
-        .skip(skip)
-        .limit(limit)
-        .sort(sortOptions), // Sort using the constructed sort options
-      Blog.countDocuments(query) // Count documents matching the query
-    ]);
+      // Fetch blogs but exclude the 'content' field
+      const [blogPosts, count] = await Promise.all([
+          Blog.find(query)
+              .select('-content') // Excludes 'content' field
+              .skip(skip)
+              .limit(limit)
+              .sort(sortOptions), 
+          Blog.countDocuments(query) // Count documents matching the query
+      ]);
 
-    // Return the response with paginated results
-    res.json({
-      count,
-      data: blogPosts,
-    });
+      // Return the response with paginated results
+      res.json({
+          count,
+          data: blogPosts,
+      });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
+      console.error(error);
+      res.status(500).json({ error: error.message });
   }
 });
 
