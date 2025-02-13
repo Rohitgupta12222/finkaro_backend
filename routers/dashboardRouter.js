@@ -296,12 +296,16 @@ router.get("/get", async (req, res) => {
       query.status = status;
     }
 
-    // Create sorting object for Mongoose
-    const sortOptions = { [sortField]: sortOrder };
+    // Create sorting object for Mongoose with default descending order
+    const sortOptions = { [sortField]: -1 }; // Force descending order
 
     // Find dashboards based on the query, apply pagination, and sort dynamically
     const [dashboards, count] = await Promise.all([
-      Dashboard.find(query).skip(skip).limit(limit).sort(sortOptions), // Sort using the constructed sort options
+      Dashboard.find(query)
+        .select("title status coverImage createdAt") // Include coverImage in the response
+        .skip(skip)
+        .limit(limit)
+        .sort(sortOptions), // Sort in descending order
       Dashboard.countDocuments(query), // Count documents matching the query
     ]);
 
@@ -315,6 +319,7 @@ router.get("/get", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 router.get("/userdashboards", jwtAuthMiddleWare, async (req, res) => {
   try {
