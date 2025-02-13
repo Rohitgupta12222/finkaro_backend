@@ -24,12 +24,6 @@ const BookSchema = new mongoose.Schema({
       }
     }
   ],
-  purchaseBook: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'  // Reference to the User model for students
-    }
-  ],
   createdAt: {
     type: Date,
     default: Date.now
