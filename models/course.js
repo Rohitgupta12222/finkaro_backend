@@ -67,12 +67,7 @@ const courseSchema = new mongoose.Schema({
     enum: ['public', 'private'],
     default: "public",
   },
-  enrolledStudents: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'  // Reference to the User model for students
-    }
-  ],
+  
   createdAt: {
     type: Date,
     default: Date.now

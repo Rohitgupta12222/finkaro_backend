@@ -63,14 +63,6 @@ const BookSchema = new mongoose.Schema({
     default: 0
   },
 
-
-  enrolled: 
-    {
-      type:[String],
-      default:[]
-
-    }
-  ,
   count:{
     type:Number,
     default:0

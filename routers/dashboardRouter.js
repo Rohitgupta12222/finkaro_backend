@@ -342,10 +342,8 @@ router.get("/userdashboards", jwtAuthMiddleWare, async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    // Build the query with case-insensitive title search and filtering by enrolled array
     const query = {
       title: { $regex: title, $options: "i" },
-      enrolled: { $in: [userId] }, // Check if userId exists in the enrolled array
     };
 
     // Conditionally add the status filter to the query if provided

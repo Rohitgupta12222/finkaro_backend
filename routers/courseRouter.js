@@ -37,7 +37,6 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
     coverImage: imagePath,
     tags: req.body.tags,
     published: req.body.published,
-    enrolledStudents: req.body.enrolledStudents || [],
     mail
   });
 
@@ -108,7 +107,6 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
       link: req.body.link || course.link,
       lessons: filteredLessons.length > 0 ? filteredLessons : course.lessons,
       published: req.body.published || course.published,
-      enrolledStudents: req.body.enrolledStudents || course.enrolledStudents,
       updatedAt: new Date(),
     };
 
@@ -226,10 +224,8 @@ router.get('/getUsercourses', jwtAuthMiddleWare, async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    // Build the query with case-insensitive title search and filtering by enrolled array
     const query = {
       title: { $regex: title, $options: 'i' }, // Case-insensitive title search
-      enrolled: { $in: [userId] } // Filter by enrolled array
     };
 
     // Conditionally add the published filter to the query if provided
