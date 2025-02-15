@@ -21,7 +21,7 @@ async function sendsubscribemail(email, name) {
             to: email, // Individual recipient
             subject: "Welcome to Finkaro",
             html: `
-            <!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -34,7 +34,7 @@ async function sendsubscribemail(email, name) {
             padding: 0;
         }
         body {
-            background-color: #f4f4f4;
+            background-color: #f4f4f4; /* Light grey background */
             font-family: Arial, sans-serif;
             padding: 40px 0;
             width: 100%;
@@ -59,11 +59,11 @@ async function sendsubscribemail(email, name) {
         }
         .header {
             text-align: center;
-          
         }
         .header img {
             width: 100%; /* Ensures a consistent logo size */
             height: auto;
+            border-radius: 8px 8px 0 0;
         }
         .content {
             padding: 20px;
@@ -79,8 +79,8 @@ async function sendsubscribemail(email, name) {
         }
         .button {
             display: inline-block;
-            background: #000; /* Professional blue color */
-            color: #ffffff;
+            background-color: #000000; /* Black button */
+            color: #ffffff; /* White text */
             padding: 14px 28px;
             text-decoration: none;
             font-size: 16px;
@@ -89,11 +89,11 @@ async function sendsubscribemail(email, name) {
             transition: 0.3s;
         }
         .button:hover {
-            background: #0056b3; /* Darker shade on hover */
+            background-color: #333333; /* Slightly lighter black on hover */
         }
         .footer {
-            background: #000000;
-            color: #ffffff;
+            background: #000000; /* Black footer */
+            color: #ffffff; /* White text */
             text-align: center;
             padding: 15px;
             border-radius: 0 0 10px 10px;
@@ -149,7 +149,6 @@ async function sendsubscribemail(email, name) {
     </div>
 </body>
 </html>
-
 `
 
 
