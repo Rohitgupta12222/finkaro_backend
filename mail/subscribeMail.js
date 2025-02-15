@@ -20,37 +20,76 @@ async function sendsubscribemail(email, name) {
             from: process.env.EMAIL_USER, // Sender address
             to: email, // Individual recipient
             subject: "Welcome to Finkaro",
-            html: `<!DOCTYPE html>
+            html: `
+            <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Finkaro!</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        /* Reset styles for email compatibility */
+        body, p, h1, h2, h3, h4, h5, h6 {
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
         }
-        .email-container {
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            padding: 40px 0;
+            width: 100%;
+            text-align: center;
+        }
+        /* Center the email template */
+        .email-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
             max-width: 600px;
-            margin: auto;
-            background: #ffffff;
+            width: 100%;
+            background-color: #ffffff;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            margin: 0 auto;
         }
         .header {
             text-align: center;
-            padding: 20px 0;
+          
+        }
+        .header img {
+            width: 100%; /* Ensures a consistent logo size */
+            height: auto;
         }
         .content {
             padding: 20px;
         }
-         .content h2 {
+        .content h2 {
             text-align: center;
-            padding-bottom: 30px;
+            padding-bottom: 15px;
+        }
+        /* Button Styling */
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .button {
+            display: inline-block;
+            background: #000; /* Professional blue color */
+            color: #ffffff;
+            padding: 14px 28px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        .button:hover {
+            background: #0056b3; /* Darker shade on hover */
         }
         .footer {
             background: #000000;
@@ -59,52 +98,58 @@ async function sendsubscribemail(email, name) {
             padding: 15px;
             border-radius: 0 0 10px 10px;
         }
-        .button {
-            display: block;
-            width: fit-content;
-            margin: 30px auto;
-            background: #000000;
-            color: #ffffff;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            text-align: center;
-        }
+        .footer p { margin: 4px 0; }
         ul {
             padding-left: 20px;
+            margin-top: 10px;
         }
         ul li {
             margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        p {
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
-    <div class="email-container">
-        <div class="header">
-            <img src="your-logo-url" alt="Finkaro Logo" width="100">
-        </div>
-        <div class="content">
-            <h2>Welcome to Finkaro!</h2>
-            <p>Hi ${name},</p>
-            <p>Welcome to Finkaro, where we empower you with financial knowledge, smart investment strategies, and powerful data insights.</p>
-            <p><strong>Here are 4 ways you can benefit from Finkaro today:</strong></p>
-            <ul>
-                <li>📖 Insightful Blogs: Stay updated with expert-written articles on finance, investing, and wealth management.</li>
-                <li>📊 Portfolio Management Services: Optimize your investments with our data-driven strategies and expert guidance.</li>
-                <li>📈 Power BI Dashboards: Get interactive and real-time financial insights with our custom-built Power BI dashboards.</li>
-                <li>📚 Finance Book: Elevate your financial knowledge with our exclusive book, designed to help you make smarter investment decisions.
-                </li>
-            </ul>
-            <a href="https://www.finkaro.com/" class="button">Visit Finkaro</a>
-        </div>
-        <div class="footer">
-            <p>Happy creating!</p>
-            <p><strong>The Finkaro Team</strong></p>
-            <p>&copy; 2024 Finkaro AI. All rights reserved.</p>
+    <div class="email-wrapper">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <img src="https://www.finkaro.com/uploads/mailbanner.jpg" alt="Finkaro Logo">
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <h2>Welcome to Finkaro!</h2>
+                <p>Hi ${name},</p>
+                <p>Welcome to Finkaro, where we empower you with financial knowledge, smart investment strategies, and powerful data insights.</p>
+                <p><strong>Here are 4 ways you can benefit from Finkaro today:</strong></p>
+                <ul>
+                    <li>📖 <strong>Insightful Blogs:</strong> Stay updated with expert-written articles on finance, investing, and wealth management.</li>
+                    <li>📊 <strong>Portfolio Management Services:</strong> Optimize your investments with our data-driven strategies and expert guidance.</li>
+                    <li>📈 <strong>Power BI Dashboards:</strong> Get interactive and real-time financial insights with our custom-built Power BI dashboards.</li>
+                    <li>📚 <strong>Finance Book:</strong> Elevate your financial knowledge with our exclusive book, designed to help you make smarter investment decisions.</li>
+                </ul>
+
+                <!-- Centered Button -->
+                <div class="button-container">
+                    <a href="https://www.finkaro.com/" class="button">Visit Finkaro</a>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p>Happy creating!</p>
+                <p><strong>The Finkaro Team</strong></p>
+                <p>&copy; 2024 Finkaro AI. All rights reserved.</p>
+            </div>
         </div>
     </div>
 </body>
 </html>
+
 `
 
 
