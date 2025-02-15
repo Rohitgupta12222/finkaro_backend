@@ -64,7 +64,10 @@ router.post('/add', async (req, res) => {
     });
 
     await newSubscription.save();
+    this.sendSubscribeMail(email, name);
     res.status(201).json({ message: 'Subscription added successfully', data: newSubscription });
+    rh
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error', error });

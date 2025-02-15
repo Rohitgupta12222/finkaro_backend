@@ -13,14 +13,9 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const sendsubscribemail = async (email, name, subject, contant) => {
+const sendsubscribemail = async (email, name) => {
 
-    const data = {
-        email: email,
-        name: name,
-        subject: subject,
-        contant: contant
-    }
+   
     let emailto = "finkaro2025@gmail.com"
 
 
@@ -29,7 +24,92 @@ const sendsubscribemail = async (email, name, subject, contant) => {
             from: email,// Sender address,
             to: process.env.EMAIL_USER,// List of recipients
             subject,
-            html: mailContant(data)
+            html: `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Finkaro!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .content {
+            padding: 20px;
+        }
+         .content h2 {
+            text-align: center;
+            padding-bottom: 30px;
+        }
+        .footer {
+            background: #000000;
+            color: #ffffff;
+            text-align: center;
+            padding: 15px;
+            border-radius: 0 0 10px 10px;
+        }
+        .button {
+            display: block;
+            width: fit-content;
+            margin: 30px auto;
+            background: #000000;
+            color: #ffffff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        ul li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="your-logo-url" alt="Finkaro Logo" width="100">
+        </div>
+        <div class="content">
+            <h2>Welcome to Finkaro!</h2>
+            <p>Hi ${name},</p>
+            <p>Welcome to Finkaro, where we empower you with financial knowledge, smart investment strategies, and powerful data insights.</p>
+            <p><strong>Here are 4 ways you can benefit from Finkaro today:</strong></p>
+            <ul>
+                <li>📖 Insightful Blogs: Stay updated with expert-written articles on finance, investing, and wealth management.</li>
+                <li>📊 Portfolio Management Services: Optimize your investments with our data-driven strategies and expert guidance.</li>
+                <li>📈 Power BI Dashboards: Get interactive and real-time financial insights with our custom-built Power BI dashboards.</li>
+                <li>📚 Finance Book: Elevate your financial knowledge with our exclusive book, designed to help you make smarter investment decisions.
+                </li>
+            </ul>
+            <a href="https://www.finkaro.com/" class="button">Visit Finkaro</a>
+        </div>
+        <div class="footer">
+            <p>Happy creating!</p>
+            <p><strong>The Finkaro Team</strong></p>
+            <p>&copy; 2024 Finkaro AI. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+`
 
 
         });
@@ -39,90 +119,7 @@ const sendsubscribemail = async (email, name, subject, contant) => {
     }
 };
 
-const mailContant = (data) => {
-    return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${data.subject}</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            text-align: center;
-            padding-bottom: 20px;
-        }
-        .header img {
-            max-width: 150px;
-            margin-bottom: 10px;
-        }
-        .header h1 {
-            margin: 0;
-            color: #007bff;
-            font-size: 24px;
-        }
-        .content {
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-        .content p {
-            margin: 0 0 10px;
-        }
-        .footer {
-            text-align: center;
-            font-size: 0.8em;
-            color: #888;
-            border-top: 1px solid #ddd;
-            padding-top: 10px;
-        }
-        .footer p {
-            margin: 0;
-        }
-        .footer a {
-            color: #007bff;
-            text-decoration: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <img src="https://media.licdn.com/dms/image/C4D0BAQFEiCNE7h-geg/company-logo_200_200/0/1669457873461?e=2147483647&v=beta&t=KlBILCEzV7ZL7daWHMC0C3lb0fXFikcNOCQaDyYdd58" alt="Company Logo">
-            <h1>${data.subject}</h1>
-        </div>
-        <div class="content">
-            <p>Hello Team,</p>
-            <p><strong>Name:</strong> ${data?.name}</p>
-            <p><strong>Email:</strong> ${data?.email}</p>
-              <p> <strong>Contant :</strong>  ${data?.contant}
-              </p>
 
-            <p>Thank you for your attention.</p>
-        </div>
-        <div class="footer">
-            <p>FINKARO &copy; ${new Date().getFullYear()} Your Company. All rights reserved.</p>
-        </div>
-    </div>
-</body>
-</html>
-`
-
-}
 
 async function sendBulkEmails(subject, blogs, url) {
     const blog = blogs;
@@ -137,8 +134,8 @@ async function sendBulkEmails(subject, blogs, url) {
         const userEmails = users.map((user) => user.email);
 
         // Combine all email recipients and ensure they are unique
-        // const recipients = [...new Set([...subscriberEmails, ...userEmails])];
-        const recipients = ["rohitgupta.dec13@gmail.com", "anilmg8898@gmail.com"];
+        const recipients = [...new Set([...subscriberEmails, ...userEmails])];
+        // const recipients = ["rohitgupta.dec13@gmail.com", "anilmg8898@gmail.com"];
         // 
 
         // Set up the email transporter
@@ -244,7 +241,7 @@ async function sendBulkEmails(subject, blogs, url) {
         <div class="container">
             <!-- Header -->
             <div class="header">
-                <img src="https://drive.google.com/file/d/1-tVrVvyHSBOEQZ25yzbuU5wD_g5rsew7/view?usp=sharing" alt="Blog Banner" class="blog-image">
+                <img src="https://www.finkaro.com/uploads/mailbanner.jpg" alt="Blog Banner" class="blog-image">
                 
             </div>
 
