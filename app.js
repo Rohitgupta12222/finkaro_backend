@@ -118,6 +118,14 @@ app.delete("/delete/:filename", (req, res) => {
     res.status(404).json({ error: "File not found" });
   }
 });
+app.get("/images/:filename", (req, res) => {
+  const filePath = path.join(__dirname, "assets", req.params.filename);
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({ error: "Image not found" });
+  }
+});
 
 
 app.listen(PORT, () => {
