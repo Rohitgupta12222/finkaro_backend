@@ -48,7 +48,7 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
     await newBlog.save();
 
     // If mail is true, send bulk emails
-    const BlogDAta =  res.status(201).json(newBlog);
+    let BlogDAta =  res.status(201).json(newBlog);
     BlogDAta?.content = '';
     console.log(process.env.BULK_EMAIL_SEND , 'check env');
     
