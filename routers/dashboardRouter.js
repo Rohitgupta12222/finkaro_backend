@@ -315,6 +315,7 @@ router.get("/get", async (req, res) => {
       title: item.title,
       status: item.status,
       coverImage: item.coverImage.length > 0 ? item.coverImage[0] : null, // Get only first image
+      tags: item.tags,
       createdAt: item.createdAt,
     }));
 
@@ -335,7 +336,7 @@ router.get("/userdashboards", jwtAuthMiddleWare, async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
     const title = req.query.title || ""; // Get the title query (default is an empty string)
     const status = req.query.status; // Get the status query, optional
-    const sortField = req.query.sortField || "updatedAt"; // Default sort field
+    const sortField = req.query.sortField || "createdAt"; // Default sort field
     const sortOrder = req.query.sortOrder === "asc" ? 1 : -1; // Ascending or descending order, default is descending
     const userId = req.user?.id;
     console.log(userId);
