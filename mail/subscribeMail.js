@@ -86,7 +86,7 @@ const mailContant = (data) => {
             margin: 0 0 10px;
         }
         .footer {
-            text-align: center;
+            text-align: center; 
             font-size: 0.8em;
             color: #888;
             border-top: 1px solid #ddd;
