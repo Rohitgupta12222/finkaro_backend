@@ -137,8 +137,8 @@ async function sendBulkEmails(subject, blogs, url) {
         const userEmails = users.map((user) => user.email);
 
         // Combine all email recipients and ensure they are unique
-        const recipients = [...new Set([...subscriberEmails, ...userEmails])];
-        // const recipients = ["rohitgupta.dec13@gmail.com","anilmg8898@gmail.com"];
+        // const recipients = [...new Set([...subscriberEmails, ...userEmails])];
+         const recipients = ["rohitgupta.dec13@gmail.com","anilmg8898@gmail.com"];
         // 
 
         // Set up the email transporter
@@ -192,8 +192,11 @@ async function sendBulkEmails(subject, blogs, url) {
         }
         .header {
             background-color: #f9fafb;
-            padding: 20px;
+          
             border-bottom: 1px solid #e5e7eb;
+                width: 100%;
+    height: 200px; 
+    object-fit: cover;
         }
         .content {
             padding: 24px;
@@ -248,6 +251,7 @@ async function sendBulkEmails(subject, blogs, url) {
 
             <!-- Blog Content -->
             <div class="content">
+                 <img src="${blog?.coverImage}" alt="Blog Image" class="blog-image">
 
                 <p class="mt-4 text-gray-700">
                     We just published a new blog post that we think you’ll love!
@@ -272,9 +276,7 @@ async function sendBulkEmails(subject, blogs, url) {
                     <p class="text-gray-700 mt-2">${blog?.shortDescription}</p>
                 </div>
 
-                <p class="text-gray-700 mt-4">Read More….</p>
-
-                <!-- Centered Button -->
+                          <!-- Centered Button -->
                 <div class="button-container">
                     <a href="${url}" class="btn">View Blog</a>
                 </div>
