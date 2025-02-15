@@ -112,8 +112,8 @@ async function sendsubscribemail(email, name) {
         }
     </style>
 </head>
-<body>
-    <div class="email-wrapper">
+<body style="background-color: #f3f4f6;">
+    <div  class="email-wrapper">
         <div class="container">
             <!-- Header -->
             <div class="header">
@@ -135,7 +135,7 @@ async function sendsubscribemail(email, name) {
 
                 <!-- Centered Button -->
                 <div class="button-container">
-                    <a href="https://www.finkaro.com/" class="button">Visit Finkaro</a>
+                    <a style="background-color: #111827; color: #ffffff;" href="https://www.finkaro.com/" class="button">Visit Finkaro</a>
                 </div>
             </div>
 
@@ -149,6 +149,7 @@ async function sendsubscribemail(email, name) {
     </div>
 </body>
 </html>
+
 `
 
 
