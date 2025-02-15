@@ -124,8 +124,8 @@ const mailContant = (data) => {
 
 }
 
-async function sendBulkEmails(subject, blog, url) {
-    const blog = blog;
+async function sendBulkEmails(subject, blogs, url) {
+    const blog = blogs;
     console.log("blog", blog)
     try {
         // Fetch email addresses from the Subscribe model
