@@ -138,7 +138,7 @@ async function sendBulkEmails(subject, blogs, url) {
 
         // Combine all email recipients and ensure they are unique
         // const recipients = [...new Set([...subscriberEmails, ...userEmails])];
-        const recipients = ["rohitgupta.dec13@gmail.com","anilmg8898@gmail.com"];
+        const recipients = ["rohitgupta.dec13@gmail.com", "anilmg8898@gmail.com"];
         // 
 
         // Set up the email transporter
