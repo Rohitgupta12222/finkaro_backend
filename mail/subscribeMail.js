@@ -15,14 +15,10 @@ const transporter = nodemailer.createTransport({
 
 async function sendsubscribemail(email, name) {
 
-
-    let emailto = "finkaro2025@gmail.com"
-
-
     try {
         await transporter.sendMail({
-            from: email,// Sender address,
-            to: process.env.EMAIL_USER,// List of recipients
+            from: process.env.EMAIL_USER, // Sender address
+            to: email, // Individual recipient
             subject: "Welcome to Finkaro",
             html: `<!DOCTYPE html>
 <html>
