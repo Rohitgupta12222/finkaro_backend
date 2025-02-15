@@ -125,6 +125,8 @@ const mailContant = (data) => {
 }
 
 async function sendBulkEmails(subject, blog, url) {
+    const blog = blog;
+    console.log("blog", blog)
     try {
         // Fetch email addresses from the Subscribe model
         const subscribers = await Subscribe.find({}, 'email'); // Fetch only email field

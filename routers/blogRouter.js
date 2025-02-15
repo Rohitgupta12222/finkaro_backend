@@ -45,17 +45,15 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
     });
 
     // Save the blog to the database
-    await newBlog.save();
+    let BlogDAta = await newBlog.save();
 
     // If mail is true, send bulk emails
-    let BlogDAta =  res.status(201).json(newBlog);
-    console.log(process.env.BULK_EMAIL_SEND , 'check env');
-    
+     res.status(201).json(newBlog);
+
     if (mail && process.env.BULK_EMAIL_SEND !== 'false') {
       await sendBulkEmails(title + 'New Blog Post', BlogDAta ,process.env.FRONTEND_LINK +'/#/blog/'+newBlog._id);
     }
 
-    // Return the newly created blog in the response
   } catch (error) {
     // Log any errors and send a 500 error response
     console.error('Error adding blog:', error);
