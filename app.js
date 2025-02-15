@@ -1,14 +1,18 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const Razorpay = require('razorpay');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const PORT = process.env.PORT || 3000;
+const db = require('./db');
 require('./cornJob/deletedSubscribe');
 app.use(express.json({ limit: '200mb' }));
 app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+
 
 app.use(cors());
 
@@ -56,15 +60,6 @@ app.use('/testimonials', testimonialRouter);
 app.use('/comments', commentRouter);
 
 
-
-
-
-
-
-
-
-
-
 // Root route
 app.get('/', (req, res) => {
   res.send('Server connected');
@@ -81,6 +76,7 @@ app.get('/uploads/:filename', (req, res) => {
     }
   });
 });
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
