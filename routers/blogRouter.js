@@ -19,11 +19,6 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
 
   const { title, content, status, shortDescription, links } = req.body;
 
-  await mongoose.connect(process.env.DB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-
   // Handle the coverImage path correctly when using memoryStorage
   const coverImage = req.file && req.file.path ? req.file.path.replace('public/', '').replace(/\\/g, '/') : '';
   const imagePath = `${process.env.BASE_URL}/${coverImage}`;
@@ -54,7 +49,6 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
 
     // If mail is true, send bulk emails
      res.status(201).json(newBlog);
-     await mongoose.connection.close();
 
     if (mail && process.env.BULK_EMAIL_SEND !== 'false') {
       await sendBulkEmails(title + 'New Blog Post', BlogDAta ,process.env.FRONTEND_LINK +'/#/blog/'+newBlog._id);
@@ -81,7 +75,6 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
     }
 
     res.status(500).json({ error: 'An error occurred while adding the blog' });
-    await mongoose.connection.close();
   }
 });
 
@@ -94,10 +87,6 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
   const blogId = req.params.id;
 
   try {
-    await mongoose.connect(process.env.DB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
     // Find the blog post by ID
     const blog = await Blog.findById(blogId);
     if (!blog) {
@@ -148,7 +137,6 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
    
 
     res.status(200).json(blog);
-    await mongoose.connection.close();
   } catch (error) {
     console.error('Error updating blog:', error);
 
@@ -166,7 +154,6 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
     }
 
     res.status(500).json({ error: 'An error occurred while updating the blog' });
-    await mongoose.connection.close();
   }
 });
 
@@ -176,10 +163,6 @@ router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
   const blogId = req.params.id;
 
   try {
-    await mongoose.connect(process.env.DB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
     // Find the blog post by ID
     const blog = await Blog.findById(blogId);
     if (!blog) {
@@ -206,21 +189,15 @@ router.delete('/delete/:id', jwtAuthMiddleWare, async (req, res) => {
 
     // Return a success response
     res.status(200).json({ message: 'Blog post and associated image deleted successfully' });
-    await mongoose.connection.close();
   } catch (error) {
     console.error('Error deleting blog:', error);
     res.status(500).json({ error: 'An error occurred while deleting the blog post' });
-    await mongoose.connection.close();
   }
 });
 
 
 router.get('/get/:blogId', async (req, res) => {
   try {
-    await mongoose.connect(process.env.DB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
     const { blogId } = req.params;
 
     // Find the blog post by ID
@@ -233,19 +210,13 @@ router.get('/get/:blogId', async (req, res) => {
 
 
     res.status(200).json(blogPost);
-    await mongoose.connection.close();
   } catch (error) {
     // Handle errors
     res.status(500).json({ error: 'An error occurred while retrieving the blog post' });
-    await mongoose.connection.close();
   }
 });
 router.get('/getAllBlogs', async (req, res) => {
   try {
-    await mongoose.connect(process.env.DB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
       const page = parseInt(req.query.page, 10) || 1; // Default to page 1
       const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
       const title = req.query.title || ''; // Get the title query (default is an empty string)
@@ -283,20 +254,14 @@ router.get('/getAllBlogs', async (req, res) => {
           count,
           data: blogPosts,
       });
-      await mongoose.connection.close();
   } catch (error) {
       console.error(error);
       res.status(500).json({ error: error.message });
-      await mongoose.connection.close();
   }
 });
 
 router.put('/addcomment/:id', async (req, res) => {
   try {
-    await mongoose.connect(process.env.DB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
     const id = req.params?.id
     console.log(id);
    
@@ -326,11 +291,7 @@ router.put('/addcomment/:id', async (req, res) => {
   }
 });
 router.put('/updatecomment/:blogId/:commentId', jwtAuthMiddleWare, async (req, res) => {
-
-  await mongoose.connect(process.env.DB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });  const tokenUser = req.user;
+  const tokenUser = req.user;
   if (tokenUser?.role !== 'admin' ) {
     return res.status(403).json({ message: 'User is not an admin' });
   }
@@ -362,21 +323,15 @@ router.put('/updatecomment/:blogId/:commentId', jwtAuthMiddleWare, async (req, r
       message: 'Comment Updated Successfully',
       updatedComment: commentToUpdate
     });
-    await mongoose.connection.close();
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
-    await mongoose.connection.close();
   }
 });
 
 router.delete('/deletecomment/:blogId/:commentId',jwtAuthMiddleWare, async (req, res) => {
-  await mongoose.connect(process.env.DB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
   const tokenUser = req.user;
-
   if (tokenUser?.role !== 'admin') {
     return res.status(403).json({ message: 'User is not an admin' });
   }
@@ -408,11 +363,10 @@ router.delete('/deletecomment/:blogId/:commentId',jwtAuthMiddleWare, async (req,
     res.status(200).json({
       message: 'Comment Deleted Successfully'
     });
-    await mongoose.connection.close();
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
-    await mongoose.connection.close();
   }
 });
 
