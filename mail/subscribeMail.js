@@ -135,8 +135,8 @@ async function sendBulkEmails(subject, blog, url) {
         const userEmails = users.map((user) => user.email);
 
         // Combine all email recipients and ensure they are unique
-        const recipients = [...new Set([...subscriberEmails, ...userEmails])];
-        // const recipients = ["rohitgupta.dec13@gmail.com","anilmg8898@gmail.com"];
+        // const recipients = [...new Set([...subscriberEmails, ...userEmails])];
+         const recipients = ["rohitgupta.dec13@gmail.com","anilmg8898@gmail.com"];
         // 
 
         // Set up the email transporter
@@ -210,8 +210,7 @@ async function sendBulkEmails(subject, blog, url) {
             <div class="mt-4">
                 <p class="text-gray-900 font-bold">Quick Preview:</p>
                 <p class="text-gray-700 mt-1">
-                    The logistics sector’s market size is expected to increase from an estimated 
-                    ~INR9t in FY23 to ~INR 13.4t by FY28 at a CAGR of 8-9%.
+                   ${blog?.shortDescription}
                 </p>
             </div>
 

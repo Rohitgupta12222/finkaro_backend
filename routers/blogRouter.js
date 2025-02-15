@@ -48,11 +48,12 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
     await newBlog.save();
 
     // If mail is true, send bulk emails
-    res.status(201).json(newBlog);
+    const BlogDAta =  res.status(201).json(newBlog);
+    BlogDAta?.content = '';
     console.log(process.env.BULK_EMAIL_SEND , 'check env');
     
     if (mail && process.env.BULK_EMAIL_SEND !== 'false') {
-      await sendBulkEmails(title + 'New Blog Post', shortDescription ,process.env.FRONTEND_LINK +'/#/blog/'+newBlog._id);
+      await sendBulkEmails(title + 'New Blog Post', BlogDAta ,process.env.FRONTEND_LINK +'/#/blog/'+newBlog._id);
     }
 
     // Return the newly created blog in the response
