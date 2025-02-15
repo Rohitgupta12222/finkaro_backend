@@ -168,7 +168,7 @@ async function sendBulkEmails(subject, blogs, url) {
         /* Reset styles for email compatibility */
         body, p, h1, h2, h3, h4, h5, h6 {
             margin: 0;
-            padding: 0;
+            padding: 0; 
         }
         body {
             background-color: #f3f4f6; /* Light gray background */
