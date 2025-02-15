@@ -102,7 +102,7 @@ const mailContant = (data) => {
 <body>
     <div class="container">
         <div class="header">
-            <img src="${bannerImages}" alt="Company Logo">
+            <img src="https://media.licdn.com/dms/image/C4D0BAQFEiCNE7h-geg/company-logo_200_200/0/1669457873461?e=2147483647&v=beta&t=KlBILCEzV7ZL7daWHMC0C3lb0fXFikcNOCQaDyYdd58" alt="Company Logo">
             <h1>${data.subject}</h1>
         </div>
         <div class="content">
@@ -137,8 +137,8 @@ async function sendBulkEmails(subject, blogs, url) {
         const userEmails = users.map((user) => user.email);
 
         // Combine all email recipients and ensure they are unique
-        // const recipients = [...new Set([...subscriberEmails, ...userEmails])];
-         const recipients = ["rohitgupta.dec13@gmail.com","anilmg8898@gmail.com"];
+        const recipients = [...new Set([...subscriberEmails, ...userEmails])];
+        // const recipients = ["rohitgupta.dec13@gmail.com","anilmg8898@gmail.com"];
         // 
 
         // Set up the email transporter
@@ -192,11 +192,10 @@ async function sendBulkEmails(subject, blogs, url) {
         }
         .header {
             background-color: #f9fafb;
-          
+              width: 100%;
+    height: 200px; /* Set a default height */
+    object-fit: cover; /* Ensures the image maintains aspect ratio without distortion */
             border-bottom: 1px solid #e5e7eb;
-                width: 100%;
-    height: 200px; 
-    object-fit: cover;
         }
         .content {
             padding: 24px;
@@ -245,13 +244,13 @@ async function sendBulkEmails(subject, blogs, url) {
         <div class="container">
             <!-- Header -->
             <div class="header">
-                <img src="${blog?.coverImage}" alt="Blog Banner" class="blog-image">
+                <img src="https://drive.google.com/file/d/1-tVrVvyHSBOEQZ25yzbuU5wD_g5rsew7/view?usp=sharing" alt="Blog Banner" class="blog-image">
                 
             </div>
 
             <!-- Blog Content -->
             <div class="content">
-                 <img src="${blog?.coverImage}" alt="Blog Image" class="blog-image">
+                <img src="${blog?.coverImage}" alt="Blog Image" class="blog-image">
 
                 <p class="mt-4 text-gray-700">
                     We just published a new blog post that we think you’ll love!
@@ -276,7 +275,9 @@ async function sendBulkEmails(subject, blogs, url) {
                     <p class="text-gray-700 mt-2">${blog?.shortDescription}</p>
                 </div>
 
-                          <!-- Centered Button -->
+                <p class="text-gray-700 mt-4">Read More….</p>
+
+                <!-- Centered Button -->
                 <div class="button-container">
                     <a href="${url}" class="btn">View Blog</a>
                 </div>
