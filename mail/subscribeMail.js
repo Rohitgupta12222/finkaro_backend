@@ -124,7 +124,7 @@ const mailContant = (data) => {
 
 }
 
-async function sendBulkEmails(subject, blogDescription, url) {
+async function sendBulkEmails(subject, blog, url) {
     try {
         // Fetch email addresses from the Subscribe model
         const subscribers = await Subscribe.find({}, 'email'); // Fetch only email field
@@ -159,79 +159,81 @@ async function sendBulkEmails(subject, blogDescription, url) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome Email - Finkaro</title>
+    <title>Email Template</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Inter', sans-serif; text-align: center;">
+<body class="bg-gray-100 flex justify-center p-6">
+    <div class="max-w-lg w-full bg-white shadow-md border border-gray-200 rounded-md">
+        <!-- Header -->
+        <div class="bg-gray-50  text-center ">
+            <div class="w-full flex justify-center">
+                 <img src="${blog?.coverImages}" alt="Blog Image" class="w-full">
+            </div>
+        </div>
 
-    <!-- Email Wrapper -->
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f3f4f6">
-        <tr>
-            <td align="center" style="padding: 20px;">
-                <!-- Main Container -->
-                <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="max-width: 600px; width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
-                    
-                    <!-- Header Section -->
-                    <tr>
-                        <td align="center" style="background-color: #f9fafb; padding: 20px;">
-                            <img src="https://ci3.googleusercontent.com/meips/ADKq_NbdwhXy8Q_DwbDJ5PskRQuUwPXrzanb_52edOxqOLTQ7tpsia4_Jx5TBtLsS41VleNyLAlIuuIds5BHSaUKlahCkRl_68DJXWixjJgH987JQaN6_omM6Q=s0-d-e1-ft#https://email-assets.Finkaro.ai/automations/welcome/header.png?v=2"
-                                 alt="Finkaro Header Image" width="100%" style="display: block; border: 0;">
-                        </td>
-                    </tr>
+        <!-- Blog Content -->
+        <div class="p-6">
+            <div class="w-full">
+                <img src="blog-image.jpg" alt="Blog Image" class="w-full rounded-md">
+            </div>
 
-                    <!-- Centered Welcome Message -->
-                    <tr>
-                        <td align="center" style="padding: 20px;">
-                            <h1 style="font-size: 22px; font-weight: bold; color: #111827; margin: 0;">Welcome to <span style="color: #000;">Finkaro</span>!</h1>
-                        </td>
-                    </tr>
+            <p class="mt-4 text-gray-700 text-center">
+                We just published a new blog post that we think you’ll love!
+            </p>
 
-                    <!-- Content Section -->
-                    <tr>
-                        <td align="left" style="padding: 30px; color: #4b5563;">
-                            <p style="font-size: 16px; margin: 15px 0 20px;">Hello Anil,</p>
-                            <p style="font-size: 15px; line-height: 1.5;">
-                                Welcome to Finkaro, where your content gets a visual upgrade. Whether it's slides for your next big talk, 
-                                a technical blog post, or your next LinkedIn update, we're here to unlock the visual potential of your text content.
-                            </p>
+            <!-- Blog Details -->
+            <div class="mt-4">
+                <p class="flex items-center text-gray-800 font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16l-4-4m0 0l4-4m-4 4h16"></path>
+                    </svg>
+                    Blog Title: 
+                    <span class="font-normal text-gray-600 ml-1">${blog?.title}</span>
+                </p>
+                <p class="flex items-center text-gray-800 font-semibold mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Author: 
+                    <span class="font-normal text-gray-600 ml-1">[Author Name]</span>
+                </p>
+                <p class="flex items-center text-gray-800 font-semibold mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h4m4 0h.01M8 11h8m-8 4h8"></path>
+                    </svg>
+                    Published on: 
+                    <span class="font-normal text-gray-600 ml-1">${new Date(blog?.createdAt).getDate()}</span>
+                </p>
+            </div>
 
-                            <h2 style="font-size: 16px; margin: 20px 0 10px;">Here are 4 ways you can use Finkaro today:</h2>
-                            
-                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-                                <tr>
-                                    <td>
-                                        <p>📊 <strong>Presentations:</strong> Generate simple diagrams from your slide text.</p>
-                                        <p>📰 <strong>Blogs + Newsletters:</strong> Create shareable visuals from key paragraphs.</p>
-                                        <p>📱 <strong>Social Media:</strong> Convert your post into an engaging graphic.</p>
-                                        <p>📄 <strong>Documentation:</strong> Make easy-to-read docs with visuals.</p>
-                                    </td>
-                                </tr>
-                            </table>
+            <!-- Quick Preview -->
+            <div class="mt-4">
+                <p class="text-gray-900 font-bold">Quick Preview:</p>
+                <p class="text-gray-700 mt-1">
+                    The logistics sector’s market size is expected to increase from an estimated 
+                    ~INR9t in FY23 to ~INR 13.4t by FY28 at a CAGR of 8-9%.
+                </p>
+            </div>
 
-                            <!-- CTA Button -->
-                            <div style="text-align: center; margin-top: 30px;">
-                                <a href="https://finkaro.com" style="background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 6px; display: inline-block;">
-                                    Go to Finkaro
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
+            <p class="text-gray-700 mt-4">Read More….</p>
 
-                    <!-- Footer Section -->
-                    <tr>
-                        <td align="center" style="background-color: #111827; color: #ffffff; padding: 20px;">
-                            <p style="font-size: 14px; margin: 0;">Happy creating! <br> <strong>The Finkaro Team</strong></p>
-                            <p style="font-size: 12px; margin: 10px 0 0; color: #9ca3af;">Copyright © 2024 Finkaro AI. All rights reserved.</p>
-                        </td>
-                    </tr>
+            <!-- Button -->
+            <div class="mt-6 flex justify-center">
+                <a href="${url}" class="bg-black text-white font-semibold px-6 py-2 rounded-md hover:bg-gray-900">
+                    View Blog
+                </a>
+            </div>
+        </div>
 
-                </table>
-            </td>
-        </tr>
-    </table>
-
+        <!-- Footer -->
+        <div class="bg-gray-100 text-center p-6 border-t">
+            <p class="text-gray-700">Happy creating!</p>
+            <p class="text-gray-900 font-bold">The Finkaro Team</p>
+            <p class="text-gray-500 text-sm mt-2">Copyright © 2024 Finkaro AI. All rights reserved.</p>
+        </div>
+    </div>
 </body>
-</html>
-         `,
+</html>`,
             };
 
 
