@@ -279,56 +279,52 @@ router.get("/get", async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1; // Default to page 1
     const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
-    const title = req.query.title || ""; // Get the title query (default is an empty string)
-    const status = req.query.status; // Get the status query, optional
-    const sortField = req.query.sortField || "createdAt"; // Default sort field is 'createdAt'
-    const sortOrder = req.query.sortOrder === "asc" ? 1 : -1; // Default to descending order
+    const title = req.query.title || ""; // Title filter (default: empty)
+    const status = req.query.status; // Optional status filter
+    const sortField = req.query.sortField || "createdAt"; // Default sorting field
+    const sortOrder = req.query.sortOrder === "asc" ? 1 : -1; // Sort order (asc/desc)
 
     const skip = (page - 1) * limit;
 
-    // Build the query with case-insensitive title search
-    const query = {
-      title: { $regex: title, $options: "i" }, // Case-insensitive title search
-    };
+    // Build the query
+    const query = { title: { $regex: title, $options: "i" } };
+    if (status) query.status = status; // Add status conditionally
 
-    // Conditionally add the status filter to the query if provided
-    if (status) {
-      query.status = status;
-    }
+    // Sorting object
+    const sortOptions = { [sortField]: sortOrder };
 
-    // Create sorting object for Mongoose with default descending order
-    const sortOptions = { [sortField]: -1 };
-
-    // Find dashboards based on the query, apply pagination, and sort dynamically
+    // Find dashboards and count documents
     const [dashboards, count] = await Promise.all([
       Dashboard.find(query)
-        .select("title status coverImage createdAt") // Include coverImage
+        .select("title status coverImage tags createdAt") // Added `tags`
         .skip(skip)
         .limit(limit)
         .sort(sortOptions),
-      Dashboard.countDocuments(query), // Count documents matching the query
+      Dashboard.countDocuments(query),
     ]);
 
-    // Modify response to include only the first image from `coverImage` array
+    // Format response
     const formattedDashboards = dashboards.map((item) => ({
       _id: item._id,
       title: item.title,
       status: item.status,
-      coverImage: item.coverImage.length > 0 ? item.coverImage[0] : null, // Get only first image
+      coverImage: Array.isArray(item.coverImage) && item.coverImage.length > 0 ? item.coverImage[0] : null,
       tags: item.tags,
       createdAt: item.createdAt,
     }));
 
-    // Return the response with paginated results
+    // Send response
     res.json({
       count,
       data: formattedDashboards,
     });
+
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching dashboards:", error);
     res.status(500).json({ error: error.message });
   }
 });
+
 
 router.get("/userdashboards", jwtAuthMiddleWare, async (req, res) => {
   try {
