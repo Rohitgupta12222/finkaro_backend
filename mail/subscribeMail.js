@@ -253,7 +253,7 @@ async function sendBulkEmails(subject, blogs, url) {
                 <img src="${blog?.coverImage}" alt="Blog Image" class="blog-image">
 
                 <p class="mt-4 text-gray-700">
-                    We just published a new blog post that we think you’ll love!
+                    We just published a new blog post that we think you’ll love! 
                 </p>
 
                 <!-- Blog Details -->
