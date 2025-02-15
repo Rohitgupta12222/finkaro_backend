@@ -135,8 +135,8 @@ async function sendBulkEmails(subject, blog, url) {
         const userEmails = users.map((user) => user.email);
 
         // Combine all email recipients and ensure they are unique
-        // const recipients = [...new Set([...subscriberEmails, ...userEmails])];
-         const recipients = ["rohitgupta.dec13@gmail.com","anilmg8898@gmail.com"];
+        const recipients = [...new Set([...subscriberEmails, ...userEmails])];
+        // const recipients = ["rohitgupta.dec13@gmail.com","anilmg8898@gmail.com"];
         // 
 
         // Set up the email transporter
@@ -154,28 +154,102 @@ async function sendBulkEmails(subject, blog, url) {
                 from: process.env.EMAIL_USER, // Sender address
                 to: recipient, // Individual recipient
                 subject, // Subject line
-                html: `<!DOCTYPE html>
+                html: `
+     <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Template</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* Reset styles for email clients */
+        body, p, h1, h2, h3, h4, h5, h6 {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #f3f4f6; /* bg-gray-100 */
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 24px;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background-color: #ffffff; /* bg-white */
+            border: 1px solid #e5e7eb; /* border-gray-200 */
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* shadow-md */
+        }
+        .header {
+            background-color: #f9fafb; /* bg-gray-50 */
+            text-align: center;
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .content {
+            padding: 24px;
+        }
+        .blog-image {
+            width: 100%;
+            border-radius: 8px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-gray-700 {
+            color: #374151;
+        }
+        .text-gray-900 {
+            color: #111827;
+        }
+        .text-gray-600 {
+            color: #4b5563;
+        }
+        .font-bold {
+            font-weight: bold;
+        }
+        .font-semibold {
+            font-weight: 600;
+        }
+        .mt-4 {
+            margin-top: 16px;
+        }
+        .mt-2 {
+            margin-top: 8px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: black;
+            color: white;
+            font-weight: bold;
+            padding: 10px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #1f2937; /* hover:bg-gray-900 */
+        }
+        .footer {
+            background-color: #f3f4f6; /* bg-gray-100 */
+            text-align: center;
+            padding: 24px;
+            border-top: 1px solid #e5e7eb;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 flex justify-center p-6">
-    <div class="max-w-lg w-full bg-white shadow-md border border-gray-200 rounded-md">
+<body>
+    <div class="container">
         <!-- Header -->
-        <div class="bg-gray-50  text-center ">
-            <div class="w-full flex justify-center">
-                 <img src="${blog?.coverImages}" alt="Blog Image" class="w-full">
-            </div>
+        <div class="header">
+            <img src="https://api.finkaro.com/assets/images/mailbanner.jpg" alt="Blog Banner" class="blog-image">
         </div>
 
         <!-- Blog Content -->
-        <div class="p-6">
-            <div class="w-full">
-                <img src="blog-image.jpg" alt="Blog Image" class="w-full rounded-md">
-            </div>
+        <div class="content">
+            <img src="${blog?.coverImage}" alt="Blog Image" class="blog-image">
 
             <p class="mt-4 text-gray-700 text-center">
                 We just published a new blog post that we think you’ll love!
@@ -183,56 +257,41 @@ async function sendBulkEmails(subject, blog, url) {
 
             <!-- Blog Details -->
             <div class="mt-4">
-                <p class="flex items-center text-gray-800 font-semibold">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16l-4-4m0 0l4-4m-4 4h16"></path>
-                    </svg>
-                    Blog Title: 
-                    <span class="font-normal text-gray-600 ml-1">${blog?.title}</span>
+                <p class="font-semibold text-gray-800">
+                    Blog Title: <span class="text-gray-600 font-normal">${blog?.title}</span>
                 </p>
-                <p class="flex items-center text-gray-800 font-semibold mt-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Author: 
-                    <span class="font-normal text-gray-600 ml-1">[Author Name]</span>
+                <p class="font-semibold text-gray-800 mt-2">
+                    Author: <span class="text-gray-600 font-normal">${blog?.author}</span>
                 </p>
-                <p class="flex items-center text-gray-800 font-semibold mt-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h4m4 0h.01M8 11h8m-8 4h8"></path>
-                    </svg>
-                    Published on: 
-                    <span class="font-normal text-gray-600 ml-1">${new Date(blog?.createdAt).getDate()}</span>
+                <p class="font-semibold text-gray-800 mt-2">
+                    Published on: <span class="text-gray-600 font-normal">${new Date(blog?.createdAt).toDateString()}</span>
                 </p>
             </div>
 
             <!-- Quick Preview -->
             <div class="mt-4">
                 <p class="text-gray-900 font-bold">Quick Preview:</p>
-                <p class="text-gray-700 mt-1">
-                   ${blog?.shortDescription}
-                </p>
+                <p class="text-gray-700 mt-2">${blog?.shortDescription}</p>
             </div>
 
             <p class="text-gray-700 mt-4">Read More….</p>
 
             <!-- Button -->
-            <div class="mt-6 flex justify-center">
-                <a href="${url}" class="bg-black text-white font-semibold px-6 py-2 rounded-md hover:bg-gray-900">
-                    View Blog
-                </a>
+            <div class="mt-6 text-center">
+                <a href="${url}" class="btn">View Blog</a>
             </div>
         </div>
 
         <!-- Footer -->
-        <div class="bg-gray-100 text-center p-6 border-t">
+        <div class="footer">
             <p class="text-gray-700">Happy creating!</p>
             <p class="text-gray-900 font-bold">The Finkaro Team</p>
             <p class="text-gray-500 text-sm mt-2">Copyright © 2024 Finkaro AI. All rights reserved.</p>
         </div>
     </div>
 </body>
-</html>`,
+</html>
+`,
             };
 
 
