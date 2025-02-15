@@ -4,7 +4,8 @@ const mongoose = require('mongoose')
  const mongoDbURL = process.env.DB_URL;
 mongoose.connect(`${mongoDbURL}`,{
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 30000
 })
 const db = mongoose.connection;
 db.on('connected',()=> console.log('mongo database connected'));
