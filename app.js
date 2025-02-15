@@ -86,48 +86,6 @@ app.get('/uploads/:filename', (req, res) => {
   });
 });
 
-// Set up storage for Multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = "uploads/"; // Store images in "assets" folder
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-  },
-});
-
-const upload = multer({ storage });
-
-// **Upload Image API**
-app.post("/upload", upload.single("image"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
-  }
-  res.json({ message: "File uploaded successfully", filename: req.file.filename });
-});
-app.delete("/delete/:filename", (req, res) => {
-  const filePath = path.join(__dirname, "assets", req.params.filename);
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-    res.json({ message: "File deleted successfully" });
-  } else {
-    res.status(404).json({ error: "File not found" });
-  }
-});
-app.get("/images/:filename", (req, res) => {
-  const filePath = path.join(__dirname, "assets", req.params.filename);
-  if (fs.existsSync(filePath)) {
-    res.sendFile(filePath);
-  } else {
-    res.status(404).json({ error: "Image not found" });
-  }
-});
-
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
