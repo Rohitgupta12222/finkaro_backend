@@ -242,7 +242,7 @@ async function sendBulkEmails(subject, blogs, url) {
         <div class="container">
             <!-- Header -->
             <div class="header">
-                <img src="https://drive.google.com/file/d/1-tVrVvyHSBOEQZ25yzbuU5wD_g5rsew7/view?usp=sharing" alt="Blog Banner" class="blog-image">
+                <img src="https://photos.fife.usercontent.google.com/pw/AP1GczPFpx4o-z0fgNQzI1JuFvebsFnVxLP6bLhMu9GjTpVmhx-ohZmSmJx6=w1920-h724-s-no-gm?authuser=0" alt="Blog Banner" class="blog-image">
                 
             </div>
 
@@ -260,7 +260,7 @@ async function sendBulkEmails(subject, blogs, url) {
                         <strong>Blog Title:</strong> <span class="text-gray-600 font-normal">${blog?.title}</span>
                     </p>
                     <p class="font-semibold text-gray-800 mt-2">
-                        <strong>Author:</strong> <span class="text-gray-600 font-normal">${blog?.author}</span>
+                        <strong>Author:</strong> <span class="text-gray-600 font-normal">Kasfur Dhuniyan</span>
                     </p>
                     <p class="font-semibold text-gray-800 mt-2">
                         <strong>Published on:</strong> <span class="text-gray-600 font-normal">${new Date(blog?.createdAt).toDateString()}</span>
