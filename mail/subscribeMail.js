@@ -44,10 +44,7 @@ async function sendsubscribemail(email, name) {
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .header {
             text-align: center;
-            padding: 0 0;
         }
         .header img {
             width: 100%;
@@ -57,54 +54,50 @@ async function sendsubscribemail(email, name) {
         .content {
             padding: 20px;
         }
-         .content h2 {
-            text-align: center;
-            padding-bottom: 30px;
-        }
-        .footer {
-            background: #000000;
-            color: #ffffff;
-            text-align: center;
-            padding: 15px;
-            border-radius: 0 0 10px 10px;
+        .content h2 {
+            padding-bottom: 20px;
         }
         .button {
-            display: block;
-            width: fit-content;
-            margin: 30px auto;
+            display: inline-block;
             background: #000000;
             color: #ffffff;
-            padding: 10px 20px;
+            padding: 12px 24px;
             text-decoration: none;
             border-radius: 5px;
-            text-align: center;
+            margin-top: 20px;
         }
         ul {
+            text-align: left;
             padding-left: 20px;
         }
         ul li {
             margin-bottom: 10px;
+        }
+        .footer {
+            background: #000000;
+            color: #ffffff;
+            padding: 15px;
+            border-radius: 0 0 10px 10px;
         }
     </style>
 </head>
 <body>
     <div class="email-container">
         <div class="header">
-            <img src="https://www.finkaro.com/uploads/mailbanner.jpg" alt="Finkaro Logo" width="100">
+            <img src="https://www.finkaro.com/uploads/mailbanner.jpg" alt="Finkaro Logo">
         </div>
         <div class="content">
             <h2>Welcome to Finkaro!</h2>
-            <p>Dear ${name},</p>
+            <p>Dear Member,</p>
             <p>Welcome to Finkaro, where we empower you with financial knowledge, smart investment strategies, and powerful data insights.</p>
             <p><strong>Here are 4 ways you can benefit from Finkaro today:</strong></p>
             <ul>
                 <li>📖 Insightful Blogs: Stay updated with expert-written articles on finance, investing, and wealth management.</li>
                 <li>📊 Portfolio Management Services: Optimize your investments with our data-driven strategies and expert guidance.</li>
                 <li>📈 Power BI Dashboards: Get interactive and real-time financial insights with our custom-built Power BI dashboards.</li>
-                <li>📚 Finance Book: Elevate your financial knowledge with our exclusive book, designed to help you make smarter investment decisions.
-                </li>
+                <li>📚 Finance Book: Elevate your financial knowledge with our exclusive book, designed to help you make smarter investment decisions.</li>
             </ul>
-            <a href="https://finkaro.com/" class="button">Visit Finkaro</a>
+            <a href="https://finkaro.com/" style="background-color:black,color:white" class="button">Visit Finkaro</a>
         </div>
         <div class="footer">
             <p>Happy creating!</p>
