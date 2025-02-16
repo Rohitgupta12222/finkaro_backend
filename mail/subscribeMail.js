@@ -21,7 +21,7 @@ async function sendsubscribemail(email, name) {
             to: email, // Individual recipient
             subject: "Welcome to Finkaro",
             html: `
-          <!DOCTYPE html>
+            <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -40,9 +40,9 @@ async function sendsubscribemail(email, name) {
                     <!-- Header Section -->
                     <tr>
                         <td align="center" style="background-color: #f9fafb; padding: 20px;">
-    <div style="width: 100%; max-width: 600px; height: 200px; background: url('https://www.finkaro.com/uploads/mailbanner.jpg') no-repeat center center; background-size: cover;">
-    </div>
-</td>
+                            <img src="https://www.finkaro.com/uploads/mailbanner.jpg"
+                                 alt="Finkaro Header Image" width="100%" style="display: block; border: 0;">
+                        </td>
                     </tr>
 
                     <!-- Centered Welcome Message -->
@@ -101,6 +101,7 @@ async function sendsubscribemail(email, name) {
 
 </body>
 </html>
+
 
 
 `
