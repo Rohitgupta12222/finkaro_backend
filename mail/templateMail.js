@@ -227,7 +227,7 @@ Happy Learning! 📖
     }
 };
 async function serviceBuy(email, name, servicesData,endDate, url) {
-    let services = services;
+    let services = servicesData;
     try {
         await transporter.sendMail({
             from: process.env.EMAIL_USER, // Sender address
@@ -268,7 +268,7 @@ async function serviceBuy(email, name, servicesData,endDate, url) {
                             </p>
 
                             <h2 style="font-size: 16px; margin: 20px 0 10px;">📌 Service Details:</h2><br/>
-🔹 <b>Service Name:</b>${servicesData?.title}<br/>
+🔹 <b>Service Name:</b>${services?.title}<br/>
 🔹 <b>Purchase Date:</b>${new Date(endDate).toDateString()} <br/>
 🔹 <b>Next Step:</b> Our expert will contact you shortly for further discussion.<br/>
 
