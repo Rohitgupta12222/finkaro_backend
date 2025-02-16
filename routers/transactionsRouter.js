@@ -8,6 +8,7 @@ const Book = require('../models/book')
 const Services = require('../models/servicesModel')
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer file
 const axios = require('axios');
+const { dashboardBuy, courseBuy, serviceBuy, hardCopyBuy,softCopyBuy } = require('../mail/templateMail');
 require('dotenv').config();
 // POST route to create a new subscription
 router.post('/add', async (req, res) => {
@@ -120,6 +121,7 @@ router.post('/add', async (req, res) => {
 
             course.count++;
             await course.save();
+            this.courseBuy(Subscriptiondata?.email,users?.name,course,"https://www.finkaro.com/course/"+productId);
 
         } else if (savedSubscription?.productsType == 'softcopyBook') {
 
