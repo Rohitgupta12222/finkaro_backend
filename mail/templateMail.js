@@ -564,8 +564,7 @@ Happy Investing! 🚀
 </body>
 </html>
 `
-      
-            // html: '<b>Hello world?</b>', // If you want to send HTML content
+
           };
         if (link) {
             mailOptions.attachments = [

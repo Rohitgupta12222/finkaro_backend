@@ -236,7 +236,7 @@ router.post('/add', async (req, res) => {
             const services = await Services.findById(productId);
                   services.count++;
             await services.save();
-            serviceBuy(Subscriptiondata?.email,users?.name,services,savedSubscription?.endDate,"https://www.finkaro.com/services/"+productId);
+            serviceBuy(Subscriptiondata?.email,users?.name,services,savedSubscription?.startDate,"https://www.finkaro.com/services/"+productId);
         }
 
 
