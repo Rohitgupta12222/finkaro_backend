@@ -111,7 +111,7 @@ async function dashboardBuy(email, title, url) {
         console.error('Error sending email:', error);
     }
 };
-async function courseBuy(email, name, courseData, url) {
+async function courseBuy(email, name, courseData,plan, url) {
     let course = courseData;
     try {
         await transporter.sendMail({
@@ -154,12 +154,12 @@ async function courseBuy(email, name, courseData, url) {
                         <td align="left" style="padding: 30px; color: #4b5563;">
                             <p style="font-size: 16px; margin: 15px 0 20px;"><b>Hi  ${name},</b></p>
                             <p style="font-size: 15px; line-height: 1.5;">
-                           Congratulations! 🎉 You’ve successfully enrolled in our course on <b>Finkaro</b>. Get ready to enhance your <b>${coursename}</b> with expert-led video lessons.
+                           Congratulations! 🎉 You’ve successfully enrolled in our course on <b>Finkaro</b>. Get ready to enhance your <b>${course?.title}</b> with expert-led video lessons.
                             </p>
 
                             <h2 style="font-size: 16px; margin: 20px 0 10px;">📚 Course Details:<br/>
 🎥 Course Name: ${course?.title}<br/>
-📅 Access Duration: ${course?.plan} <br/>
+📅 Access Duration: ${plan} <br/>
 🔗 Start Learning Now: Login & Access Course</h2><br/>
                             
                             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
