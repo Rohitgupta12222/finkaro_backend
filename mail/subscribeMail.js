@@ -21,92 +21,86 @@ async function sendsubscribemail(email, name) {
             to: email, // Individual recipient
             subject: "Welcome to Finkaro",
             html: `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Finkaro!</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #e0e0e0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .email-container {
-            max-width: 600px;
-            width: 100%;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        .header img {
-            width: 100%;
-            display: block;
-            border-radius: 10px 10px 0 0;
-        }
-        .content {
-            padding: 20px;
-        }
-        .content h2 {
-            padding-bottom: 20px;
-        }
-        .button {
-            display: inline-block;
-            background: #000000;
-            color: #ffffff;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        ul {
-            text-align: left;
-            padding-left: 20px;
-        }
-        ul li {
-            margin-bottom: 10px;
-        }
-        .footer {
-            background: #000000;
-            color: #ffffff;
-            padding: 15px;
-            border-radius: 0 0 10px 10px;
-        }
-    </style>
+    <title>Welcome Email - Finkaro</title>
 </head>
-<body>
-    <div class="email-container">
-        <div class="header">
-            <img src="https://www.finkaro.com/uploads/mailbanner.jpg" alt="Finkaro Logo">
-        </div>
-        <div class="content">
-            <h2>Welcome to Finkaro!</h2>
-            <p>Dear Member,</p>
-            <p>Welcome to Finkaro, where we empower you with financial knowledge, smart investment strategies, and powerful data insights.</p>
-            <p><strong>Here are 4 ways you can benefit from Finkaro today:</strong></p>
-            <ul>
-                <li>📖 Insightful Blogs: Stay updated with expert-written articles on finance, investing, and wealth management.</li>
-                <li>📊 Portfolio Management Services: Optimize your investments with our data-driven strategies and expert guidance.</li>
-                <li>📈 Power BI Dashboards: Get interactive and real-time financial insights with our custom-built Power BI dashboards.</li>
-                <li>📚 Finance Book: Elevate your financial knowledge with our exclusive book, designed to help you make smarter investment decisions.</li>
-            </ul>
-            <a href="https://finkaro.com/" style="background-color:black,color:white" class="button">Visit Finkaro</a>
-        </div>
-        <div class="footer">
+<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Inter', sans-serif; text-align: center;">
+
+    <!-- Email Wrapper -->
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f3f4f6">
+        <tr>
+            <td align="center" style="padding: 20px;">
+                <!-- Main Container -->
+                <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="max-width: 600px; width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
+                    
+                    <!-- Header Section -->
+                    <tr>
+                        <td align="center" style="background-color: #f9fafb; padding: 20px;">
+                            <img src="https://www.finkaro.com/uploads/mailbanner.jpg"
+                                 alt="Finkaro Header Image" width="100%" style="display: block; border: 0;">
+                        </td>
+                    </tr>
+
+                    <!-- Centered Welcome Message -->
+                    <tr>
+                        <td align="center" style="padding: 20px;">
+                            <h1 style="font-size: 22px; font-weight: bold; color: #111827; margin: 0;">Welcome to <span style="color: #000;">Finkaro</span>!</h1>
+                        </td>
+                    </tr>
+
+                    <!-- Content Section -->
+                    <tr>
+                        <td align="left" style="padding: 30px; color: #4b5563;">
+                            <p style="font-size: 16px; margin: 15px 0 20px;">Hello Anil,</p>
+                            <p style="font-size: 15px; line-height: 1.5;">
+                               Welcome to Finkaro, where we empower you with financial knowledge, smart investment strategies, and powerful data insights.
+                            </p>
+
+                            <h2 style="font-size: 16px; margin: 20px 0 10px;">Here are 4 ways you can benefit from Finkaro today:</h2>
+                            
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                <tr>
+                                    <td>
+                                        <p>📖 <strong>Insightful Blogs:</strong> Stay updated with expert-written articles on finance, investing, and wealth management</p>
+                                        <p>📊  <strong> Portfolio Management Services:</strong> Optimize your investments with our data-driven strategies and expert guidance.</p>
+                                        <p>📈 <strong> Power BI Dashboards:</strong> Get interactive and real-time financial insights with our custom-built Power BI dashboards.</p>
+                                        <p>📚 <strong> Finance Book:</strong> Elevate your financial knowledge with our exclusive book, designed to help you make smarter investment decisions.</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- CTA Button -->
+                            <div style="text-align: center; margin-top: 30px;">
+                                <a href="https://finkaro.com" style="background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 6px; display: inline-block;">
+                                    Visit Finkaro
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Footer Section -->
+                    <tr>
+                        <td align="center" style="background-color: #111827; color: #ffffff; padding: 20px;">
+                            <div class="footer">
             <p>Happy creating!</p>
             <p><strong>The Finkaro Team</strong></p>
             <p>&copy; 2024 Finkaro AI. All rights reserved.</p>
         </div>
-    </div>
+                          
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
 </body>
 </html>
+
 
 
 `
