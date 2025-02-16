@@ -121,7 +121,10 @@ router.post('/add', async (req, res) => {
 
             course.count++;
             await course.save();
-            this.courseBuy(Subscriptiondata?.email,users?.name,course,"https://www.finkaro.com/course/"+productId);
+            console.log(course , "course");
+            
+            courseBuy(Subscriptiondata?.email,users?.name,course,"https://www.finkaro.com/course/"+productId);
+            console.log( "course send");
 
         } else if (savedSubscription?.productsType == 'softcopyBook') {
 
