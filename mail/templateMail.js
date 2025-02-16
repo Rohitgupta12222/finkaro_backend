@@ -43,12 +43,7 @@ async function dashboardBuy(email, title, url) {
                         </td>
                     </tr>
 
-                    <!-- Centered Welcome Message -->
-                    <tr>
-                        <td align="center" style="padding: 20px;">
-                            <h1 style="font-size: 22px; font-weight: bold; color: #111827; margin: 0;">Welcome to <span style="color: #000;">Finkaro</span>!</h1>
-                        </td>
-                    </tr>
+                
 
                     <!-- Content Section -->
                     <tr>
@@ -111,7 +106,7 @@ async function dashboardBuy(email, title, url) {
         console.error('Error sending email:', error);
     }
 };
-async function courseBuy(email, name, courseData,plan, url) {
+async function courseBuy(email, name, courseData, plan, url) {
     let course = courseData;
     try {
         await transporter.sendMail({
@@ -142,13 +137,7 @@ async function courseBuy(email, name, courseData,plan, url) {
                         </td>
                     </tr>
 
-                    <!-- Centered Welcome Message -->
-                    <tr>
-                        <td align="center" style="padding: 20px;">
-                            <h1 style="font-size: 22px; font-weight: bold; color: #111827; margin: 0;">For Courses purchase by ${name} </h1>
-                        </td>
-                    </tr>
-
+   
                     <!-- Content Section -->
                     <tr>
                         <td align="left" style="padding: 30px; color: #4b5563;">
@@ -237,8 +226,8 @@ Happy Learning! 📖
         console.error('Error sending email:', error);
     }
 };
-async function serviceBuy(email, name, Data, url) {
-    let course = courseData;
+async function serviceBuy(email, name, servicesData,endDate, url) {
+    let services = services;
     try {
         await transporter.sendMail({
             from: process.env.EMAIL_USER, // Sender address
@@ -268,12 +257,7 @@ async function serviceBuy(email, name, Data, url) {
                         </td>
                     </tr>
 
-                    <!-- Centered Welcome Message -->
-                    <tr>
-                        <td align="center" style="padding: 20px;">
-                            <h1 style="font-size: 22px; font-weight: bold; color: #111827; margin: 0;">For Service Purchase</h1>
-                        </td>
-                    </tr>
+               
 
                     <!-- Content Section -->
                     <tr>
@@ -284,8 +268,8 @@ async function serviceBuy(email, name, Data, url) {
                             </p>
 
                             <h2 style="font-size: 16px; margin: 20px 0 10px;">📌 Service Details:</h2><br/>
-🔹 <b>Service Name:</b>${Data?.title}<br/>
-🔹 <b>Purchase Date:</b> ${Data?.startDate} <br/>
+🔹 <b>Service Name:</b>${servicesData?.title}<br/>
+🔹 <b>Purchase Date:</b>${new Date(endDate).toDateString()} <br/>
 🔹 <b>Next Step:</b> Our expert will contact you shortly for further discussion.<br/>
 
 
@@ -321,7 +305,7 @@ If you have any questions in the meantime, feel free to reply to this email. We�
 
                             <!-- CTA Button -->
                             <div style="text-align: center; margin-top: 30px;">
-                                <a href="https://finkaro.com" style="background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 6px; display: inline-block;">
+                                <a href="${url}" style="background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 6px; display: inline-block;">
                                     Visit Service 
                                 </a>
                             </div>
@@ -358,7 +342,7 @@ If you have any questions in the meantime, feel free to reply to this email. We�
 };
 
 async function hardCopyBuy(email) {
-  
+
     try {
         await transporter.sendMail({
             from: process.env.EMAIL_USER, // Sender address
@@ -388,13 +372,7 @@ async function hardCopyBuy(email) {
                         </td>
                     </tr>
 
-                    <!-- Centered Welcome Message -->
-                    <tr>
-                        <td align="center" style="padding: 20px;">
-                            <h1 style="font-size: 22px; font-weight: bold; color: #111827; margin: 0;">For Book Purchase - Hard Copy</h1>
-                        </td>
-                    </tr>
-
+             
                     <!-- Content Section -->
                     <tr>
                         <td align="left" style="padding: 30px; color: #4b5563;">
@@ -437,13 +415,7 @@ async function hardCopyBuy(email) {
 Reply to this email, and we’ll be happy to help.
 
 Happy Investing! 🚀
-
-
 <br/>
-
-
-
- 
                                     </td>
                                 </tr>
                             </table>
@@ -481,10 +453,12 @@ Happy Investing! 🚀
     }
 };
 
-async function softCopyBuy(email) {
-  
+async function softCopyBuy(email, link) {
+
     try {
-        await transporter.sendMail({
+     
+
+        const mailOptions = {
             from: process.env.EMAIL_USER, // Sender address
             to: email, // Individual recipient
             subject: "Finkaro – Romancing with Equity Inside!",
@@ -509,13 +483,6 @@ async function softCopyBuy(email) {
                         <td align="center" style="background-color: #f9fafb; padding: 20px;">
                             <img src="https://www.finkaro.com/uploads/mailbanner.jpg"
                                  alt="Finkaro Header Image" width="100%" style="display: block; border: 0;">
-                        </td>
-                    </tr>
-
-                    <!-- Centered Welcome Message -->
-                    <tr>
-                        <td align="center" style="padding: 20px;">
-                            <h1 style="font-size: 22px; font-weight: bold; color: #111827; margin: 0;">For Book Purchase - Hard Copy</h1>
                         </td>
                     </tr>
 
@@ -570,8 +537,8 @@ Happy Investing! 🚀
                             </table>
 
                    <div style="text-align: center; margin-top: 30px;">
-                                <a href="https://finkaro.com" style="background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 6px; display: inline-block;">
-                                    Download Book 
+                                <a href="https://www.finkaro.com/" style="background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 6px; display: inline-block;">
+                                    Visit Finkaro 
                                 </a>
                             </div>
                         </td>
@@ -596,10 +563,19 @@ Happy Investing! 🚀
 
 </body>
 </html>
-
 `
+      
+            // html: '<b>Hello world?</b>', // If you want to send HTML content
+          };
+        if (link) {
+            mailOptions.attachments = [
+                {
+                    path: link, // File path for the attachment
+                },
+            ];
+        }
 
-        });
+        await transporter.sendMail(mailOptions);
         console.log('Email sent successfully.');
     } catch (error) {
         console.error('Error sending email:', error);
@@ -609,5 +585,5 @@ Happy Investing! 🚀
 
 
 
-module.exports = { dashboardBuy, courseBuy, serviceBuy, hardCopyBuy,softCopyBuy };
+module.exports = { dashboardBuy, courseBuy, serviceBuy, hardCopyBuy, softCopyBuy };
 

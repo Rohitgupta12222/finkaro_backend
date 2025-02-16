@@ -114,6 +114,7 @@ router.post('/add', async (req, res) => {
 
             dashboard.count++; // Increment the count
          await dashboard.save(); // Save the updated dashboard
+         dashboardBuy(Subscriptiondata?.email,dashboard?.title,"https://www.finkaro.com/dashboard/"+productId);
 
         } else if (savedSubscription?.productsType == 'course') {
 
@@ -132,9 +133,7 @@ router.post('/add', async (req, res) => {
             book.count++;
             await book.save();
             const attachmentPath = `${process.env.FRONTEND_LINK}/assets/product/Finkaro-Book-Romance-with-Equity.pdf`;
-            sendRegistrationEmail(savedSubscription?.email, ' Softcopy Received  from Finkaro', 'Please  Find the Attchement And stay connected with Finkaro', attachmentPath);
-
-
+            softCopyBuy(Subscriptiondata?.email,attachmentPath);
         }
         else if (savedSubscription?.productsType === 'Hardcopybook') {
             try {
@@ -227,11 +226,7 @@ router.post('/add', async (req, res) => {
         
             // Send email notification
             try {
-                await sendRegistrationEmail(
-                    savedSubscription?.email,
-                    'Hardcopy has been delivered to your address. Received from Finkaro',
-                    'Please stay connected with Finkaro.'
-                );
+                hardCopyBuy(Subscriptiondata?.email);
             } catch (emailError) {
                 console.error('Error sending email:', emailError.message);
             }
@@ -241,6 +236,7 @@ router.post('/add', async (req, res) => {
             const services = await Services.findById(productId);
                   services.count++;
             await services.save();
+            serviceBuy(Subscriptiondata?.email,users?.name,services,savedSubscription?.endDate,"https://www.finkaro.com/services/"+productId);
         }
 
 
