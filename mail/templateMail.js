@@ -37,7 +37,7 @@ async function dashboardBuy(email, title, url) {
                     
                     <!-- Header Section -->
                     <tr>
-                        <td align="center" style="background-color: #f9fafb; padding: 20px;">
+                         <td align="center" style="background-color: #f9fafb;">
                             <img src="https://www.finkaro.com/uploads/mailbanner.jpg"
                                  alt="Finkaro Header Image" width="100%" style="display: block; border: 0;">
                         </td>
@@ -131,7 +131,7 @@ async function courseBuy(email, name, courseData, plan, url) {
                     
                     <!-- Header Section -->
                     <tr>
-                        <td align="center" style="background-color: #f9fafb; padding: 20px;">
+                         <td align="center" style="background-color: #f9fafb;">
                             <img src="https://www.finkaro.com/uploads/mailbanner.jpg"
                                  alt="Finkaro Header Image" width="100%" style="display: block; border: 0;">
                         </td>
@@ -251,7 +251,7 @@ async function serviceBuy(email, name, servicesData,endDate, url) {
                     
                     <!-- Header Section -->
                     <tr>
-                        <td align="center" style="background-color: #f9fafb; padding: 20px;">
+                          <td align="center" style="background-color: #f9fafb;">
                             <img src="https://www.finkaro.com/uploads/mailbanner.jpg"
                                  alt="Finkaro Header Image" width="100%" style="display: block; border: 0;">
                         </td>
@@ -366,7 +366,7 @@ async function hardCopyBuy(email) {
                     
                     <!-- Header Section -->
                     <tr>
-                        <td align="center" style="background-color: #f9fafb; padding: 20px;">
+                         <td align="center" style="background-color: #f9fafb;">
                             <img src="https://www.finkaro.com/uploads/mailbanner.jpg"
                                  alt="Finkaro Header Image" width="100%" style="display: block; border: 0;">
                         </td>
@@ -480,7 +480,7 @@ async function softCopyBuy(email, link) {
                     
                     <!-- Header Section -->
                     <tr>
-                        <td align="center" style="background-color: #f9fafb; padding: 20px;">
+                        <td align="center" style="background-color: #f9fafb;">
                             <img src="https://www.finkaro.com/uploads/mailbanner.jpg"
                                  alt="Finkaro Header Image" width="100%" style="display: block; border: 0;">
                         </td>
