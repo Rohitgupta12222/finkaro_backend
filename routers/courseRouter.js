@@ -167,6 +167,8 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
 
 router.get('/getcourses', async (req, res) => {
   try {
+    console.log(req.query.published, 'query published');
+    
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const title = req.query.title || '';
@@ -176,16 +178,15 @@ router.get('/getcourses', async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    // Get user role from JWT authentication
-    const userRole = req.user?.role;
-    console.log('User Role:', userRole);
+
+    console.log('User Role: published', published);
 
     const query = {
       title: { $regex: title, $options: 'i' }, // Case-insensitive title search
     };
 
     // Apply role-based filtering
-    if (published == null ) {
+    if (published == undefined ) {
       // Admin sees both public and private courses
       query.published = { $in: ['public', 'private'] };
     } else {
