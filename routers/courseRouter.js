@@ -170,7 +170,7 @@ router.get('/getcourses', async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const title = req.query.title || '';
-    const published = req.query.published;
+    const published = req.query.published || req.query.status;
     const sortField = req.query.sortField || 'createdAt';
     const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1;
 
@@ -185,7 +185,7 @@ router.get('/getcourses', async (req, res) => {
     };
 
     // Apply role-based filtering
-    if (query.published == null ) {
+    if (published == null ) {
       // Admin sees both public and private courses
       query.published = { $in: ['public', 'private'] };
     } else {
