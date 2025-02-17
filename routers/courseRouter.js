@@ -165,52 +165,58 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
 
 
 
-router.get('/getcourses', async (req, res) => {
+router.get('/getcourses', jwtAuthMiddleWare, async (req, res) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1; // Default to page 1
-    const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
-    const title = req.query.title || ''; // Get the title query (default is an empty string)
-    const published = req.query.published; // Published filter, optional
-    const sortField = req.query.sortField || 'updatedAt'; // Default sort field
-    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Ascending or descending order, default is descending
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const title = req.query.title || '';
+    const published = req.query.published;
+    const sortField = req.query.sortField || 'updatedAt';
+    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1;
 
     const skip = (page - 1) * limit;
 
-    // Build the query with case-insensitive title search
+    // Get user role from JWT authentication
+    const userRole = req.user?.role;
+    console.log('User Role:', userRole);
+
     const query = {
-      title: { $regex: title, $options: 'i' } // Case-insensitive title search
+      title: { $regex: title, $options: 'i' }, // Case-insensitive title search
     };
 
-    // Conditionally add the published filter to the query if provided
-    if (published) {
-      query.published = published;
+    // Apply role-based filtering
+    if (userRole === 'admin') {
+      // Admin sees both public and private courses
+      query.published = { $in: ['public', 'private'] };
+    } else {
+      // Regular users see only public courses
+      query.published = 'public';
     }
 
-    // Create sorting object for Mongoose
+    // Debugging Output
+    console.log('Final Query:', JSON.stringify(query, null, 2));
+
     const sortOptions = {};
     if (sortField === 'createdAt' || sortField === 'updatedAt') {
       sortOptions[sortField] = sortOrder;
     }
 
-    // Find courses based on the query, apply pagination, and sort dynamically
     const [courses, count] = await Promise.all([
-      Course.find(query)
-        .skip(skip)
-        .limit(limit)
-        .sort(sortOptions), // Sort using the constructed sort options
-      Course.countDocuments(query) // Count documents matching the query
+      Course.find(query).skip(skip).limit(limit).sort(sortOptions),
+      Course.countDocuments(query),
     ]);
 
-    // Return the response with paginated results
     res.status(200).json({
       count,
-      data: courses
+      data: courses,
     });
+
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error: 'An error occurred while retrieving courses' });
   }
 });
+
 
 router.get('/getUsercourses', jwtAuthMiddleWare, async (req, res) => {
   try {
