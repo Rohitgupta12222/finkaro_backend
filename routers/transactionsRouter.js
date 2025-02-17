@@ -132,7 +132,7 @@ router.post('/add', async (req, res) => {
             const book = await Book.findById(productId);
             book.count++;
             await book.save();
-            const attachmentPath = `${process.env.FRONTEND_LINK}/assets/product/Finkaro-Book-Romance-with-Equity.pdf`;
+            const attachmentPath = `${process.env.FRONTEND_LINK}/assets/product/FinkaroEbook.pdf`;
             softCopyBuy(Subscriptiondata?.email,attachmentPath);
         }
         else if (savedSubscription?.productsType === 'Hardcopybook') {
