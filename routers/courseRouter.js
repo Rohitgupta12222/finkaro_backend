@@ -165,13 +165,13 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
 
 
 
-router.get('/getcourses', jwtAuthMiddleWare, async (req, res) => {
+router.get('/getcourses', async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const title = req.query.title || '';
     const published = req.query.published;
-    const sortField = req.query.sortField || 'updatedAt';
+    const sortField = req.query.sortField || 'createdAt';
     const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1;
 
     const skip = (page - 1) * limit;
