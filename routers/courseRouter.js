@@ -185,7 +185,7 @@ router.get('/getcourses', async (req, res) => {
     };
 
     // Apply role-based filtering
-    if (userRole === 'admin') {
+    if (query.published == null ) {
       // Admin sees both public and private courses
       query.published = { $in: ['public', 'private'] };
     } else {
