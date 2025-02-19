@@ -4,7 +4,7 @@ const User = require('../models/users');
 const router = express.Router();
 const bcrypt = require('bcrypt')
 const sendRegistrationEmail = require('../mail/registerMail'); // Adjust path to your mailer file
-const { jwtAuthMiddleWare, genrateToken } = require('../jwt/jwt')
+const { jwtAuthMiddleWare, generateToken } = require('../jwt/jwt')
 
 
 router.post('/register', async (req, res) => {
@@ -27,7 +27,7 @@ router.post('/register', async (req, res) => {
           role: updatedUser.role,
         };
 
-        const token = genrateToken(payloadJwt);
+        const token = generateToken(payloadJwt);
 
         return res.status(200).json({
           response: updatedUser,
@@ -61,7 +61,7 @@ router.post('/register', async (req, res) => {
 
         return res.status(201).json({
           data: existingUser,
-          token: genrateToken({
+          token: generateToken({
             id: existingUser.id,
             email: existingUser.email,
             role: existingUser.role,
@@ -103,7 +103,7 @@ router.post('/register', async (req, res) => {
 
       return res.status(201).json({
         data: response,
-        token: genrateToken({
+        token: generateToken({
           id: response.id,
           email: response.email,
           role: response.role,
@@ -117,7 +117,7 @@ router.post('/register', async (req, res) => {
         role: response.role,
       };
 
-      const token = genrateToken(payloadJwt);
+      const token = generateToken(payloadJwt);
 
       const emailContent = `
       Subject: Welcome to Our Service
@@ -155,56 +155,61 @@ router.post('/register', async (req, res) => {
 
 
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body
-  const user = await User.findOne({ email: email })
+  try {
+    const { email, password } = req.body;
+    console.log(req.boby);
+    
+    const user = await User.findOne({ email });
 
-  if (!user) return res.status(404).json({ message: 'user not found' })
-  if (!user?.isActive) {
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
+    if (!user.isActive) {
+      const activationLink = `${process.env.FRONTEND_LINK}/activate/${user.id}`;
 
-    const activationLink = `${process.env.FRONTEND_LINK}/activate/${response.id}`
+      const smsContent = `
+        Subject: Activate Your Account
 
+        Dear ${user.name},
 
-    const smsContent = `
-  Subject: Activate Your Account
+        Welcome to Our Service!
 
-  Dear ${user?.name},
+        Your account has been successfully created. To start using your account, please activate it by clicking the link below:
 
-  Welcome to Our Service!
+        ${activationLink}
 
-  Your account has been successfully created. To start using your account, please activate it by clicking the link below:
+        Here are your account details:
+        - **Email**: ${user.email}
+        - **Password**: ${password}
 
-  ${activationLink}
+        Please keep this information safe and secure. You can use these credentials to log in after activating your account.
 
-  Here are your account details:
-  - **Email**: ${user?.email}
-  - **Password**: ${password}
+        If you didn't create this account, please ignore this email.
 
-  Please keep this information safe and secure. You can use these credentials to log in after activating your account.
+        Thank you,
+        FINKARO
+      `;
 
-  If you didn't create this account, please ignore this email.
+      await sendRegistrationEmail(email, 'Account Activation Required', smsContent);
 
-  Thank you,
-  FINKARO
-`;
+      return res.status(403).json({ message: 'Please check your email to activate your account.' });
+    }
 
+    const check = await user.comparePassword(password);
+    if (!check) return res.status(401).json({ message: 'Invalid password' });
 
-    await sendRegistrationEmail(email, 'Account activated', smsContent);
+    const payload = {
+      id: user.id,
+      name: user.email,
+      role: user.role,
+    };
 
-    return res.status(404).json({ message: 'Please visit your email to activate your account. ' })
+    res.status(200).json({ response: user, token: generateToken(payload) });
+
+  } catch (error) {
+    console.error('Login Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
-
-  const check = await user.comparePassword(password)
-  if (!check) return res.status(404).json({ message: 'invaild password' })
-  const payload = {
-    id: user.id,
-    name: user.email,
-    role: user.role,
-  }
-  res.status(200).json({ response: user, token: genrateToken(payload) })
-
-
-})
+});
 
 router.put('/activateProfile', async (req, res) => {
   try {
@@ -220,7 +225,7 @@ router.put('/activateProfile', async (req, res) => {
       name: user.email,
       role: user.role,
     }
-    return res.status(200).json({ response: user, token: genrateToken(payload) })
+    return res.status(200).json({ response: user, token: generateToken(payload) })
 
   } catch (message) {
     console.log(message);
