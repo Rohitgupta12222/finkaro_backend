@@ -50,10 +50,10 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
 
     // Send bulk emails if mail is true and bulk email sending is enabled
     if (mail && process.env.BULK_EMAIL_SEND !== 'false') {
-      await sendBulkEmailsCourse(
-        `${req.body.title} - New Course Available`,
-        `${process.env.FRONTEND_LINK}/#/courses/${response._id}`
-      );
+      // await sendBulkEmailsCourse(
+      //   `${req.body.title} - New Course Available`,
+      //   `${process.env.FRONTEND_LINK}/courses/${response._id}`
+      // );
     }
 
   } catch (error) {
@@ -133,10 +133,10 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
     if (course.mail === false && process.env.BULK_EMAIL_SEND !== 'false' && updateData.published === 'public') {
       updateData.mail = true;
       updateData.createdAt = new Date();
-      await sendBulkEmailsCourse(
-        `${updateData.title} - New Course Available`,
-        `${process.env.FRONTEND_LINK}/#/course/${courseId}`
-      );
+      // await sendBulkEmailsCourse(
+      //   `${updateData.title} - New Course Available`,
+      //   `${process.env.FRONTEND_LINK}/course/${courseId}`
+      // );
     }
 
     // Update the course in the database

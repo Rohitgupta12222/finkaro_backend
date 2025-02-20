@@ -51,7 +51,7 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
      res.status(201).json(newBlog);
 
     if (mail && process.env.BULK_EMAIL_SEND !== 'false') {
-      await sendBulkEmails(title + 'New Blog Post', BlogDAta ,process.env.FRONTEND_LINK +'/#/blog/'+newBlog._id);
+      await sendBulkEmails(title + 'New Blog Post', BlogDAta ,process.env.FRONTEND_LINK +'/blog/'+newBlog._id);
     }
 
   } catch (error) {
@@ -124,7 +124,7 @@ router.put('/update/:id', jwtAuthMiddleWare, upload.single('coverImage'), proces
         blog.mail = true;
         blog.createdAt = new Date();
         blog.updatedAt = new Date();
-        await sendBulkEmails(blog.title + 'New Blog Post', blog.shortDescription ,process.env.FRONTEND_LINK +'/#/blog/'+blog._id);
+        await sendBulkEmails(blog.title + 'New Blog Post', blog.shortDescription ,process.env.FRONTEND_LINK +'/blog/'+blog._id);
       }
      
     

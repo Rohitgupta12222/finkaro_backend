@@ -64,14 +64,14 @@ router.post(
       // Send response
       res.status(201).json(savedDashboard);
 
-      console.log(process.env.BULK_EMAIL_SEND, "check env");
+     
 
       // Send bulk emails if mail is true and bulk email sending is enabled
       if (mail && process.env.BULK_EMAIL_SEND !== "false") {
-        await sendBulkEmailsDashboard(
-          `${title} -New Dashboard Available for Purchase`,
-          `${process.env.FRONTEND_LINK}/#/dashboard/${savedDashboard._id}`
-        );
+        //  sendBulkEmailsDashboard(
+        //   `${title} -New Dashboard Available for Purchase`,
+        //   `${process.env.FRONTEND_LINK}/dashboard/${savedDashboard._id}`
+        // );
       }
     } catch (error) {
       console.error("Error creating dashboard:", error);
@@ -183,10 +183,10 @@ router.put(
       // If status is 'public', send bulk mail
       if (status === "public" && !existingDashboard.mail) {
         existingDashboard.mail = true; // Mark as mailed
-        await sendBulkEmailsDashboard(
-          `${title} - New Dashboard Available for Purchase`,
-          `${process.env.FRONTEND_LINK}/#/dashboard/${existingDashboard._id}`
-        );
+        // await sendBulkEmailsDashboard(
+        //   `${title} - New Dashboard Available for Purchase`,
+        //   `${process.env.FRONTEND_LINK}/dashboard/${existingDashboard._id}`
+        // );
       }
 
       // Ensure `createdAt` is preserved
