@@ -148,8 +148,7 @@ async function sendBulkEmails(subject, blogs, url) {
                 from: process.env.EMAIL_USER, // Sender address
                 to: recipient, // Individual recipient
                 subject, // Subject line
-                html: `
-<!DOCTYPE html>
+                html: `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -163,12 +162,11 @@ async function sendBulkEmails(subject, blogs, url) {
             padding: 0; 
         }
         body {
-            background-color: #f3f4f6; /* Light gray background */
+            background-color: #f3f4f6;
             font-family: Arial, sans-serif;
             padding: 40px 0;
             width: 100%;
         }
-        /* Center the email template */
         .email-wrapper {
             width: 100%;
             display: flex;
@@ -182,16 +180,15 @@ async function sendBulkEmails(subject, blogs, url) {
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .header {
-            background-color: #f9fafb;
-              width: 100%;
-    height: 200px; /* Set a default height */
-    object-fit: cover; /* Ensures the image maintains aspect ratio without distortion */
+        .header img {
+            width: 100%;
+            height: auto;
+            display: block;
             border-bottom: 1px solid #e5e7eb;
         }
         .content {
             padding: 24px;
-            text-align: left; /* Keep content left-aligned */
+            text-align: left;
         }
         .blog-image {
             width: 100%;
@@ -204,9 +201,8 @@ async function sendBulkEmails(subject, blogs, url) {
         .font-semibold { font-weight: 600; }
         .mt-4 { margin-top: 16px; }
         .mt-2 { margin-top: 8px; }
-        /* Centered Button */
         .button-container {
-            text-align: center; /* Center the button */
+            text-align: center;
             margin-top: 20px;
         }
         .btn {
@@ -220,7 +216,7 @@ async function sendBulkEmails(subject, blogs, url) {
             font-size: 16px;
         }
         .btn:hover {
-            background-color: #1f2937; /* Dark gray hover */
+            background-color: #1f2937;
         }
         .footer {
             background-color: #f3f4f6;
@@ -229,26 +225,27 @@ async function sendBulkEmails(subject, blogs, url) {
             border-top: 1px solid #e5e7eb;
         }
         .footer p { margin: 4px 0; }
+        @media screen and (max-width: 600px) {
+            .container {
+                width: 100%;
+            }
+            .header img {
+                height: auto;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="email-wrapper">
         <div class="container">
-            <!-- Header -->
             <div class="header">
-                <img src="https://www.finkaro.com/uploads/mailbanner.jpg" alt="Blog Banner" class="blog-image">
-                
+                <img src="https://www.finkaro.com/uploads/mailbanner.jpg" alt="Blog Banner">
             </div>
-
-            <!-- Blog Content -->
             <div class="content">
                 <img src="${blog?.coverImage}" alt="Blog Image" class="blog-image">
-
                 <p class="mt-4 text-gray-700">
                     We just published a new blog post that we think you’ll love! 
                 </p>
-
-                <!-- Blog Details -->
                 <div class="mt-4">
                     <p class="font-semibold text-gray-800">
                         <strong>Blog Title:</strong> <span class="text-gray-600 font-normal">${blog?.title}</span>
@@ -260,22 +257,15 @@ async function sendBulkEmails(subject, blogs, url) {
                         <strong>Published on:</strong> <span class="text-gray-600 font-normal">${new Date(blog?.createdAt).toDateString()}</span>
                     </p>
                 </div>
-
-                <!-- Quick Preview -->
                 <div class="mt-4">
                     <p class="text-gray-900 font-bold">Quick Preview:</p>
-                    <p class="text-gray-700 mt-2">${blog?.shortDescription}</p>
+                    <p class="text-gray-700 mt-2">${blog?.shortDescription.substring(0, 100)}...</p>
                 </div>
-
                 <p class="text-gray-700 mt-4">Read More….</p>
-
-                <!-- Centered Button -->
                 <div class="button-container">
                     <a href="${url}" class="btn">View Blog</a>
                 </div>
             </div>
-
-            <!-- Footer -->
             <div class="footer">
                 <p class="text-gray-700">Happy creating!</p>
                 <p class="text-gray-900 font-bold">The Finkaro Team</p>

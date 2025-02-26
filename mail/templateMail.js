@@ -580,9 +580,91 @@ Happy Investing! 🚀
         console.error('Error sending email:', error);
     }
 };
+const activedAccount = async (email, name) => {
+    try {
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER, // Sender address
+            to: email, // Individual recipient
+            subject: "Welcome to Finkaro! Activate Your Account Now",
+            html: `   <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
+</head>
+<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Inter', sans-serif; text-align: center;">
+
+    <!-- Email Wrapper -->
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f3f4f6">
+        <tr>
+            <td align="center" style="padding: 20px;">
+                <!-- Main Container -->
+                <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="max-width: 600px; width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
+                    
+                    <!-- Header Section -->
+                    <tr>
+                          <td align="center" style="background-color: #f9fafb;">
+                            <img src="https://www.finkaro.com/uploads/mailbanner.jpg"
+                                 alt="Finkaro Header Image" width="100%" style="display: block; border: 0;">
+                        </td>
+                    </tr>
+
+               
+
+                    <!-- Content Section -->
+                    <tr>
+                        <td align="left" style="padding: 30px; color: #4b5563;">
+                            <p style="font-size: 16px; margin: 15px 0 20px;"><b>Dear ${name},</b></p>
+                                   <p style="font-size: 15px; line-height: 1.5;">
+                                Your account has been successfully activated!
+                            </p>
+                            <p style="font-size: 15px; line-height: 1.5;">
+                                You can now log in and access all features of your account.
+                            </p>
+                            <p style="font-size: 15px; line-height: 1.5;">
+                                Click the link below to log in to your account:
+                            </p>
+                     
+                            <p style="font-size: 15px; line-height: 1.5; margin-top: 20px;">
+                                If you have any questions or need support, feel free to contact us.
+                            </p>
+              
+                            <div style="text-align: center; margin-top: 30px;">
+                                <a href="www.finkaro.com" style="background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 6px; display: inline-block;">
+                                    Visit Website 
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Footer Section -->
+                    <tr>
+                        <td align="center" style="background-color: #111827; color: #ffffff; padding: 20px;">
+                            <div class="footer">
+            <p>Happy creating!</p>
+            <p><strong>The Finkaro Team</strong></p>
+            <p>&copy; 2024 Finkaro AI. All rights reserved.</p>
+        </div>
+                          
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+`
+        });
+        console.log('Email sent successfully.');
+    }          catch (error) {                              
+    }
+}
 
 
 
-
-module.exports = { dashboardBuy, courseBuy, serviceBuy, hardCopyBuy, softCopyBuy };
+module.exports = { dashboardBuy, courseBuy, serviceBuy, hardCopyBuy, softCopyBuy,activedAccount };
 
