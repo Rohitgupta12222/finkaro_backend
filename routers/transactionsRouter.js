@@ -269,24 +269,34 @@ router.post('/add', async (req, res) => {
 router.get('/get', async (req, res) => {
     try {
         // Get query parameters
-        const { page, limit, search } = req.query;
+        const { page, limit, search, productsType } = req.query;
 
         // Convert page and limit to numbers
         const pageNumber = parseInt(page, 10) || 1; // Default to page 1
         const pageSize = parseInt(limit, 10) || 10; // Default to 10 items per page
 
-        // Create a filter for search
-        const searchFilter = search ? { $text: { $search: search } } : {};
+        // Create a filter object
+        let filter = {};
+
+        // Apply search filter if provided
+        if (search) {
+            filter.$text = { $search: search };
+        }
+
+        // Apply productsType filter if provided and not empty
+        if (productsType && productsType !== '') {
+            filter.productsType = productsType;
+        }
 
         // Fetch paginated subscriptions in descending order
-        const subscriptions = await Subscription.find(searchFilter)
+        const subscriptions = await Subscription.find(filter)
             .sort({ _id: -1 }) // Sort by `_id` in descending order
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .exec();
 
         // Count total number of documents
-        const count = await Subscription.countDocuments(searchFilter);
+        const count = await Subscription.countDocuments(filter);
 
         res.json({
             count,
@@ -300,6 +310,7 @@ router.get('/get', async (req, res) => {
         });
     }
 });
+
 
 router.get('/get/:id', async (req, res) => {
     try {
