@@ -116,9 +116,8 @@ async function sendsubscribemail(email, name) {
 
 
 
-async function sendBulkEmails(subject, blogs, url) {
+async function sendBulkEmails( blogs, url) {
     const blog = blogs;
-    console.log("blog", blog)
     try {
         // Fetch email addresses from the Subscribe model
         const subscribers = await Subscribe.find({}, 'email'); // Fetch only email field
@@ -130,7 +129,7 @@ async function sendBulkEmails(subject, blogs, url) {
 
         // Combine all email recipients and ensure they are unique
         const recipients = [...new Set([...subscriberEmails, ...userEmails])];
-        // const recipients = ["rohitgupta.dec13@gmail.com", "anilmg8898@gmail.com"];
+        // const recipients = ["rohitgupta.dec13@gmail.com"];
         // 
 
         // Set up the email transporter
@@ -147,7 +146,7 @@ async function sendBulkEmails(subject, blogs, url) {
             const mailOptions = {
                 from: process.env.EMAIL_USER, // Sender address
                 to: recipient, // Individual recipient
-                subject, // Subject line
+                subject:blogs?.title, // Subject line
                 html: `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -235,7 +234,7 @@ async function sendBulkEmails(subject, blogs, url) {
         }
     </style>
 </head>
-<body>
+<body  style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Inter', sans-serif; text-align: center;">
     <div class="email-wrapper">
         <div class="container">
             <div class="header">
@@ -263,7 +262,7 @@ async function sendBulkEmails(subject, blogs, url) {
                 </div>
                 <p class="text-gray-700 mt-4">Read More….</p>
                 <div class="button-container">
-                    <a href="${url}" class="btn">View Blog</a>
+                    <a href="${url}" style="background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 6px; display: inline-block;">View Blog</a>
                 </div>
             </div>
             <div class="footer">
@@ -275,6 +274,7 @@ async function sendBulkEmails(subject, blogs, url) {
     </div>
 </body>
 </html>
+
 
 `,
             };

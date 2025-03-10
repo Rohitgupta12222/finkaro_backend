@@ -51,7 +51,7 @@ router.post('/add', jwtAuthMiddleWare, upload.single('coverImage'), processImage
      res.status(201).json(newBlog);
 
     if (mail && process.env.BULK_EMAIL_SEND !== 'false') {
-      await sendBulkEmails(title + 'New Blog Post', BlogDAta ,process.env.FRONTEND_LINK +'/blog/'+newBlog._id);
+      await sendBulkEmails( BlogDAta ,process.env.FRONTEND_LINK +'/blog/'+newBlog._id);
     }
 
   } catch (error) {

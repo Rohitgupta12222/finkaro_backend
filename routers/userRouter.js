@@ -8,6 +8,7 @@ const { activedAccount } = require("../mail/templateMail");
 
 router.post("/register", async (req, res) => {
   const { email, password, name, isActive, address, phoneNumber } = req.body;
+  console.log(req.body, "req.body");
 
   try {
     const existingUser = await User.findOne({ email });
@@ -19,7 +20,7 @@ router.post("/register", async (req, res) => {
           { phoneNumber, address },
           { new: true, runValidators: true }
         );
-        if (!existingUser?.isActive) {
+        if (existingUser?.isActive) {
           const payloadJwt = {
             id: updatedUser.id,
             email: updatedUser.email,
