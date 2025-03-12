@@ -217,46 +217,42 @@ router.get('/get/:blogId', async (req, res) => {
 });
 router.get('/getAllBlogs', async (req, res) => {
   try {
-      const page = parseInt(req.query.page, 10) || 1; // Default to page 1
-      const limit = parseInt(req.query.limit, 10) || 10; // Default to 10 items per page
-      const title = req.query.title || ''; // Get the title query (default is an empty string)
-      const status = req.query.status; // Get the status query, optional
-      const sortField = req.query.sortField || 'createdAt'; // Default sort field is createdAt
-      const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1; // Default is descending
+    let { page, limit, status } = req.query;
 
-      const skip = (page - 1) * limit;
+    // Convert to numbers and ensure they are valid
+    page = parseInt(page, 10) || 1;
+    limit = parseInt(limit, 10) || 10;
 
-      // Build the query with case-insensitive title search
-      const query = {
-          title: { $regex: title, $options: 'i' } // Case-insensitive title search
-      };
+    if (page < 1) {
+      return res.status(400).json({ error: 'Page number must be at least 1.' });
+    }
 
-      // Conditionally add the status filter to the query if provided
-      if (status) {
-          query.status = status;
-      }
+    const skip = (page - 1) * limit;
 
-      // Create sorting object for Mongoose
-      const sortOptions = { [sortField]: sortOrder };
+    // Fetch total count of blogs
+    const totalBlogs = await Blog.countDocuments({ status: status });
 
-      // Fetch blogs but exclude the 'content' field
-      const [blogPosts, count] = await Promise.all([
-          Blog.find(query)
-              .select('-content') // Excludes 'content' field
-              .skip(skip)
-              .limit(limit)
-              .sort(sortOptions), 
-          Blog.countDocuments(query) // Count documents matching the query
-      ]);
+    // Calculate total pages
+    const totalPages = Math.ceil(totalBlogs / limit);
 
-      // Return the response with paginated results
-      res.json({
-          count,
-          data: blogPosts,
+    // Handle requests for pages that don't exist
+    if (page > totalPages && totalPages !== 0) {
+      return res.status(400).json({
+        error: `Invalid page number. You requested page ${page}, but there are only ${totalPages} pages.`,
       });
-  } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: error.message });
+    }
+
+    // Fetch paginated results
+    const blogs = await Blog.find({ status: status }).skip(skip).limit(limit);
+
+    res.json({
+      count: totalBlogs,
+      data: blogs,
+      totalPages,
+      currentPage: page,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Something went wrong', details: err.message });
   }
 });
 
