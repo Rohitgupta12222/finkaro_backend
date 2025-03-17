@@ -274,15 +274,13 @@ router.get('/getAllBlogs', async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    
-
     // Fetch total count and paginated data in parallel
     const [totalBlogs, blogs] = await Promise.all([
       Blog.countDocuments({ status }),
       Blog.find({ status })
         .skip(skip)
         .limit(limit)
-        .select('title content createdAt coverImage updatedAt') // Fetch only necessary fields
+        .select('title createdAt coverImage updatedAt shortDescription') // Fetch only necessary fields
         .lean(), // Convert documents to plain JavaScript objects for better performance
     ]);
 
