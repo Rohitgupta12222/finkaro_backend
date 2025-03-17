@@ -282,7 +282,7 @@ router.get('/getAllBlogs', async (req, res) => {
       Blog.find({ status })
         .skip(skip)
         .limit(limit)
-        .select('title content createdAt coverImage') // Fetch only necessary fields
+        .select('title content createdAt coverImage updatedAt') // Fetch only necessary fields
         .lean(), // Convert documents to plain JavaScript objects for better performance
     ]);
 
