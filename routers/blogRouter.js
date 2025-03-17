@@ -215,11 +215,56 @@ router.get('/get/:blogId', async (req, res) => {
     res.status(500).json({ error: 'An error occurred while retrieving the blog post' });
   }
 });
+// router.get('/getAllBlogs', async (req, res) => {
+//   try {
+//     let { page, limit, status, title } = req.query;
+
+//     // Convert to numbers and ensure they are valid
+//     page = parseInt(page, 10) || 1;
+//     limit = parseInt(limit, 10) || 10;
+
+//     if (page < 1) {
+//       return res.status(400).json({ error: 'Page number must be at least 1.' });
+//     }
+
+//     const skip = (page - 1) * limit;
+
+//     // Build the query dynamically
+//     let query = {};
+//     if (status) query.status = status;
+//     if (title) query.title = { $regex: title, $options: 'i' }; // Case-insensitive search
+
+//     // Fetch total count of blogs matching the query
+//     const totalBlogs = await Blog.countDocuments(query);
+
+//     // Calculate total pages
+//     const totalPages = Math.ceil(totalBlogs / limit);
+
+//     // Fetch paginated results in descending order of createdAt
+//     const blogs = await Blog.find(query)
+//       .sort({ createdAt: -1 }) // Sort by createdAt in descending order
+//       .skip(skip)
+//       .limit(limit);
+
+//     res.json({
+//       count: totalBlogs,
+//       data: blogs,
+//       totalPages,
+//       currentPage: page,
+//     });
+//   } catch (err) {
+//     res.status(500).json({ error: 'Something went wrong', details: err.message });
+//   }
+// });
+
+
+Blog.createIndexes({ status: 1 });
+
 router.get('/getAllBlogs', async (req, res) => {
   try {
-    let { page, limit, status, title } = req.query;
+    let { page, limit, status ,title } = req.query;
 
-    // Convert to numbers and ensure they are valid
+    // Convert query parameters to numbers and set defaults
     page = parseInt(page, 10) || 1;
     limit = parseInt(limit, 10) || 10;
 
@@ -229,22 +274,25 @@ router.get('/getAllBlogs', async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    // Build the query dynamically
-    let query = {};
-    if (status) query.status = status;
-    if (title) query.title = { $regex: title, $options: 'i' }; // Case-insensitive search
+    
 
-    // Fetch total count of blogs matching the query
-    const totalBlogs = await Blog.countDocuments(query);
+    // Fetch total count and paginated data in parallel
+    const [totalBlogs, blogs] = await Promise.all([
+      Blog.countDocuments({ status }),
+      Blog.find({ status })
+        .skip(skip)
+        .limit(limit)
+        .select('title content createdAt coverImage') // Fetch only necessary fields
+        .lean(), // Convert documents to plain JavaScript objects for better performance
+    ]);
 
-    // Calculate total pages
     const totalPages = Math.ceil(totalBlogs / limit);
 
-    // Fetch paginated results in descending order of createdAt
-    const blogs = await Blog.find(query)
-      .sort({ createdAt: -1 }) // Sort by createdAt in descending order
-      .skip(skip)
-      .limit(limit);
+    if (page > totalPages && totalPages !== 0) {
+      return res.status(400).json({
+        error: `Invalid page number. You requested page ${page}, but there are only ${totalPages} pages.`,
+      });
+    }
 
     res.json({
       count: totalBlogs,
@@ -253,6 +301,7 @@ router.get('/getAllBlogs', async (req, res) => {
       currentPage: page,
     });
   } catch (err) {
+    console.error('Error fetching blogs:', err.message);
     res.status(500).json({ error: 'Something went wrong', details: err.message });
   }
 });
