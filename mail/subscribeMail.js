@@ -117,6 +117,7 @@ async function sendsubscribemail(email, name) {
 
 
 async function sendBulkEmails( blogs, url) {
+   
     const blog = blogs;
     try {
         // Fetch email addresses from the Subscribe model
