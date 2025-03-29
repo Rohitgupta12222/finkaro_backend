@@ -164,13 +164,13 @@ async function sendBulkEmails( blogs, url) {
         body {
             background-color: #f3f4f6;
             font-family: Arial, sans-serif;
-            padding: 40px 0;
+            padding: 0;
             width: 100%;
+            text-align: center;
         }
-        .email-wrapper {
+        table {
             width: 100%;
-            display: flex;
-            justify-content: center;
+            background-color: #f3f4f6;
         }
         .container {
             max-width: 600px;
@@ -179,6 +179,7 @@ async function sendBulkEmails( blogs, url) {
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 40px auto;
         }
         .header img {
             width: 100%;
@@ -235,48 +236,54 @@ async function sendBulkEmails( blogs, url) {
         }
     </style>
 </head>
-<body  style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Inter', sans-serif; text-align: center;">
-    <div class="email-wrapper">
-        <div class="container">
-            <div class="header">
-                <img src="https://www.finkaro.com/uploads/mailbanner.jpg" alt="Blog Banner">
-            </div>
-            <div class="content">
-                <img src="${blog?.coverImage}" alt="Blog Image" class="blog-image">
-                <p class="mt-4 text-gray-700">
-                    We just published a new blog post that we think you’ll love! 
-                </p>
-                <div class="mt-4">
-                    <p class="font-semibold text-gray-800">
-                        <strong>Blog Title:</strong> <span class="text-gray-600 font-normal">${blog?.title}</span>
-                    </p>
-                    <p class="font-semibold text-gray-800 mt-2">
-                        <strong>Author:</strong> <span class="text-gray-600 font-normal">Kasfur Dhuniyan</span>
-                    </p>
-                    <p class="font-semibold text-gray-800 mt-2">
-                        <strong>Published on:</strong> <span class="text-gray-600 font-normal">${new Date(blog?.createdAt).toDateString()}</span>
-                    </p>
-                </div>
-                <div class="mt-4">
-                    <p class="text-gray-900 font-bold">Quick Preview:</p>
-                    <p class="text-gray-700 mt-2">${blog?.shortDescription.substring(0, 100)}...</p>
-                </div>
-                <p class="text-gray-700 mt-4">Read More….</p>
-                <div class="button-container">
-                    <a href="${url}" style="background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 6px; display: inline-block;">View Blog</a>
-                </div>
-            </div>
-            <div class="footer">
-                <p class="text-gray-700">Happy creating!</p>
-                <p class="text-gray-900 font-bold">The Finkaro Team</p>
-                <p class="text-gray-500 text-sm mt-2">Copyright © 2024 Finkaro AI. All rights reserved.</p>
-            </div>
-        </div>
-    </div>
+<body>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" align="center">
+        <tr>
+            <td align="center">
+                <table role="presentation" class="container">
+                    <tr>
+                        <td>
+                            <div class="header">
+                                <img src="https://www.finkaro.com/uploads/mailbanner.jpg" alt="Blog Banner">
+                            </div>
+                            <div class="content">
+                                <img src="${blog?.coverImage}" alt="Blog Image" class="blog-image">
+                                <p class="mt-4 text-gray-700">
+                                    We just published a new blog post that we think you’ll love! 
+                                </p>
+                                <div class="mt-4">
+                                    <p class="font-semibold text-gray-800">
+                                        <strong>Blog Title:</strong> <span class="text-gray-600 font-normal">${blog?.title}</span>
+                                    </p>
+                                    <p class="font-semibold text-gray-800 mt-2">
+                                        <strong>Author:</strong> <span class="text-gray-600 font-normal">Kasfur Dhuniyan</span>
+                                    </p>
+                                    <p class="font-semibold text-gray-800 mt-2">
+                                        <strong>Published on:</strong> <span class="text-gray-600 font-normal">${new Date(blog?.createdAt).toDateString()}</span>
+                                    </p>
+                                </div>
+                                <div class="mt-4">
+                                    <p class="text-gray-900 font-bold">Quick Preview:</p>
+                                    <p class="text-gray-700 mt-2">${blog?.shortDescription.substring(0, 100)}...</p>
+                                </div>
+                                <p class="text-gray-700 mt-4">Read More….</p>
+                                <div class="button-container">
+                                    <a href="${url}" style="background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 6px; display: inline-block;">View Blog</a>
+                                </div>
+                            </div>
+                            <div class="footer">
+                                <p class="text-gray-700">Happy creating!</p>
+                                <p class="text-gray-900 font-bold">The Finkaro Team</p>
+                                <p class="text-gray-500 text-sm mt-2">Copyright © 2024 Finkaro AI. All rights reserved.</p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
-
-
 `,
             };
 
