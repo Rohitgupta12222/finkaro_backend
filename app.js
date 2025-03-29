@@ -29,8 +29,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/', (req, res) => {
-  sendBulkEmails();
+app.get('/', (req, res) => {s
   res.send('Server connected');
 });
 // Routers
