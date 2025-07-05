@@ -14,7 +14,7 @@ const razorpay = new Razorpay({
 router.post('/create-order', async (req, res) => {
 
   const option ={
-    amount:100,
+     amount:req.body.amount,
     currency:req.body.currency,
     receipt:'Finkaro receipt',
     payment_capture:1
