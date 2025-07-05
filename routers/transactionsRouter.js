@@ -158,9 +158,13 @@ router.post('/add', async (req, res) => {
                         },
                     }
                 );
+                console.log(loginResponse , '=========== loginResponse');
+                
         
                 const { token } = loginResponse.data;
                 const shipRocketToken = `Bearer ${token}`;
+                console.log(shipRocketToken , '========= shipRocketToken');
+                
         
                 // Generate current date and time
                 const now = new Date();
@@ -175,7 +179,7 @@ router.post('/add', async (req, res) => {
                 const orderData = {
                     order_id: generateUniqueId(),
                     order_date: order_date,
-                    pickup_location: "Primary",
+                    pickup_location: "warehouse",
                     billing_customer_name: users?.name || "N/A",
                     billing_address: users?.address || "N/A",
                     billing_city: "", // Needs to be populated
@@ -200,10 +204,11 @@ router.post('/add', async (req, res) => {
                     transaction_charges: 0,
                     total_discount: 0,
                     sub_total: Number(savedSubscription?.price) || 0, // Fixed typo `prices` to `price`
-                    length: 10,
-                    breadth: 15,
-                    height: 20,
-                    weight: 2.5,
+                    length: 24,
+                    breadth: 18,
+                    height: 2,
+                    weight: 0.5,
+
                 };
         
                 // Create order in Shiprocket
@@ -216,6 +221,7 @@ router.post('/add', async (req, res) => {
                 });
         
         
+                
             } catch (error) {
                 if (error.response?.data) {
                     console.error('API Error:', error.response.data);
