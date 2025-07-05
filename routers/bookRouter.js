@@ -76,17 +76,18 @@ router.put('/update/:id', jwtAuthMiddleWare, async (req, res) => {
 
 
 router.get('/get', async (req, res) => {
-    try {
-    const books = await Book.find()
-        // Return the response with paginated results
-        res.status(200).json({
-            data: books
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'An error occurred while retrieving Books' });
-    }
+  try {
+    // Exclude `pdfFile` using select
+    const books = await Book.find().select('-pdfFile');
+    
+    console.log(books, '============= >>>>>>>>>>>>');
+    res.status(200).json({ data: books });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'An error occurred while retrieving Books' });
+  }
 });
+
 
 
 router.get('/getBooks/:id', async (req, res) => {
