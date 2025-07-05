@@ -35,7 +35,7 @@ app.get('/', (req, res) => {s
 // Routers
 const userRouter = require('./routers/userRouter');
 const subscribeRouter = require('./routers/subscribeRouter');
-const blogRouter = require('./routers/blogRouter');
+// const blogRouter = require('./routers/blogRouter');
 const youtubeRouter = require('./routers/youtubelinkRouter');
 const courseRouter = require('./routers/courseRouter');
 const razorpayRouter = require('./routers/razorpayRouter');
@@ -52,7 +52,7 @@ const commentRouter = require('./routers/commentsRouter')
 // Define routes
 app.use('/user', userRouter);
 app.use('/subscribe', subscribeRouter);
-app.use('/blog', blogRouter);
+// app.use('/blog', blogRouter);
 app.use('/youtubelink', youtubeRouter);
 app.use('/course', courseRouter);
 app.use('/services', servicesRouter);
